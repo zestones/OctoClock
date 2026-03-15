@@ -2,6 +2,7 @@ import { useMemo, useState } from 'preact/hooks';
 import { SearchInput } from '../../components/SearchInput.jsx';
 import { useElapsedTimer } from '../../hooks/useElapsedTimer.js';
 import { IconChevronLeft, IconChevronRight, IconClock } from '../../icons.jsx';
+import { AggregationService } from '../../utils/aggregation.utils.js';
 import { TimeService } from '../../utils/time.utils.js';
 import { TrackedList } from './TrackedList.jsx';
 
@@ -58,7 +59,9 @@ export function CalendarView({ tracked }) {
     const entries = useMemo(() => {
         const grouped = filteredTracked.reduce((acc, entry) => {
             if (!acc[entry.issueUrl]) {
-                acc[entry.issueUrl] = { title: entry.title, seconds: 0, issueUrl: entry.issueUrl };
+                const repo = AggregationService.parseRepo(entry.issueUrl);
+                const { issueNumber } = AggregationService.parseEntryTitle(entry.title);
+                acc[entry.issueUrl] = { title: AggregationService.extractCleanTitle(entry.title), repo, issueNumber, seconds: 0, issueUrl: entry.issueUrl };
             }
             acc[entry.issueUrl].seconds += entry.seconds;
             return acc;
@@ -139,12 +142,12 @@ export function CalendarView({ tracked }) {
                             type="button"
                             key={day}
                             className={`h-8 w-full flex items-center justify-center rounded-lg text-[12px] transition-colors ${selected
-                                    ? 'bg-accent text-white font-medium cursor-pointer'
-                                    : tracked
-                                        ? 'bg-accent-subtle text-accent-text cursor-pointer hover:bg-accent-ring font-medium'
-                                        : today
-                                            ? 'text-primary font-medium'
-                                            : 'text-faint'
+                                ? 'bg-accent text-white font-medium cursor-pointer'
+                                : tracked
+                                    ? 'bg-accent-subtle text-accent-text cursor-pointer hover:bg-accent-ring font-medium'
+                                    : today
+                                        ? 'text-primary font-medium'
+                                        : 'text-faint'
                                 } ${tracked || today ? 'cursor-pointer' : ''}`}
                             onClick={() => (tracked || today) && selectDay(day)}
                             tabIndex={tracked || today ? 0 : -1}

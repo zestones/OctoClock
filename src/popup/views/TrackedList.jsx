@@ -23,9 +23,20 @@ export function TrackedList({ entries, showTimerControls = false }) {
                     className="flex items-center gap-2 p-2 hover:bg-surface rounded-lg group transition-colors"
                 >
                     <div className="flex-1 min-w-0">
-                        <div className="text-[13px] text-primary truncate leading-snug">{entry.title}</div>
+                        <div className="text-[13px] text-primary truncate leading-snug">
+                            {entry.issueNumber && (
+                                <span className="text-muted font-mono text-[11px]">{entry.issueNumber} </span>
+                            )}
+                            {entry.title}
+                        </div>
                         <div className="flex items-center gap-2 mt-0.5 text-[11px] text-muted">
                             <span className="font-mono tabular-nums">{entry.displayTime}</span>
+                            {entry.repo && (
+                                <>
+                                    <span className="text-faint">·</span>
+                                    <span className="text-faint truncate max-w-30">{entry.repo}</span>
+                                </>
+                            )}
                             {entry.date && (
                                 <>
                                     <span className="text-faint">·</span>
@@ -47,11 +58,10 @@ export function TrackedList({ entries, showTimerControls = false }) {
                         <button
                             type="button"
                             onClick={() => handleTimerClick(entry)}
-                            className={`shrink-0 flex items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-md cursor-pointer transition-all ${
-                                isActive(entry)
-                                    ? 'bg-danger-subtle text-danger-text hover:bg-danger-hover'
-                                    : 'bg-success-subtle text-success-text hover:bg-success-hover opacity-0 group-hover:opacity-100'
-                            }`}
+                            className={`shrink-0 flex items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-md cursor-pointer transition-all ${isActive(entry)
+                                ? 'bg-danger-subtle text-danger-text hover:bg-danger-hover'
+                                : 'bg-success-subtle text-success-text hover:bg-success-hover opacity-0 group-hover:opacity-100'
+                                }`}
                         >
                             {isActive(entry) ? (
                                 <>
