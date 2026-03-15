@@ -1,7 +1,7 @@
 {
   "name": "github-time-tracker",
   "private": true,
-  "version": "1.0.2",
+  "version": "1.0.3",
   "type": "module",
   "scripts": {
     "watch": "nodemon --watch src --ext js,jsx,html,css,json --exec \"npm run build\"",
