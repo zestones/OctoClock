@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'preact/hooks';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { IssueRow } from '../../components/IssueRow.jsx';
 import { PinRepoModal } from '../../components/PinRepoModal.jsx';
 import { SearchInput } from '../../components/SearchInput.jsx';
@@ -15,6 +15,16 @@ export function IssuesTab() {
     const [searchTerm, setSearchTerm] = useState('');
     const [showPinModal, setShowPinModal] = useState(false);
     const [filter, setFilter] = useState('open');
+    const [isStuck, setIsStuck] = useState(false);
+    const containerRef = useRef(null);
+
+    useEffect(() => {
+        const scrollParent = containerRef.current?.closest('.overflow-y-auto');
+        if (!scrollParent) return;
+        const onScroll = () => setIsStuck(scrollParent.scrollTop > 8);
+        scrollParent.addEventListener('scroll', onScroll, { passive: true });
+        return () => scrollParent.removeEventListener('scroll', onScroll);
+    }, []);
 
     const tracked = useStorageListener(STORAGE_KEYS.TRACKED_TIMES, []);
     const { activeIssue } = useActiveTimer();
@@ -69,9 +79,12 @@ export function IssuesTab() {
     }, [searchTerm, repoIssues, filter, currentUser]);
 
     return (
-        <div className="p-4">
+        <div ref={containerRef} className="px-4 pb-4">
             {/* Sticky controls */}
-            <div className="sticky top-0 z-10 bg-base py-2">
+            <div
+                className={`sticky top-0 -mx-4 px-4 z-10 bg-base/95 backdrop-blur-sm pt-2 pb-2 transition-shadow duration-200 ${isStuck ? 'shadow-md shadow-base/50' : ''
+                    }`}
+            >
                 {/* Search + Pin */}
                 <div className="flex gap-2 mb-3">
                     <div className="flex-1">
