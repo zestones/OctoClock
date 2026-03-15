@@ -148,10 +148,11 @@ export function RepoDetailView({ repo, repoDetails, userMode, onBack }) {
                                 type="button"
                                 key={opt.key}
                                 onClick={() => handleSort(opt.key)}
-                                className={`text-[10px] px-1 py-1 rounded-md cursor-pointer transition-colors font-medium ${isActive
+                                className={`text-[10px] px-1 py-1 rounded-md cursor-pointer transition-colors font-medium ${
+                                    isActive
                                         ? 'bg-accent-subtle text-accent'
                                         : 'text-tertiary hover:bg-raised hover:text-secondary'
-                                    }`}
+                                }`}
                             >
                                 {opt.label}
                                 {arrow && ` ${arrow}`}

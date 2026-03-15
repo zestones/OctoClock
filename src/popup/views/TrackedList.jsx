@@ -58,10 +58,11 @@ export function TrackedList({ entries, showTimerControls = false }) {
                         <button
                             type="button"
                             onClick={() => handleTimerClick(entry)}
-                            className={`shrink-0 flex items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-md cursor-pointer transition-all ${isActive(entry)
-                                ? 'bg-danger-subtle text-danger-text hover:bg-danger-hover'
-                                : 'bg-success-subtle text-success-text hover:bg-success-hover opacity-0 group-hover:opacity-100'
-                                }`}
+                            className={`shrink-0 flex items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-md cursor-pointer transition-all ${
+                                isActive(entry)
+                                    ? 'bg-danger-subtle text-danger-text hover:bg-danger-hover'
+                                    : 'bg-success-subtle text-success-text hover:bg-success-hover opacity-0 group-hover:opacity-100'
+                            }`}
                         >
                             {isActive(entry) ? (
                                 <>

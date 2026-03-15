@@ -63,7 +63,13 @@ export function CalendarView({ tracked }) {
             if (!acc[entry.issueUrl]) {
                 const repo = AggregationService.parseRepo(entry.issueUrl);
                 const { issueNumber } = AggregationService.parseEntryTitle(entry.title);
-                acc[entry.issueUrl] = { title: AggregationService.extractCleanTitle(entry.title), repo, issueNumber, seconds: 0, issueUrl: entry.issueUrl };
+                acc[entry.issueUrl] = {
+                    title: AggregationService.extractCleanTitle(entry.title),
+                    repo,
+                    issueNumber,
+                    seconds: 0,
+                    issueUrl: entry.issueUrl,
+                };
             }
             acc[entry.issueUrl].seconds += entry.seconds;
             return acc;
@@ -158,9 +164,11 @@ export function CalendarView({ tracked }) {
                             type="button"
                             key={day}
                             style={tracked && !selected && opacity > 0 ? { '--day-opacity': opacity } : undefined}
-                            className={`h-8 w-full flex items-center justify-center rounded-lg text-[12px] transition-colors ${tracked ? 'day-heat font-medium' : today ? 'text-primary font-medium' : 'text-faint'
-                                } ${selected ? 'ring-2 ring-accent text-accent font-semibold' : tracked ? 'text-success-text hover:brightness-110' : ''} ${tracked || today ? 'cursor-pointer' : ''
-                                }`}
+                            className={`h-8 w-full flex items-center justify-center rounded-lg text-[12px] transition-colors ${
+                                tracked ? 'day-heat font-medium' : today ? 'text-primary font-medium' : 'text-faint'
+                            } ${selected ? 'ring-2 ring-accent text-accent font-semibold' : tracked ? 'text-success-text hover:brightness-110' : ''} ${
+                                tracked || today ? 'cursor-pointer' : ''
+                            }`}
                             onClick={() => (tracked || today) && selectDay(day)}
                             tabIndex={tracked || today ? 0 : -1}
                         >
