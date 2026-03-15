@@ -5,16 +5,11 @@ import { PinnedReposService } from './pinned-repos.service.js';
 import { StorageService } from './storage.service.js';
 
 /**
- * Recovers tracked times from GitHub comments for all pinned repos.
- * Merges remote data into local storage (imports if no local data or remote has more).
- * Returns { importedCount } or null if nothing to recover.
+ * Merges recovered time entries into local storage.
+ * Imports remote entries when local is empty or remote has more.
  */
-export async function syncFromGitHub() {
-    const pinnedRepos = await PinnedReposService.getPinnedRepos();
-    if (pinnedRepos.length === 0) return null;
-
-    const recovered = await GitHubService.recoverAllTimes(pinnedRepos);
-    if (recovered.length === 0) return null;
+async function mergeRecoveredTimes(recovered) {
+    if (recovered.length === 0) return { importedCount: 0 };
 
     // Fetch issue titles from GitHub API for proper display
     const issueTitleMap = {};
@@ -85,4 +80,30 @@ export async function syncFromGitHub() {
     await StorageService.set(STORAGE_KEYS.COMMENT_IDS, commentIds);
 
     return { importedCount };
+}
+
+/**
+ * Recovers tracked times from GitHub comments for all pinned repos.
+ * Merges remote data into local storage (imports if no local data or remote has more).
+ * Returns { importedCount } or null if nothing to recover.
+ */
+export async function syncFromGitHub() {
+    const pinnedRepos = await PinnedReposService.getPinnedRepos();
+    if (pinnedRepos.length === 0) return null;
+
+    const recovered = await GitHubService.recoverAllTimes(pinnedRepos);
+    if (recovered.length === 0) return null;
+
+    return mergeRecoveredTimes(recovered);
+}
+
+/**
+ * Recovers tracked times from GitHub comments for a single repo.
+ * Used when a new repo is pinned with auto-sync enabled.
+ */
+export async function syncRepoFromGitHub(owner, repoName) {
+    const recovered = await GitHubService.recoverTimesFromRepo(owner, repoName);
+    if (recovered.length === 0) return null;
+
+    return mergeRecoveredTimes(recovered);
 }

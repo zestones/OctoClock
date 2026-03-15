@@ -2,6 +2,9 @@ import { useCallback, useEffect, useState } from 'preact/hooks';
 import { CacheService } from '../services/cache.service.js';
 import { GitHubService } from '../services/github.service.js';
 import { PinnedReposService } from '../services/pinned-repos.service.js';
+import { StorageService } from '../services/storage.service.js';
+import { syncRepoFromGitHub } from '../services/sync.service.js';
+import { STORAGE_KEYS } from '../utils/constants.utils.js';
 
 export function useIssuesData() {
     const [pinnedRepos, setPinnedRepos] = useState([]);
@@ -63,6 +66,14 @@ export function useIssuesData() {
             const updated = await PinnedReposService.getPinnedRepos();
             setPinnedRepos(updated);
             refreshRepoIssues(repo);
+
+            const autoSync = await StorageService.get(STORAGE_KEYS.AUTO_SYNC);
+            if (autoSync) {
+                const [owner, repoName] = repo.fullName.split('/');
+                syncRepoFromGitHub(owner, repoName).catch((e) =>
+                    console.error(`Auto-sync failed for ${repo.fullName}:`, e),
+                );
+            }
         },
         [refreshRepoIssues],
     );
