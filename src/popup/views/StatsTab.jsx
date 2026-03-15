@@ -67,6 +67,10 @@ export function StatsTab({ tracked, user }) {
         () => AggregationService.getTotalSeconds(AggregationService.getMonthEntries(activeEntries)),
         [activeEntries],
     );
+    const allSeconds = useMemo(
+        () => AggregationService.getTotalSeconds(activeEntries),
+        [activeEntries],
+    );
 
     const repoBreakdown = useMemo(() => AggregationService.getTimePerRepo(filteredEntries), [filteredEntries]);
 
@@ -98,12 +102,20 @@ export function StatsTab({ tracked, user }) {
             text: 'text-amber-text',
             value: 'text-amber-value',
         },
+        {
+            bg: 'bg-success-text',
+            light: 'bg-success-subtle',
+            ring: 'ring-success-border',
+            text: 'text-success-text',
+            value: 'text-success-text',
+        },
     ];
 
     const cards = [
         { id: 'today', label: 'Today', seconds: todaySeconds },
         { id: 'week', label: 'This Week', seconds: weekSeconds },
         { id: 'month', label: 'This Month', seconds: monthSeconds },
+        { id: 'all', label: 'All Time', seconds: allSeconds },
     ];
 
     const barColors = [
@@ -130,16 +142,15 @@ export function StatsTab({ tracked, user }) {
     return (
         <div className="p-4">
             {/* Summary cards */}
-            <div className="grid grid-cols-3 gap-2 mb-4">
+            <div className="grid grid-cols-4 gap-2 mb-4">
                 {cards.map((card, i) => (
                     <button
                         type="button"
                         key={card.id}
-                        className={`rounded-xl p-3 text-center cursor-pointer transition-all w-full ${
-                            rangeMode === card.id
+                        className={`rounded-xl p-3 text-center cursor-pointer transition-all w-full ${rangeMode === card.id
                                 ? `${colors[i].light} ring-1 ${colors[i].ring}`
                                 : 'bg-surface hover:bg-raised'
-                        }`}
+                            }`}
                         onClick={() => setRangeMode(card.id)}
                     >
                         <div
@@ -163,11 +174,10 @@ export function StatsTab({ tracked, user }) {
                     <button
                         type="button"
                         onClick={() => handleUserModeChange('me')}
-                        className={`flex items-center gap-1 text-[11px] cursor-pointer font-medium px-2.5 py-1.5 transition-all ${
-                            userMode === 'me'
+                        className={`flex items-center gap-1 text-[11px] cursor-pointer font-medium px-2.5 py-1.5 transition-all ${userMode === 'me'
                                 ? 'bg-accent-subtle text-accent'
                                 : 'bg-surface text-tertiary hover:bg-raised hover:text-secondary'
-                        }`}
+                            }`}
                     >
                         <IconUser size={11} /> Me
                     </button>
@@ -175,11 +185,10 @@ export function StatsTab({ tracked, user }) {
                     <button
                         type="button"
                         onClick={() => handleUserModeChange('everyone')}
-                        className={`flex items-center gap-1 text-[11px] cursor-pointer font-medium px-2.5 py-1.5 transition-all ${
-                            userMode === 'everyone'
+                        className={`flex items-center gap-1 text-[11px] cursor-pointer font-medium px-2.5 py-1.5 transition-all ${userMode === 'everyone'
                                 ? 'bg-accent-subtle text-accent'
                                 : 'bg-surface text-tertiary hover:bg-raised hover:text-secondary'
-                        }`}
+                            }`}
                     >
                         <IconUsers size={11} /> Everyone
                     </button>
@@ -201,11 +210,10 @@ export function StatsTab({ tracked, user }) {
                 <button
                     type="button"
                     onClick={() => setRangeMode(rangeMode === 'custom' ? 'today' : 'custom')}
-                    className={`flex items-center gap-1.5 text-[11px] cursor-pointer transition-all font-medium px-3 py-1.5 rounded-lg border ${
-                        rangeMode === 'custom'
+                    className={`flex items-center gap-1.5 text-[11px] cursor-pointer transition-all font-medium px-3 py-1.5 rounded-lg border ${rangeMode === 'custom'
                             ? 'bg-accent-subtle text-accent border-accent-ring'
                             : 'bg-surface text-tertiary border-border-default hover:bg-raised hover:text-secondary'
-                    }`}
+                        }`}
                 >
                     {rangeMode === 'custom' ? (
                         <>
