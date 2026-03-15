@@ -35,9 +35,9 @@
 
   --th-txt-primary: #1f2d3a;
   --th-txt-secondary: #344653;
-  --th-txt-tertiary: #57738a;
-  --th-txt-muted: #94aabb;
-  --th-txt-faint: #c2d3e0;
+  --th-txt-tertiary: #4f6b82;
+  --th-txt-muted: #778ca0;
+  --th-txt-faint: #96acbd;
 
   --th-border-default: #b5ccdd;
   --th-border-subtle: #ccdce8;
@@ -55,13 +55,13 @@
   --th-success-muted: rgba(10, 110, 78, 0.7);
   --th-success-border: #8fd4b0;
   --th-success-dot: #179b65;
-  --th-success-hover: #b0e4bf;
+  --th-success-hover: #9ad9b0;
 
   --th-danger-subtle: #fde9e9;
   --th-danger-text: #c42b2b;
   --th-danger-hover: #fde0e0;
   --th-danger-border: #f9c5c5;
-  --th-danger-muted: #e84d4d;
+  --th-danger-muted: #cc3030;
 
   --th-violet-subtle: #f3f0ff;
   --th-violet-text: #7044cf;
@@ -88,17 +88,17 @@
 
   --th-txt-primary: #e8f0f7;
   --th-txt-secondary: #c2d3e0;
-  --th-txt-tertiary: #7e97a9;
-  --th-txt-muted: #4e6577;
-  --th-txt-faint: #3a4f5c;
+  --th-txt-tertiary: #8da5b5;
+  --th-txt-muted: #6b8599;
+  --th-txt-faint: #536b7b;
 
   --th-border-default: #3d5868;
   --th-border-subtle: #2e4250;
 
   --th-ring-default: #3d5868;
 
-  --th-accent: #5b9cd6;
-  --th-accent-hover: #74ade0;
+  --th-accent: #3878b5;
+  --th-accent-hover: #4a8cc6;
   --th-accent-subtle: #1a2f3f;
   --th-accent-text: #a2c8e6;
   --th-accent-ring: #2d6ba3;
@@ -114,7 +114,7 @@
   --th-danger-text: #f5a3ab;
   --th-danger-hover: #4d1b22;
   --th-danger-border: #6b2028;
-  --th-danger-muted: #e0555e;
+  --th-danger-muted: #c43035;
 
   --th-violet-subtle: #221540;
   --th-violet-text: #b89bef;
@@ -127,9 +127,9 @@
   --th-amber-ring: #8a6a10;
 
   --th-brand-octo: #e8f0f7;
-  --th-brand-clock: #5b9cd6;
+  --th-brand-clock: #3878b5;
 
-  --th-scrollbar: #2d4350;
+  --th-scrollbar: #3d5868;
 }
 
 /* ───── Register semantic tokens as Tailwind utilities ───── */
