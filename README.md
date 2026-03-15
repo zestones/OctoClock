@@ -13,31 +13,6 @@ _A feature-rich browser extension that brings time tracking directly into GitHub
 
 ## Screenshots
 
-### Light Theme
-
-<table>
-  <tr>
-    <td align="center"><strong>Issues</strong></td>
-    <td align="center"><strong>Calendar</strong></td>
-    <td align="center"><strong>Stats</strong></td>
-  </tr>
-  <tr>
-    <td><img src="docs/screenshots/light/issues.png" width="280" alt="Issues tab — light" /></td>
-    <td><img src="docs/screenshots/light/calendar.png" width="280" alt="Calendar view — light" /></td>
-    <td><img src="docs/screenshots/light/stats.png" width="280" alt="Stats overview — light" /></td>
-  </tr>
-  <tr>
-    <td align="center"><strong>Repo Details</strong></td>
-    <td align="center"><strong>Contributors</strong></td>
-    <td align="center"><strong>Settings</strong></td>
-  </tr>
-  <tr>
-    <td><img src="docs/screenshots/light/stats-details.png" width="280" alt="Repository detail view — light" /></td>
-    <td><img src="docs/screenshots/light/stats-contributors.png" width="280" alt="Contributors view — light" /></td>
-    <td><img src="docs/screenshots/light/settings.png" width="280" alt="Settings panel — light" /></td>
-  </tr>
-</table>
-
 ### Dark Theme
 
 <table>
@@ -63,6 +38,31 @@ _A feature-rich browser extension that brings time tracking directly into GitHub
   </tr>
 </table>
 
+### Light Theme
+
+<table>
+  <tr>
+    <td align="center"><strong>Issues</strong></td>
+    <td align="center"><strong>Calendar</strong></td>
+    <td align="center"><strong>Stats</strong></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/light/issues.png" width="280" alt="Issues tab — light" /></td>
+    <td><img src="docs/screenshots/light/calendar.png" width="280" alt="Calendar view — light" /></td>
+    <td><img src="docs/screenshots/light/stats.png" width="280" alt="Stats overview — light" /></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>Repo Details</strong></td>
+    <td align="center"><strong>Contributors</strong></td>
+    <td align="center"><strong>Settings</strong></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/light/stats-details.png" width="280" alt="Repository detail view — light" /></td>
+    <td><img src="docs/screenshots/light/stats-contributors.png" width="280" alt="Contributors view — light" /></td>
+    <td><img src="docs/screenshots/light/settings.png" width="280" alt="Settings panel — light" /></td>
+  </tr>
+</table>
+
 ---
 
 ## Features
@@ -83,7 +83,7 @@ Pin any GitHub repository for quick access from the extension popup. Browse, sea
 
 ### Calendar
 
-An interactive monthly calendar highlights every day with tracked time. Days are shaded with a **heat map** — the more time tracked on a given day, the more intense the colour — making it easy to spot busy and quiet periods at a glance. The week starts on **Monday**. Click any day to see a full breakdown of issues worked on (including issue number and repository) and total time spent. Entries are searchable and update live while a timer is running.
+An interactive monthly calendar highlights every day with tracked time. Days are shaded with a **5-level heat map** inspired by GitHub's contribution graph — the more time tracked on a given day, the more intense the colour — making it easy to spot busy and quiet periods at a glance. The week starts on **Monday**. Click any day to see a full breakdown of issues worked on (including issue number and repository) and total time spent. Entries are searchable and update live while a timer is running.
 
 ### Stats and Analytics
 
@@ -92,14 +92,16 @@ Summary cards display time tracked **today**, **this week**, **this month**, and
 > [!TIP]
 > Forgot to stop a timer? Go to **Stats → repository → expand an issue** and click the session duration to manually correct it. Both local storage and the synced GitHub comment are updated instantly.
 
-An **Everyone** mode fetches all team members' tracker comments from issues, providing aggregated analytics with individual contributor attribution.
+An **Everyone** mode automatically fetches all team members' tracker comments from issues when toggled — no manual sync required. Your own data always appears instantly from local storage, while others' data loads in the background. Drilling into a repository switches between an **Issues** tab and a **Contributors** tab, which shows a stacked time-distribution bar chart, per-contributor breakdowns with color-coded progress bars, and expandable per-issue detail for each user.
 
 ### Sync and Data Recovery
 
 The extension posts time sessions as formatted Markdown tables to GitHub issue comments. These comments double as a backup: tracked times can be recovered from them after data loss or when setting up on a new device.
 
+When a timer is started, the extension automatically **backfills remote entries** from the corresponding GitHub comment into local storage — ensuring your data stays in sync without manual intervention.
+
 > [!IMPORTANT]
-> Auto-sync on popup open is available as an optional toggle in Settings. The merge logic only imports remote data when it exceeds local records — your local data is never silently overwritten.
+> Auto-sync triggers on popup open (optional toggle in Settings) and automatically when pinning a new repo. The merge logic only imports remote data when it exceeds local records — your local data is never silently overwritten.
 
 ### More Features
 
