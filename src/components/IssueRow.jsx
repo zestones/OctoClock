@@ -52,7 +52,7 @@ export function IssueRow({ issue, isActive, onStart, onStop, trackedSeconds = 0 
                     onClick={() => (isActive ? onStop(issue) : onStart(issue))}
                     className={`flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-lg cursor-pointer transition-all ${isActive
                         ? 'bg-danger-subtle text-danger-text hover:bg-danger-hover'
-                        : 'bg-accent-subtle text-accent-text hover:bg-accent-ring/40 opacity-40 group-hover:opacity-100'
+                        : 'bg-success-subtle text-success-text hover:bg-success-hover opacity-40 group-hover:opacity-100'
                         }`}
                 >
                     {isActive ? (
