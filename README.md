@@ -4,8 +4,7 @@
 
 <br/>
 
-[![CI](https://github.com/zestones/OctoClock/actions/workflows/ci.yml/badge.svg)](https://github.com/zestones/OctoClock/actions/workflows/ci.yml)
-[![GitHub release](https://img.shields.io/github/v/release/zestones/OctoClock)](https://github.com/zestones/OctoClock/releases)
+[![CI](https://github.com/zestones/OctoClock/actions/workflows/ci.yml/badge.svg)](https://github.com/zestones/OctoClock/actions/workflows/ci.yml) [![GitHub release](https://img.shields.io/github/v/release/zestones/OctoClock)](https://github.com/zestones/OctoClock/releases)
 
 _A feature-rich browser extension that brings time tracking directly into GitHub. Track time on issues, pin repositories, visualize your work in a calendar, analyze stats per repo, and collaborate with your team — all without leaving GitHub._
 
