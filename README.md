@@ -1,4 +1,8 @@
-# <img src="docs/screenshots/repos-icon.png" width="32" height="32" alt="icon" /> GitHub Time Tracker
+<div align="center">
+<img src="./docs/screenshots/og-home.png" alt="OctoClock logo" align="center" />
+</div>
+
+<br/>
 
 [![CI](https://github.com/zestones/github-timetracker-extension/actions/workflows/ci.yml/badge.svg)](https://github.com/zestones/github-timetracker-extension/actions/workflows/ci.yml) [![GitHub release](https://img.shields.io/github/v/release/zestones/github-timetracker-extension)](https://github.com/zestones/github-timetracker-extension/releases)
 
