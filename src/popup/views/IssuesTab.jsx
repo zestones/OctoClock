@@ -70,42 +70,45 @@ export function IssuesTab() {
 
     return (
         <div className="p-4">
-            {/* Search + Pin */}
-            <div className="flex gap-2 mb-3">
-                <div className="flex-1">
-                    <SearchInput placeholder="Search issues..." value={searchTerm} onInput={setSearchTerm} className="" />
-                </div>
-                <button
-                    type="button"
-                    onClick={() => setShowPinModal(true)}
-                    className="shrink-0 w-1/3 flex items-center justify-center gap-1.5 text-[12px] font-medium text-muted hover:text-accent border border-dashed border-border-default hover:border-accent rounded-lg cursor-pointer transition-all hover:bg-accent-subtle/30"
-                    title="Pin a repository"
-                >
-                    <IconPlus size={13} />
-                    Pin a repository
-                </button>
-            </div>
-
-            {/* Segmented filter control */}
-            <div className="flex bg-surface rounded-lg p-0.5 mb-4 border border-border-subtle">
-                {[
-                    { id: 'open', label: 'Open' },
-                    { id: 'assigned', label: 'Assigned' },
-                    { id: 'created', label: 'Created' },
-                    { id: 'closed', label: 'Closed' },
-                ].map((f) => (
+            {/* Sticky controls */}
+            <div className="sticky top-0 z-10 bg-base py-2">
+                {/* Search + Pin */}
+                <div className="flex gap-2 mb-3">
+                    <div className="flex-1">
+                        <SearchInput placeholder="Search issues..." value={searchTerm} onInput={setSearchTerm} className="" />
+                    </div>
                     <button
                         type="button"
-                        key={f.id}
-                        onClick={() => setFilter(f.id)}
-                        className={`flex-1 text-[11px] px-2 py-1.5 rounded-md cursor-pointer transition-all font-medium text-center ${filter === f.id
-                            ? 'bg-base text-accent-text shadow-sm'
-                            : 'text-muted hover:text-secondary'
-                            }`}
+                        onClick={() => setShowPinModal(true)}
+                        className="shrink-0 w-1/3 flex items-center justify-center gap-1.5 text-[12px] font-medium text-muted hover:text-accent border border-dashed border-border-default hover:border-accent rounded-lg cursor-pointer transition-all hover:bg-accent-subtle/30"
+                        title="Pin a repository"
                     >
-                        {f.label}
+                        <IconPlus size={13} />
+                        Pin a repository
                     </button>
-                ))}
+                </div>
+
+                {/* Segmented filter control */}
+                <div className="flex bg-surface rounded-lg p-0.5 mb-4 border border-border-subtle">
+                    {[
+                        { id: 'open', label: 'Open' },
+                        { id: 'assigned', label: 'Assigned' },
+                        { id: 'created', label: 'Created' },
+                        { id: 'closed', label: 'Closed' },
+                    ].map((f) => (
+                        <button
+                            type="button"
+                            key={f.id}
+                            onClick={() => setFilter(f.id)}
+                            className={`flex-1 text-[11px] px-2 py-1.5 rounded-md cursor-pointer transition-all font-medium text-center ${filter === f.id
+                                ? 'bg-base text-accent-text shadow-sm'
+                                : 'text-muted hover:text-secondary'
+                                }`}
+                        >
+                            {f.label}
+                        </button>
+                    ))}
+                </div>
             </div>
 
             {/* Search results */}
