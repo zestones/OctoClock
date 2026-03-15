@@ -6,7 +6,7 @@ import { Settings } from '../components/Settings.jsx';
 import { useAuth } from '../hooks/useAuth.js';
 import { useStorageListener } from '../hooks/useStorageListener.js';
 import { useTheme } from '../hooks/useTheme.js';
-import { IconCalendar, IconChart, IconGitHub, IconIssues, IconSettings } from '../icons.jsx';
+import { IconCalendar, IconChart, IconIssues, IconSettings } from '../icons.jsx';
 import { IssueStorageService } from '../services/issue-storage.service.js';
 import { StorageService } from '../services/storage.service.js';
 import { syncFromGitHub } from '../services/sync.service.js';
@@ -68,10 +68,16 @@ export function App() {
             <div
                 className={`w-100 h-140 flex flex-col items-center justify-center px-10 font-['Inter',system-ui,sans-serif] bg-base ${isDark ? 'dark' : ''}`}
             >
-                <div className="text-primary mb-5">
-                    <IconGitHub size={48} />
+                <div className="mb-1">
+                    <img src="/icons/favicon.png" alt="OctoClock" className="w-26 h-26" />
                 </div>
-                <h1 className="text-xl font-semibold text-primary mb-1">Time Tracker</h1>
+                <h1 className="text-xl mb-0.5" style={{ fontFamily: "'Saira Stencil One', cursive" }}>
+                    <span style={{ color: 'var(--th-brand-octo)' }}>Octo</span>
+                    <span style={{ color: 'var(--th-brand-clock)' }}>Clock</span>
+                </h1>
+                <p className="text-[11px] text-tertiary tracking-wide mb-1" style={{ fontFamily: "'Saira Condensed', sans-serif" }}>
+                    GitHub Time Tracker
+                </p>
                 <p className="text-[13px] text-tertiary text-center mb-8 leading-relaxed">
                     Track time spent on GitHub issues
                     <br />
@@ -114,7 +120,15 @@ export function App() {
         >
             {/* Header */}
             <header className="flex items-center justify-between px-4 h-11 border-b border-border-subtle shrink-0">
-                <h1 className="text-[13px] font-semibold text-primary tracking-tight">Time Tracker</h1>
+                <div className="flex items-center gap-1.5">
+                    <img src="/icons/favicon.png" alt="OctoClock" className="w-8 h-8" />
+                    <div className="flex items-baseline gap-1.5">
+                        <h1 className="text-[16px] tracking-tight" style={{ fontFamily: "'Saira Stencil One', cursive" }}>
+                            <span style={{ color: 'var(--th-brand-octo)' }}>Octo</span>
+                            <span style={{ color: 'var(--th-brand-clock)' }}>Clock</span>
+                        </h1>
+                    </div>
+                </div>
                 {user?.avatar_url ? (
                     <img
                         src={user.avatar_url}
@@ -157,9 +171,8 @@ export function App() {
                         type="button"
                         key={id}
                         onClick={() => setPage(id)}
-                        className={`flex-1 flex flex-col items-center gap-0.5 py-2.5 cursor-pointer transition-colors ${
-                            page === id ? 'text-accent' : 'text-muted hover:text-secondary'
-                        }`}
+                        className={`flex-1 flex flex-col items-center gap-0.5 py-2.5 cursor-pointer transition-colors ${page === id ? 'text-accent' : 'text-muted hover:text-secondary'
+                            }`}
                     >
                         <Icon size={18} />
                         <span className="text-[10px] font-medium">{label}</span>

@@ -8,6 +8,24 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "Saira Stencil One";
+  src: url("../../public/fonts/SairaStencilOne/SairaStencilOne-Regular.ttf")
+    format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Saira Condensed";
+  src: url("../../public/fonts/SairaCondensed/SairaCondensed-Regular.ttf")
+    format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ───── Light theme (default) ───── */
 :root {
   --th-base: #fdfdfd;
@@ -54,6 +72,9 @@
   --th-amber-text: #c47d0a;
   --th-amber-value: #8a4a0e;
   --th-amber-ring: #f5d97a;
+
+  --th-brand-octo: #1f2d3a;
+  --th-brand-clock: #4e81b6;
 
   --th-scrollbar: #c2d3e0;
 }
@@ -104,6 +125,9 @@
   --th-amber-text: #f0d050;
   --th-amber-value: #f7e8a0;
   --th-amber-ring: #8a6a10;
+
+  --th-brand-octo: #e8f0f7;
+  --th-brand-clock: #5b9cd6;
 
   --th-scrollbar: #2d4350;
 }
