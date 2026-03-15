@@ -95,16 +95,17 @@ export function CalendarView({ tracked }) {
         return dateStr in trackedDays || dateStr === todayStr;
     };
 
-    const getDayOpacity = (day) => {
+    const getDayHeatLevel = (day) => {
         const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
         const dateStr = TimeService.getLocalDateString(date);
         const seconds = trackedDays[dateStr] || 0;
         if (seconds === 0) return 0;
         const ratio = seconds / maxDaySeconds;
-        if (ratio < 0.25) return 0.25;
-        if (ratio < 0.5) return 0.5;
-        if (ratio < 0.75) return 0.75;
-        return 1;
+        if (ratio < 0.15) return 1;
+        if (ratio < 0.35) return 2;
+        if (ratio < 0.55) return 3;
+        if (ratio < 0.80) return 4;
+        return 5;
     };
 
     const isSelectedDay = (day) => {
@@ -186,14 +187,13 @@ export function CalendarView({ tracked }) {
                             const hasTracked = isDayTracked(day);
                             const selected = isSelectedDay(day);
                             const today = isToday(day);
-                            const opacity = getDayOpacity(day);
+                            const heatLevel = getDayHeatLevel(day);
                             return (
                                 <button
                                     type="button"
                                     key={day}
-                                    style={hasTracked && !selected && opacity > 0 ? { '--day-opacity': opacity } : undefined}
-                                    className={`h-7 w-full flex items-center justify-center rounded-md text-[11px] transition-all ${hasTracked ? 'day-heat font-medium' : today ? 'text-primary font-medium bg-raised/50' : 'text-faint'
-                                        } ${selected ? 'ring-2 ring-accent text-accent font-semibold' : hasTracked ? 'text-success-text hover:brightness-110' : ''} ${hasTracked || today ? 'cursor-pointer' : ''
+                                    className={`h-7 w-full flex items-center justify-center rounded-md text-[11px] transition-all ${heatLevel > 0 ? `day-heat-${heatLevel} font-medium` : today ? 'text-primary font-medium bg-raised/50' : 'text-faint'
+                                        } ${selected ? 'ring-2 ring-accent text-accent font-semibold' : heatLevel > 0 ? `${heatLevel >= 3 ? 'text-white' : 'text-success-text'} hover:brightness-110` : ''} ${hasTracked || today ? 'cursor-pointer' : ''
                                         }`}
                                     onClick={() => (hasTracked || today) && selectDay(day)}
                                     tabIndex={hasTracked || today ? 0 : -1}

@@ -76,6 +76,12 @@
   --th-brand-octo: #1f2d3a;
   --th-brand-clock: #4272a3;
 
+  --th-heat-1: #d4f0df;
+  --th-heat-2: #a5ddb8;
+  --th-heat-3: #6ec48f;
+  --th-heat-4: #3ba368;
+  --th-heat-5: #1a7f4b;
+
   --th-scrollbar: #b5ccdd;
 }
 
@@ -129,6 +135,12 @@
   --th-brand-octo: #e8f0f7;
   --th-brand-clock: #3878b5;
 
+  --th-heat-1: #0e3d1f;
+  --th-heat-2: #135a2d;
+  --th-heat-3: #1a7a3d;
+  --th-heat-4: #28a752;
+  --th-heat-5: #3bd06a;
+
   --th-scrollbar: #3d5868;
 }
 
@@ -180,13 +192,21 @@
   --color-amber-ring: var(--th-amber-ring);
 }
 
-/* Calendar day heat map */
-.day-heat {
-  background-color: color-mix(
-    in srgb,
-    var(--th-success-dot) calc(var(--day-opacity, 0.25) * 55%),
-    transparent
-  );
+/* Calendar day heat map — 5 GitHub-style levels */
+.day-heat-1 {
+  background-color: var(--th-heat-1);
+}
+.day-heat-2 {
+  background-color: var(--th-heat-2);
+}
+.day-heat-3 {
+  background-color: var(--th-heat-3);
+}
+.day-heat-4 {
+  background-color: var(--th-heat-4);
+}
+.day-heat-5 {
+  background-color: var(--th-heat-5);
 }
 
 /* Custom scrollbar */
