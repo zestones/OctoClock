@@ -145,22 +145,24 @@ export function App() {
             <ActiveTimer />
 
             {/* Page Content */}
-            <main className="flex-1 overflow-y-auto popup-scroll">
+            <main className="flex-1 flex flex-col overflow-hidden">
                 <ErrorBoundary>
                     {page === 'issues' && <IssuesTab />}
-                    {page === 'stats' && <StatsTab tracked={tracked} user={user} />}
-                    {page === 'calendar' && <CalendarView tracked={tracked} />}
-                    {page === 'settings' && (
-                        <Settings
-                            token={token}
-                            maskedToken={maskedToken}
-                            user={user}
-                            onTokenChange={handleTokenChange}
-                            onClearData={() => setShowClearConfirm(true)}
-                            theme={theme}
-                            onThemeChange={setTheme}
-                        />
-                    )}
+                    <div className={`flex-1 overflow-y-auto popup-scroll ${page === 'issues' ? 'hidden' : ''}`}>
+                        {page === 'stats' && <StatsTab tracked={tracked} user={user} />}
+                        {page === 'calendar' && <CalendarView tracked={tracked} />}
+                        {page === 'settings' && (
+                            <Settings
+                                token={token}
+                                maskedToken={maskedToken}
+                                user={user}
+                                onTokenChange={handleTokenChange}
+                                onClearData={() => setShowClearConfirm(true)}
+                                theme={theme}
+                                onThemeChange={setTheme}
+                            />
+                        )}
+                    </div>
                 </ErrorBoundary>
             </main>
 

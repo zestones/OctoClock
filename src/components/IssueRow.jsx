@@ -5,9 +5,9 @@ export function IssueRow({ issue, isActive, onStart, onStop, trackedSeconds = 0 
     const isClosed = issue.state === 'closed';
     return (
         <div
-            className={`relative py-1.5 px-2.5 my-0.5 rounded-xl border transition-all group ${isActive
-                    ? 'bg-success-subtle/40 border-success-border shadow-sm'
-                    : 'bg-base border-border-subtle hover:border-border-default hover:shadow-sm'
+            className={`relative py-1.5 px-2.5 my-0.5 rounded-xs border transition-all group ${isActive
+                ? 'bg-success-subtle/40 border-success-border shadow-sm'
+                : 'bg-base border-border-subtle hover:border-border-default hover:shadow-sm'
                 } ${isClosed ? 'opacity-55' : ''}`}
         >
             {/* Top row: number + title + open link */}
@@ -51,8 +51,8 @@ export function IssueRow({ issue, isActive, onStart, onStop, trackedSeconds = 0 
                     type="button"
                     onClick={() => (isActive ? onStop(issue) : onStart(issue))}
                     className={`flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-lg cursor-pointer transition-all ${isActive
-                            ? 'bg-danger-subtle text-danger-text hover:bg-danger-hover'
-                            : 'bg-accent-subtle text-accent-text hover:bg-accent-ring/40 opacity-0 group-hover:opacity-100'
+                        ? 'bg-danger-subtle text-danger-text hover:bg-danger-hover'
+                        : 'bg-accent-subtle text-accent-text hover:bg-accent-ring/40 opacity-0 group-hover:opacity-100'
                         }`}
                 >
                     {isActive ? (
