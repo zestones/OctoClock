@@ -5,7 +5,7 @@ export function IssueRow({ issue, isActive, onStart, onStop, trackedSeconds = 0 
     const isClosed = issue.state === 'closed';
     return (
         <div
-            className={`relative py-1.5 px-2.5 my-0.5 rounded-xs border transition-all group ${isActive
+            className={`relative py-1.5 px-2.5 my-0.5 rounded-md border transition-all group ${isActive
                 ? 'bg-success-subtle/60 border-success-border border-l-[3px] border-l-success-dot shadow-sm'
                 : 'bg-base border-border-subtle hover:border-border-default hover:shadow-sm'
                 } ${isClosed ? 'opacity-55' : ''}`}
