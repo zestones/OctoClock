@@ -1,5 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'preact/hooks';
-import { IconCalendar, IconChart, IconChevronRight, IconClock, IconTrendingUp, IconUser, IconUsers, IconX } from '../../icons.jsx';
+import {
+    IconCalendar,
+    IconChart,
+    IconChevronRight,
+    IconClock,
+    IconTrendingUp,
+    IconUser,
+    IconUsers,
+    IconX,
+} from '../../icons.jsx';
 import { fetchAndMergeEveryoneData } from '../../services/everyone-data.service.js';
 import { StorageService } from '../../services/storage.service.js';
 import { AggregationService } from '../../utils/aggregation.utils.js';
@@ -133,19 +142,24 @@ export function StatsTab({ tracked, user }) {
                         <button
                             type="button"
                             key={card.id}
-                            className={`relative rounded-xl p-3 text-left cursor-pointer transition-all w-full border overflow-hidden ${active
-                                ? 'bg-accent-subtle/50 border-accent-ring/40 shadow-sm'
-                                : 'bg-surface border-border-subtle hover:border-border-default hover:shadow-sm'
-                                }`}
+                            className={`relative rounded-xl p-3 text-left cursor-pointer transition-all w-full border overflow-hidden ${
+                                active
+                                    ? 'bg-accent-subtle/50 border-accent-ring/40 shadow-sm'
+                                    : 'bg-surface border-border-subtle hover:border-border-default hover:shadow-sm'
+                            }`}
                             onClick={() => setRangeMode(card.id)}
                         >
                             <div className="flex items-center justify-between mb-1">
-                                <span className={`text-[11px] font-medium ${active ? 'text-accent-text' : 'text-tertiary'}`}>
+                                <span
+                                    className={`text-[11px] font-medium ${active ? 'text-accent-text' : 'text-tertiary'}`}
+                                >
                                     {card.label}
                                 </span>
                                 <CardIcon size={13} className={active ? 'text-accent' : 'text-faint'} />
                             </div>
-                            <div className={`text-[16px] font-bold font-mono tabular-nums ${active ? 'text-accent' : 'text-primary'}`}>
+                            <div
+                                className={`text-[16px] font-bold font-mono tabular-nums ${active ? 'text-accent' : 'text-primary'}`}
+                            >
                                 {TimeService.formatTime(card.seconds)}
                             </div>
                         </button>
@@ -173,10 +187,9 @@ export function StatsTab({ tracked, user }) {
                                 type="button"
                                 key={mode.id}
                                 onClick={() => setUserMode(mode.id)}
-                                className={`relative z-10 flex items-center gap-1 text-[11px] cursor-pointer font-medium px-2.5 py-1.5 transition-colors ${userMode === mode.id
-                                    ? 'text-accent'
-                                    : 'text-tertiary hover:text-secondary'
-                                    }`}
+                                className={`relative z-10 flex items-center gap-1 text-[11px] cursor-pointer font-medium px-2.5 py-1.5 transition-colors ${
+                                    userMode === mode.id ? 'text-accent' : 'text-tertiary hover:text-secondary'
+                                }`}
                             >
                                 <ModeIcon size={11} /> {mode.label}
                             </button>
@@ -190,10 +203,11 @@ export function StatsTab({ tracked, user }) {
                 <button
                     type="button"
                     onClick={() => setRangeMode(rangeMode === 'custom' ? 'all' : 'custom')}
-                    className={`flex items-center gap-1.5 text-[11px] cursor-pointer transition-all font-medium px-2.5 py-1.5 rounded-lg border ${rangeMode === 'custom'
-                        ? 'bg-accent-subtle text-accent border-accent-ring'
-                        : 'bg-surface text-tertiary border-border-default hover:bg-raised hover:text-secondary'
-                        }`}
+                    className={`flex items-center gap-1.5 text-[11px] cursor-pointer transition-all font-medium px-2.5 py-1.5 rounded-lg border ${
+                        rangeMode === 'custom'
+                            ? 'bg-accent-subtle text-accent border-accent-ring'
+                            : 'bg-surface text-tertiary border-border-default hover:bg-raised hover:text-secondary'
+                    }`}
                 >
                     {rangeMode === 'custom' ? (
                         <>
@@ -227,9 +241,7 @@ export function StatsTab({ tracked, user }) {
 
             {/* Per-repo breakdown */}
             <div>
-                <div className="text-[11px] font-medium text-muted uppercase tracking-wider mb-2">
-                    Repositories
-                </div>
+                <div className="text-[11px] font-medium text-muted uppercase tracking-wider mb-2">Repositories</div>
                 {repoBreakdown.length === 0 ? (
                     <div className="flex flex-col items-center py-10">
                         <div className="text-faint mb-2">
@@ -279,8 +291,6 @@ export function StatsTab({ tracked, user }) {
                     </div>
                 )}
             </div>
-
-
         </div>
     );
 }

@@ -132,7 +132,10 @@ export function Settings({ token, maskedToken, user, onTokenChange, onClearData,
                                     </div>
                                     <div className="text-[10px] text-muted">
                                         resets{' '}
-                                        {rateLimit.resetAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        {rateLimit.resetAt.toLocaleTimeString([], {
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                        })}
                                     </div>
                                 </div>
                             )}
@@ -216,10 +219,9 @@ export function Settings({ token, maskedToken, user, onTokenChange, onClearData,
                                 type="button"
                                 key={id}
                                 onClick={() => onThemeChange(id)}
-                                className={`relative z-10 flex-1 flex items-center justify-center gap-1.5 text-[12px] font-medium py-2 rounded-lg cursor-pointer transition-colors ${theme === id
-                                    ? 'text-accent-text'
-                                    : 'text-tertiary hover:text-secondary'
-                                    }`}
+                                className={`relative z-10 flex-1 flex items-center justify-center gap-1.5 text-[12px] font-medium py-2 rounded-lg cursor-pointer transition-colors ${
+                                    theme === id ? 'text-accent-text' : 'text-tertiary hover:text-secondary'
+                                }`}
                             >
                                 <Icon size={13} />
                                 {label}
@@ -293,12 +295,14 @@ export function Settings({ token, maskedToken, user, onTokenChange, onClearData,
                                 <button
                                     type="button"
                                     onClick={toggleAutoSync}
-                                    className={`relative shrink-0 w-9 h-5 rounded-full transition-colors cursor-pointer ${autoSync ? 'bg-accent' : 'bg-raised border border-border-subtle'
-                                        }`}
+                                    className={`relative shrink-0 w-9 h-5 rounded-full transition-colors cursor-pointer ${
+                                        autoSync ? 'bg-accent' : 'bg-raised border border-border-subtle'
+                                    }`}
                                 >
                                     <span
-                                        className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${autoSync ? 'translate-x-4' : ''
-                                            }`}
+                                        className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${
+                                            autoSync ? 'translate-x-4' : ''
+                                        }`}
                                     />
                                 </button>
                             </div>
@@ -321,9 +325,7 @@ export function Settings({ token, maskedToken, user, onTokenChange, onClearData,
 
                 {/* Version */}
                 <div className="text-center pt-1">
-                    <span className="text-[10px] text-faint">
-                        OctoClock v{chrome.runtime.getManifest().version}
-                    </span>
+                    <span className="text-[10px] text-faint">OctoClock v{chrome.runtime.getManifest().version}</span>
                 </div>
             </div>
         </div>

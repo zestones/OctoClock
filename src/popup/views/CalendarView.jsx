@@ -104,7 +104,7 @@ export function CalendarView({ tracked }) {
         if (ratio < 0.15) return 1;
         if (ratio < 0.35) return 2;
         if (ratio < 0.55) return 3;
-        if (ratio < 0.80) return 4;
+        if (ratio < 0.8) return 4;
         return 5;
     };
 
@@ -129,7 +129,11 @@ export function CalendarView({ tracked }) {
                     <div className="flex items-center gap-1.5 bg-surface border border-border-subtle rounded-lg px-2 py-1">
                         <IconCalendar size={11} className="text-accent" />
                         <span className="text-[11px] font-medium text-primary">
-                            {selectedDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                            {selectedDate.toLocaleDateString('en-US', {
+                                weekday: 'short',
+                                month: 'short',
+                                day: 'numeric',
+                            })}
                         </span>
                     </div>
                     <div className="flex items-center gap-1.5 bg-surface border border-border-subtle rounded-lg px-2 py-1">
@@ -192,9 +196,15 @@ export function CalendarView({ tracked }) {
                                 <button
                                     type="button"
                                     key={day}
-                                    className={`h-7 w-full flex items-center justify-center rounded-md text-[11px] transition-all ${heatLevel > 0 ? `day-heat-${heatLevel} font-medium` : today ? 'text-primary font-medium bg-raised/50' : 'text-faint'
-                                        } ${selected ? `ring-2 ring-accent font-semibold ${heatLevel > 0 ? 'text-white' : 'text-accent'}` : heatLevel > 0 ? `${heatLevel >= 3 ? 'text-white' : 'text-success-text'} hover:brightness-110` : ''} ${hasTracked || today ? 'cursor-pointer' : ''
-                                        }`}
+                                    className={`h-7 w-full flex items-center justify-center rounded-md text-[11px] transition-all ${
+                                        heatLevel > 0
+                                            ? `day-heat-${heatLevel} font-medium`
+                                            : today
+                                              ? 'text-primary font-medium bg-raised/50'
+                                              : 'text-faint'
+                                    } ${selected ? `ring-2 ring-accent font-semibold ${heatLevel > 0 ? 'text-white' : 'text-accent'}` : heatLevel > 0 ? `${heatLevel >= 3 ? 'text-white' : 'text-success-text'} hover:brightness-110` : ''} ${
+                                        hasTracked || today ? 'cursor-pointer' : ''
+                                    }`}
                                     onClick={() => (hasTracked || today) && selectDay(day)}
                                     tabIndex={hasTracked || today ? 0 : -1}
                                 >
@@ -220,7 +230,9 @@ export function CalendarView({ tracked }) {
                             <IconClock size={28} />
                         </div>
                         <div className="text-[12px] text-muted">No entries for this day</div>
-                        <div className="text-[11px] text-faint mt-0.5">Select a highlighted day to view tracked time</div>
+                        <div className="text-[11px] text-faint mt-0.5">
+                            Select a highlighted day to view tracked time
+                        </div>
                     </div>
                 ) : (
                     <TrackedList entries={entries} showTimerControls={true} />

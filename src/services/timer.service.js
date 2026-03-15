@@ -155,9 +155,7 @@ export class TimerService {
 
             const trackedTimes = (await StorageService.get(STORAGE_KEYS.TRACKED_TIMES)) ?? [];
             const localKeys = new Set(
-                trackedTimes
-                    .filter((e) => e.issueUrl === issueUrl)
-                    .map((e) => `${e.date}:${e.seconds}`),
+                trackedTimes.filter((e) => e.issueUrl === issueUrl).map((e) => `${e.date}:${e.seconds}`),
             );
 
             let added = false;

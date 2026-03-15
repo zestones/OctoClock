@@ -5,16 +5,16 @@ export function IssueRow({ issue, isActive, onStart, onStop, trackedSeconds = 0 
     const isClosed = issue.state === 'closed';
     return (
         <div
-            className={`relative py-1.5 px-2.5 my-0.5 rounded-md border transition-all group ${isActive
-                ? 'bg-success-subtle/60 border-success-border border-l-[3px] border-l-success-dot shadow-sm'
-                : 'bg-base border-border-subtle hover:border-border-default hover:shadow-sm'
-                } ${isClosed ? 'opacity-55' : ''}`}
+            className={`relative py-1.5 px-2.5 my-0.5 rounded-md border transition-all group ${
+                isActive
+                    ? 'bg-success-subtle/60 border-success-border border-l-[3px] border-l-success-dot shadow-sm'
+                    : 'bg-base border-border-subtle hover:border-border-default hover:shadow-sm'
+            } ${isClosed ? 'opacity-55' : ''}`}
         >
             {/* Top row: number + title + open link */}
             <div className="flex items-start gap-1.5 mb-0.5">
                 <span
-                    className={`mt-1 w-2 h-2 rounded-full shrink-0 ${isClosed ? 'bg-violet-value' : 'bg-success-dot'
-                        }`}
+                    className={`mt-1 w-2 h-2 rounded-full shrink-0 ${isClosed ? 'bg-violet-value' : 'bg-success-dot'}`}
                 />
                 <a
                     href={`https://github.com${issue.issueUrl}`}
@@ -50,10 +50,11 @@ export function IssueRow({ issue, isActive, onStart, onStop, trackedSeconds = 0 
                 <button
                     type="button"
                     onClick={() => (isActive ? onStop(issue) : onStart(issue))}
-                    className={`flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-lg cursor-pointer transition-all ${isActive
-                        ? 'bg-danger-subtle text-danger-text hover:bg-danger-hover'
-                        : 'bg-success-subtle text-success-text hover:bg-success-hover opacity-40 group-hover:opacity-100'
-                        }`}
+                    className={`flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-lg cursor-pointer transition-all ${
+                        isActive
+                            ? 'bg-danger-subtle text-danger-text hover:bg-danger-hover'
+                            : 'bg-success-subtle text-success-text hover:bg-success-hover opacity-40 group-hover:opacity-100'
+                    }`}
                 >
                     {isActive ? (
                         <>

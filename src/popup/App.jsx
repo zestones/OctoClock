@@ -75,7 +75,10 @@ export function App() {
                     <span style={{ color: 'var(--th-brand-octo)' }}>Octo</span>
                     <span style={{ color: 'var(--th-brand-clock)' }}>Clock</span>
                 </h1>
-                <p className="text-[11px] text-tertiary tracking-wide mb-1" style={{ fontFamily: "'Saira Condensed', sans-serif" }}>
+                <p
+                    className="text-[11px] text-tertiary tracking-wide mb-1"
+                    style={{ fontFamily: "'Saira Condensed', sans-serif" }}
+                >
                     GitHub Time Tracker
                 </p>
                 <p className="text-[13px] text-tertiary text-center mb-8 leading-relaxed">
@@ -123,7 +126,10 @@ export function App() {
                 <div className="flex items-center gap-1.5">
                     <img src="/icons/favicon.png" alt="OctoClock" className="w-8 h-8" />
                     <div className="flex items-baseline gap-1.5">
-                        <h1 className="text-[16px] tracking-tight" style={{ fontFamily: "'Saira Stencil One', cursive" }}>
+                        <h1
+                            className="text-[16px] tracking-tight"
+                            style={{ fontFamily: "'Saira Stencil One', cursive" }}
+                        >
                             <span style={{ color: 'var(--th-brand-octo)' }}>Octo</span>
                             <span style={{ color: 'var(--th-brand-clock)' }}>Clock</span>
                         </h1>
@@ -186,14 +192,14 @@ export function App() {
                                     type="button"
                                     key={id}
                                     onClick={() => setPage(id)}
-                                    className={`relative z-10 flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-xl cursor-pointer transition-colors duration-200 ${active
-                                        ? 'text-white'
-                                        : 'text-muted hover:text-primary'
-                                        }`}
+                                    className={`relative z-10 flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-xl cursor-pointer transition-colors duration-200 ${
+                                        active ? 'text-white' : 'text-muted hover:text-primary'
+                                    }`}
                                 >
                                     <Icon size={16} strokeWidth={active ? 2.5 : 1.75} />
-                                    <span className={`text-[9px] ${active ? 'font-bold' : 'font-medium'
-                                        }`}>{label}</span>
+                                    <span className={`text-[9px] ${active ? 'font-bold' : 'font-medium'}`}>
+                                        {label}
+                                    </span>
                                 </button>
                             );
                         })}

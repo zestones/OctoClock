@@ -112,10 +112,9 @@ export function RepoDetailView({ repo, repoDetails, userMode, onBack }) {
                                 type="button"
                                 key={t.id}
                                 onClick={() => setDetailTab(t.id)}
-                                className={`relative z-10 flex-1 text-[11px] px-2 py-1.5 rounded-md cursor-pointer transition-colors font-medium text-center ${detailTab === t.id
-                                    ? 'text-accent-text'
-                                    : 'text-muted hover:text-secondary'
-                                    }`}
+                                className={`relative z-10 flex-1 text-[11px] px-2 py-1.5 rounded-md cursor-pointer transition-colors font-medium text-center ${
+                                    detailTab === t.id ? 'text-accent-text' : 'text-muted hover:text-secondary'
+                                }`}
                             >
                                 {t.label}
                             </button>
@@ -125,7 +124,12 @@ export function RepoDetailView({ repo, repoDetails, userMode, onBack }) {
 
                 {/* Search (issues tab only) */}
                 {detailTab === 'issues' && (
-                    <SearchInput placeholder="Filter issues..." value={filterText} onInput={setFilterText} className="" />
+                    <SearchInput
+                        placeholder="Filter issues..."
+                        value={filterText}
+                        onInput={setFilterText}
+                        className=""
+                    />
                 )}
             </div>
 
@@ -143,17 +147,19 @@ export function RepoDetailView({ repo, repoDetails, userMode, onBack }) {
                         ) : (
                             filtered.map((issue) => {
                                 const isOpen = expandedIssue === issue.url;
-                                const percentage = maxIssueSeconds > 0 ? (issue.totalSeconds / maxIssueSeconds) * 100 : 0;
+                                const percentage =
+                                    maxIssueSeconds > 0 ? (issue.totalSeconds / maxIssueSeconds) * 100 : 0;
 
                                 return (
                                     <div key={issue.url}>
                                         {/* Issue row */}
                                         <button
                                             type="button"
-                                            className={`w-full text-left rounded-xl px-3 py-2 cursor-pointer transition-all border ${isOpen
-                                                ? 'bg-surface border-border-default shadow-sm'
-                                                : 'bg-base border-transparent hover:bg-surface hover:border-border-subtle'
-                                                }`}
+                                            className={`w-full text-left rounded-xl px-3 py-2 cursor-pointer transition-all border ${
+                                                isOpen
+                                                    ? 'bg-surface border-border-default shadow-sm'
+                                                    : 'bg-base border-transparent hover:bg-surface hover:border-border-subtle'
+                                            }`}
                                             onClick={() => setExpandedIssue(isOpen ? null : issue.url)}
                                         >
                                             <div className="flex items-center gap-2">
@@ -188,7 +194,10 @@ export function RepoDetailView({ repo, repoDetails, userMode, onBack }) {
                                             <div>
                                                 <div className="ml-7 py-1 space-y-0.5">
                                                     {issue.sessions
-                                                        .sort((a, b) => b.date.localeCompare(a.date) || b.seconds - a.seconds)
+                                                        .sort(
+                                                            (a, b) =>
+                                                                b.date.localeCompare(a.date) || b.seconds - a.seconds,
+                                                        )
                                                         .map((session, si) => (
                                                             <div
                                                                 key={si}

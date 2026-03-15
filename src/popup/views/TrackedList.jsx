@@ -22,10 +22,11 @@ export function TrackedList({ entries, showTimerControls = false }) {
                 return (
                     <div
                         key={entry.issueUrl || i}
-                        className={`relative py-1.5 px-2.5 my-0.5 rounded-lg border transition-all group ${active
-                            ? 'bg-success-subtle/60 border-success-border border-l-[3px] border-l-success-dot shadow-sm'
-                            : 'bg-surface border-border-subtle hover:border-border-default hover:shadow-sm'
-                            }`}
+                        className={`relative py-1.5 px-2.5 my-0.5 rounded-lg border transition-all group ${
+                            active
+                                ? 'bg-success-subtle/60 border-success-border border-l-[3px] border-l-success-dot shadow-sm'
+                                : 'bg-surface border-border-subtle hover:border-border-default hover:shadow-sm'
+                        }`}
                     >
                         {/* Top row: number + title + open link */}
                         <div className="flex items-start gap-1.5 mb-0.5">
@@ -37,7 +38,9 @@ export function TrackedList({ entries, showTimerControls = false }) {
                             >
                                 <span className="text-[13px] text-primary leading-snug line-clamp-2 group-hover/link:text-accent transition-colors">
                                     {entry.issueNumber && (
-                                        <span className="text-muted font-mono text-[11px] mr-1">{entry.issueNumber}</span>
+                                        <span className="text-muted font-mono text-[11px] mr-1">
+                                            {entry.issueNumber}
+                                        </span>
                                     )}
                                     {entry.title}
                                 </span>
@@ -66,10 +69,11 @@ export function TrackedList({ entries, showTimerControls = false }) {
                                 <button
                                     type="button"
                                     onClick={() => handleTimerClick(entry)}
-                                    className={`flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-lg cursor-pointer transition-all ${active
-                                        ? 'bg-danger-subtle text-danger-text hover:bg-danger-hover'
-                                        : 'bg-success-subtle text-success-text hover:bg-success-hover opacity-40 group-hover:opacity-100'
-                                        }`}
+                                    className={`flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-lg cursor-pointer transition-all ${
+                                        active
+                                            ? 'bg-danger-subtle text-danger-text hover:bg-danger-hover'
+                                            : 'bg-success-subtle text-success-text hover:bg-success-hover opacity-40 group-hover:opacity-100'
+                                    }`}
                                 >
                                     {active ? (
                                         <>

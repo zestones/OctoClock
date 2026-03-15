@@ -101,8 +101,12 @@ export function ContributorsView({ repoDetails }) {
                                 const pct = totalSeconds > 0 ? Math.round((contrib.seconds / totalSeconds) * 100) : 0;
                                 return (
                                     <div key={contrib.user} className="flex items-center gap-1">
-                                        <div className={`w-2 h-2 rounded-full ${barColors[i % barColors.length].dot} shrink-0`} />
-                                        <span className="text-[10px] text-secondary truncate max-w-20">{contrib.user}</span>
+                                        <div
+                                            className={`w-2 h-2 rounded-full ${barColors[i % barColors.length].dot} shrink-0`}
+                                        />
+                                        <span className="text-[10px] text-secondary truncate max-w-20">
+                                            {contrib.user}
+                                        </span>
                                         <span className="text-[10px] text-faint font-mono tabular-nums">{pct}%</span>
                                     </div>
                                 );
@@ -119,16 +123,19 @@ export function ContributorsView({ repoDetails }) {
                             <div key={contrib.user}>
                                 <button
                                     type="button"
-                                    className={`w-full text-left rounded-xl p-2.5 cursor-pointer transition-all border ${isOpen
-                                        ? 'bg-surface border-border-default shadow-sm'
-                                        : 'bg-base border-transparent hover:bg-surface hover:border-border-subtle'
-                                        }`}
+                                    className={`w-full text-left rounded-xl p-2.5 cursor-pointer transition-all border ${
+                                        isOpen
+                                            ? 'bg-surface border-border-default shadow-sm'
+                                            : 'bg-base border-transparent hover:bg-surface hover:border-border-subtle'
+                                    }`}
                                     onClick={() => setExpandedUser(isOpen ? null : contrib.user)}
                                 >
                                     {/* Name + time row */}
                                     <div className="flex items-center justify-between mb-1.5">
                                         <div className="flex items-center gap-1.5">
-                                            <span className={`text-muted shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`}>
+                                            <span
+                                                className={`text-muted shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`}
+                                            >
                                                 <IconChevronRight size={10} />
                                             </span>
                                             <div className={`w-2.5 h-2.5 rounded-full ${color.dot} shrink-0`} />
@@ -155,13 +162,18 @@ export function ContributorsView({ repoDetails }) {
                                     {/* Stats row */}
                                     <div className="ml-5 flex items-center gap-3 text-[10px] text-muted">
                                         <span>
-                                            <span className="font-semibold text-secondary">{contrib.issueCount}</span> issue{contrib.issueCount !== 1 ? 's' : ''}
+                                            <span className="font-semibold text-secondary">{contrib.issueCount}</span>{' '}
+                                            issue{contrib.issueCount !== 1 ? 's' : ''}
                                         </span>
                                         <span>
-                                            <span className="font-semibold text-secondary">{contrib.sessionCount}</span> session{contrib.sessionCount !== 1 ? 's' : ''}
+                                            <span className="font-semibold text-secondary">{contrib.sessionCount}</span>{' '}
+                                            session{contrib.sessionCount !== 1 ? 's' : ''}
                                         </span>
                                         <span>
-                                            avg <span className="font-semibold text-secondary font-mono tabular-nums">{TimeService.formatTime(contrib.avgSession)}</span>
+                                            avg{' '}
+                                            <span className="font-semibold text-secondary font-mono tabular-nums">
+                                                {TimeService.formatTime(contrib.avgSession)}
+                                            </span>
                                         </span>
                                     </div>
                                 </button>

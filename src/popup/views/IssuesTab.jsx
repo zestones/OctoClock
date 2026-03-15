@@ -27,8 +27,6 @@ export function IssuesTab() {
     const { activeIssue } = useActiveTimer();
     const { pinnedRepos, repoIssues, loading, currentUser, refreshRepoIssues, pinRepo, unpinRepo } = useIssuesData();
 
-
-
     const trackedTimeByIssue = useMemo(() => {
         const map = {};
         for (const entry of tracked) {
@@ -82,7 +80,12 @@ export function IssuesTab() {
                 {/* Search + Pin */}
                 <div className="flex gap-2 mb-2">
                     <div className="flex-1">
-                        <SearchInput placeholder="Search issues..." value={searchTerm} onInput={setSearchTerm} className="" />
+                        <SearchInput
+                            placeholder="Search issues..."
+                            value={searchTerm}
+                            onInput={setSearchTerm}
+                            className=""
+                        />
                     </div>
                     <button
                         type="button"
@@ -111,10 +114,9 @@ export function IssuesTab() {
                             type="button"
                             key={f.id}
                             onClick={() => setFilter(f.id)}
-                            className={`relative z-10 flex-1 text-[11px] px-2 py-1.5 rounded-md cursor-pointer transition-colors font-medium text-center ${filter === f.id
-                                ? 'text-accent-text'
-                                : 'text-muted hover:text-secondary'
-                                }`}
+                            className={`relative z-10 flex-1 text-[11px] px-2 py-1.5 rounded-md cursor-pointer transition-colors font-medium text-center ${
+                                filter === f.id ? 'text-accent-text' : 'text-muted hover:text-secondary'
+                            }`}
                         >
                             {f.label}
                         </button>
@@ -156,8 +158,6 @@ export function IssuesTab() {
                 {/* Pinned repos */}
                 {!searchTerm && (
                     <div>
-
-
                         {pinnedRepos.length === 0 && (
                             <div className="text-center py-10">
                                 <div className="text-faint mb-3">
@@ -181,10 +181,11 @@ export function IssuesTab() {
                                 <div key={repo.fullName} className="mb-2">
                                     {/* Repo card header */}
                                     <div
-                                        className={`flex items-center justify-between py-2.5 px-3 cursor-pointer rounded-xl border transition-all ${isExpanded
-                                            ? 'bg-accent-subtle/40 border-accent-ring/30 shadow-sm'
-                                            : 'bg-surface border-border-subtle hover:border-border-default hover:shadow-sm'
-                                            }`}
+                                        className={`flex items-center justify-between py-2.5 px-3 cursor-pointer rounded-xl border transition-all ${
+                                            isExpanded
+                                                ? 'bg-accent-subtle/40 border-accent-ring/30 shadow-sm'
+                                                : 'bg-surface border-border-subtle hover:border-border-default hover:shadow-sm'
+                                        }`}
                                         onClick={() =>
                                             setExpandedRepos((prev) => ({
                                                 ...prev,
@@ -204,10 +205,15 @@ export function IssuesTab() {
                                         tabIndex={0}
                                     >
                                         <div className="flex items-center gap-2 min-w-0">
-                                            <span className="text-muted transition-transform duration-200" style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}>
+                                            <span
+                                                className="text-muted transition-transform duration-200"
+                                                style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}
+                                            >
                                                 <IconChevronRight size={13} />
                                             </span>
-                                            <span className="text-[13px] font-medium text-primary truncate">{repo.fullName}</span>
+                                            <span className="text-[13px] font-medium text-primary truncate">
+                                                {repo.fullName}
+                                            </span>
                                             {!loading[repo.fullName] && (
                                                 <span className="text-[10px] font-medium text-muted bg-raised px-1.5 py-0.5 rounded-full shrink-0 min-w-5 text-center tabular-nums">
                                                     {issues.length}
@@ -250,7 +256,10 @@ export function IssuesTab() {
                                                 {loading[repo.fullName] && !repoIssues[repo.fullName] ? (
                                                     <div className="space-y-2 py-2 pl-2">
                                                         {[1, 2, 3].map((i) => (
-                                                            <div key={i} className="animate-pulse flex items-start gap-2">
+                                                            <div
+                                                                key={i}
+                                                                className="animate-pulse flex items-start gap-2"
+                                                            >
                                                                 <div className="w-2 h-2 mt-1.5 rounded-full bg-raised" />
                                                                 <div className="flex-1 space-y-1.5">
                                                                     <div className="h-3 bg-raised rounded w-3/4" />
@@ -264,8 +273,8 @@ export function IssuesTab() {
                                                         {filter === 'closed'
                                                             ? 'No closed issues'
                                                             : filter === 'open'
-                                                                ? 'No open issues'
-                                                                : 'No matching issues'}
+                                                              ? 'No open issues'
+                                                              : 'No matching issues'}
                                                     </div>
                                                 ) : (
                                                     issues.map((issue) => (
@@ -285,8 +294,6 @@ export function IssuesTab() {
                                 </div>
                             );
                         })}
-
-
                     </div>
                 )}
             </div>
