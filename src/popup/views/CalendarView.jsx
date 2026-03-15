@@ -27,15 +27,17 @@ export function CalendarView({ tracked }) {
     const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
     const paddingDays = Array(firstDayWeekday).fill(null);
 
-    const trackedDates = useMemo(() => {
-        const dates = new Set();
+    const trackedDays = useMemo(() => {
+        const map = {};
         tracked.forEach((entry) => {
             if (entry.date && /^\d{4}-\d{2}-\d{2}$/.test(entry.date)) {
-                dates.add(entry.date);
+                map[entry.date] = (map[entry.date] || 0) + (entry.seconds || 0);
             }
         });
-        return Array.from(dates);
+        return map;
     }, [tracked]);
+
+    const maxDaySeconds = useMemo(() => Math.max(...Object.values(trackedDays), 1), [trackedDays]);
 
     const selectedDayTracked = useMemo(() => {
         const dateStr = TimeService.getLocalDateString(selectedDate);
@@ -85,7 +87,20 @@ export function CalendarView({ tracked }) {
         const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
         const dateStr = TimeService.getLocalDateString(date);
         const todayStr = TimeService.getLocalDateString(getLocalDate());
-        return trackedDates.includes(dateStr) || dateStr === todayStr;
+        return dateStr in trackedDays || dateStr === todayStr;
+    };
+
+    const getDayOpacity = (day) => {
+        const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+        const dateStr = TimeService.getLocalDateString(date);
+        const seconds = trackedDays[dateStr] || 0;
+        if (seconds === 0) return 0;
+        // 4 intensity levels: 0.25 / 0.5 / 0.75 / 1.0
+        const ratio = seconds / maxDaySeconds;
+        if (ratio < 0.25) return 0.25;
+        if (ratio < 0.5) return 0.5;
+        if (ratio < 0.75) return 0.75;
+        return 1;
     };
 
     const isSelectedDay = (day) => {
@@ -137,18 +152,15 @@ export function CalendarView({ tracked }) {
                     const tracked = isDayTracked(day);
                     const selected = isSelectedDay(day);
                     const today = isToday(day);
+                    const opacity = getDayOpacity(day);
                     return (
                         <button
                             type="button"
                             key={day}
-                            className={`h-8 w-full flex items-center justify-center rounded-lg text-[12px] transition-colors ${selected
-                                ? 'bg-accent text-white font-medium cursor-pointer'
-                                : tracked
-                                    ? 'bg-accent-subtle text-accent-text cursor-pointer hover:bg-accent-ring font-medium'
-                                    : today
-                                        ? 'text-primary font-medium'
-                                        : 'text-faint'
-                                } ${tracked || today ? 'cursor-pointer' : ''}`}
+                            style={tracked && !selected && opacity > 0 ? { '--day-opacity': opacity } : undefined}
+                            className={`h-8 w-full flex items-center justify-center rounded-lg text-[12px] transition-colors ${tracked ? 'day-heat font-medium' : today ? 'text-primary font-medium' : 'text-faint'
+                                } ${selected ? 'ring-2 ring-accent text-accent font-semibold' : tracked ? 'text-success-text hover:brightness-110' : ''} ${tracked || today ? 'cursor-pointer' : ''
+                                }`}
                             onClick={() => (tracked || today) && selectDay(day)}
                             tabIndex={tracked || today ? 0 : -1}
                         >
