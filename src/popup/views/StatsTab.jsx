@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'preact/hooks';
-import { IconCalendar, IconChart, IconChevronRight, IconClock, IconRefresh, IconTrendingUp, IconUser, IconUsers, IconX } from '../../icons.jsx';
+import { IconCalendar, IconChart, IconChevronRight, IconClock, IconTrendingUp, IconUser, IconUsers, IconX } from '../../icons.jsx';
 import { fetchAndMergeEveryoneData } from '../../services/everyone-data.service.js';
 import { StorageService } from '../../services/storage.service.js';
 import { AggregationService } from '../../utils/aggregation.utils.js';
@@ -29,6 +29,13 @@ export function StatsTab({ tracked, user }) {
         });
     }, []);
 
+    // Auto-fetch when switching to Everyone
+    useEffect(() => {
+        if (userMode === 'everyone' && !everyoneLoading) {
+            fetchEveryoneData();
+        }
+    }, [userMode]);
+
     const fetchEveryoneData = useCallback(async () => {
         setEveryoneLoading(true);
         try {
@@ -42,10 +49,18 @@ export function StatsTab({ tracked, user }) {
         }
     }, [tracked, user]);
 
+    // In Everyone mode, always use fresh local data for current user + cached remote data for others
     const activeEntries = useMemo(() => {
-        if (userMode === 'everyone') return everyoneData || [];
+        if (userMode === 'everyone') {
+            const username = user?.login;
+            // Others' entries from remote (exclude current user to avoid duplicates)
+            const othersEntries = (everyoneData || []).filter((e) => e.user !== username);
+            // Current user's entries from local tracked data (always fresh)
+            const myEntries = tracked.map((e) => ({ ...e, user: username || 'me' }));
+            return [...myEntries, ...othersEntries];
+        }
         return tracked;
-    }, [userMode, everyoneData, tracked]);
+    }, [userMode, everyoneData, tracked, user]);
 
     const filteredEntries = useMemo(() => {
         if (rangeMode === 'today') return AggregationService.getTodayEntries(activeEntries);
@@ -169,18 +184,6 @@ export function StatsTab({ tracked, user }) {
                     })}
                 </div>
 
-                {userMode === 'everyone' && (
-                    <button
-                        type="button"
-                        onClick={fetchEveryoneData}
-                        disabled={everyoneLoading}
-                        className="flex items-center gap-1 text-[11px] cursor-pointer font-medium p-1.5 rounded-lg border border-border-default bg-surface text-tertiary hover:bg-raised hover:text-secondary transition-all disabled:opacity-50"
-                        title="Refresh everyone's data from GitHub"
-                    >
-                        <IconRefresh size={12} className={everyoneLoading ? 'animate-spin' : ''} />
-                    </button>
-                )}
-
                 <div className="flex-1" />
 
                 {/* Custom date range */}
@@ -219,14 +222,6 @@ export function StatsTab({ tracked, user }) {
                         onInput={(e) => setCustomEnd(e.currentTarget.value)}
                         className="text-[12px] border border-border-default rounded-lg px-2.5 py-1.5 flex-1 bg-base focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 text-primary"
                     />
-                </div>
-            )}
-
-            {/* Loading state for everyone */}
-            {userMode === 'everyone' && everyoneLoading && (
-                <div className="flex flex-col items-center py-8">
-                    <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin mb-2" />
-                    <span className="text-[12px] text-muted">Fetching data from GitHub...</span>
                 </div>
             )}
 
