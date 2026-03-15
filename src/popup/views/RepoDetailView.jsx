@@ -91,7 +91,7 @@ export function RepoDetailView({ repo, repoDetails, userMode, onBack }) {
             </div>
 
             {/* Scrollable issue list */}
-            <div className="flex-1 overflow-y-auto popup-scroll px-4 pt-2 pb-14">
+            <div className="flex-1 overflow-y-auto popup-scroll px-4 pt-2 pb-2">
                 <div className="space-y-1">
                     {filtered.length === 0 ? (
                         <div className="flex flex-col items-center py-8">
