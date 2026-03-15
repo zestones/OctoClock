@@ -87,53 +87,53 @@
 
 /* ───── Dark theme ───── */
 .dark {
-  --th-base: #141e27;
-  --th-surface: #1b2a36;
-  --th-raised: #243a45;
-  --th-overlay: #0f1820;
+  --th-base: #0d1117;
+  --th-surface: #161b22;
+  --th-raised: #21262d;
+  --th-overlay: #090c10;
 
-  --th-txt-primary: #e8f0f7;
-  --th-txt-secondary: #c2d3e0;
-  --th-txt-tertiary: #8da5b5;
-  --th-txt-muted: #6b8599;
-  --th-txt-faint: #536b7b;
+  --th-txt-primary: #e6edf3;
+  --th-txt-secondary: #c9d1d9;
+  --th-txt-tertiary: #8b949e;
+  --th-txt-muted: #6e7681;
+  --th-txt-faint: #555d66;
 
-  --th-border-default: #3d5868;
-  --th-border-subtle: #2e4250;
+  --th-border-default: #30363d;
+  --th-border-subtle: #21262d;
 
-  --th-ring-default: #3d5868;
+  --th-ring-default: #30363d;
 
-  --th-accent: #3878b5;
-  --th-accent-hover: #4a8cc6;
-  --th-accent-subtle: #1a2f3f;
-  --th-accent-text: #a2c8e6;
-  --th-accent-ring: #2d6ba3;
+  --th-accent: #316dac;
+  --th-accent-hover: #3a7ab8;
+  --th-accent-subtle: #0d2240;
+  --th-accent-text: #58a6ff;
+  --th-accent-ring: #1f4d7c;
 
-  --th-success-subtle: #132e1e;
-  --th-success-text: #7ddea0;
-  --th-success-muted: rgba(125, 222, 160, 0.7);
-  --th-success-border: #1a4a2a;
-  --th-success-dot: #2fc96e;
-  --th-success-hover: #1c5730;
+  --th-success-subtle: #0d2117;
+  --th-success-text: #56d364;
+  --th-success-muted: rgba(86, 211, 100, 0.7);
+  --th-success-border: #196c2e;
+  --th-success-dot: #3fb950;
+  --th-success-hover: #174d28;
 
-  --th-danger-subtle: #3a1418;
+  --th-danger-subtle: #2d0f12;
   --th-danger-text: #f5a3ab;
-  --th-danger-hover: #4d1b22;
+  --th-danger-hover: #4d1f24;
   --th-danger-border: #6b2028;
   --th-danger-muted: #c43035;
 
-  --th-violet-subtle: #221540;
+  --th-violet-subtle: #1a1230;
   --th-violet-text: #b89bef;
   --th-violet-value: #d1bbf7;
   --th-violet-ring: #352060;
 
-  --th-amber-subtle: #2e250e;
+  --th-amber-subtle: #261f0a;
   --th-amber-text: #f0d050;
   --th-amber-value: #f7e8a0;
   --th-amber-ring: #8a6a10;
 
-  --th-brand-octo: #e8f0f7;
-  --th-brand-clock: #3878b5;
+  --th-brand-octo: #e6edf3;
+  --th-brand-clock: #316dac;
 
   --th-heat-1: #0e3d1f;
   --th-heat-2: #135a2d;
@@ -141,7 +141,7 @@
   --th-heat-4: #28a752;
   --th-heat-5: #3bd06a;
 
-  --th-scrollbar: #3d5868;
+  --th-scrollbar: #30363d;
 }
 
 /* ───── Register semantic tokens as Tailwind utilities ───── */
