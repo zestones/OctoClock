@@ -13,6 +13,8 @@ _A feature-rich browser extension that brings time tracking directly into GitHub
 
 ## Screenshots
 
+### Light Theme
+
 <table>
   <tr>
     <td align="center"><strong>Issues</strong></td>
@@ -20,19 +22,44 @@ _A feature-rich browser extension that brings time tracking directly into GitHub
     <td align="center"><strong>Stats</strong></td>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/issues.png" width="280" alt="Issues tab" /></td>
-    <td><img src="docs/screenshots/calendar.png" width="280" alt="Calendar view" /></td>
-    <td><img src="docs/screenshots/stats.png" width="280" alt="Stats overview" /></td>
+    <td><img src="docs/screenshots/light/issues.png" width="280" alt="Issues tab — light" /></td>
+    <td><img src="docs/screenshots/light/calendar.png" width="280" alt="Calendar view — light" /></td>
+    <td><img src="docs/screenshots/light/stats.png" width="280" alt="Stats overview — light" /></td>
   </tr>
   <tr>
     <td align="center"><strong>Repo Details</strong></td>
-    <td align="center"><strong>Settings</strong></td>
+    <td align="center"><strong>Contributors</strong></td>
     <td align="center"><strong>Settings</strong></td>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/stats-details.png" width="280" alt="Repository detail view" /></td>
-    <td><img src="docs/screenshots/settings.png" width="280" alt="Settings panel" /></td>
-    <td><img src="docs/screenshots/settings-2.png" width="280" alt="Settings panel" /></td>
+    <td><img src="docs/screenshots/light/stats-details.png" width="280" alt="Repository detail view — light" /></td>
+    <td><img src="docs/screenshots/light/stats-contributors.png" width="280" alt="Contributors view — light" /></td>
+    <td><img src="docs/screenshots/light/settings.png" width="280" alt="Settings panel — light" /></td>
+  </tr>
+</table>
+
+### Dark Theme
+
+<table>
+  <tr>
+    <td align="center"><strong>Issues</strong></td>
+    <td align="center"><strong>Calendar</strong></td>
+    <td align="center"><strong>Stats</strong></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/dark/issues.png" width="280" alt="Issues tab — dark" /></td>
+    <td><img src="docs/screenshots/dark/calendar.png" width="280" alt="Calendar view — dark" /></td>
+    <td><img src="docs/screenshots/dark/stats.png" width="280" alt="Stats overview — dark" /></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>Repo Details</strong></td>
+    <td align="center"><strong>Contributors</strong></td>
+    <td align="center"><strong>Settings</strong></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/dark/stats-details.png" width="280" alt="Repository detail view — dark" /></td>
+    <td><img src="docs/screenshots/dark/stats-contributors.png" width="280" alt="Contributors view — dark" /></td>
+    <td><img src="docs/screenshots/dark/settings.png" width="280" alt="Settings panel — dark" /></td>
   </tr>
 </table>
 
