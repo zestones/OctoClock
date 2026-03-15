@@ -22,7 +22,7 @@ export function CalendarView({ tracked }) {
     const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
     lastDayOfMonth.setHours(0, 0, 0, 0);
     const daysInMonth = lastDayOfMonth.getDate();
-    const firstDayWeekday = firstDayOfMonth.getDay();
+    const firstDayWeekday = (firstDayOfMonth.getDay() + 6) % 7; // Mon=0 ... Sun=6
     const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
     const paddingDays = Array(firstDayWeekday).fill(null);
 
@@ -122,7 +122,7 @@ export function CalendarView({ tracked }) {
 
             {/* Calendar grid */}
             <div className="grid grid-cols-7 gap-0.5 text-center mb-4">
-                {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
+                {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => (
                     <div key={i} className="text-[10px] font-medium text-muted py-1">
                         {day}
                     </div>
@@ -138,15 +138,14 @@ export function CalendarView({ tracked }) {
                         <button
                             type="button"
                             key={day}
-                            className={`h-8 w-full flex items-center justify-center rounded-lg text-[12px] transition-colors ${
-                                selected
+                            className={`h-8 w-full flex items-center justify-center rounded-lg text-[12px] transition-colors ${selected
                                     ? 'bg-accent text-white font-medium cursor-pointer'
                                     : tracked
-                                      ? 'bg-accent-subtle text-accent-text cursor-pointer hover:bg-accent-ring font-medium'
-                                      : today
-                                        ? 'text-primary font-medium'
-                                        : 'text-faint'
-                            } ${tracked || today ? 'cursor-pointer' : ''}`}
+                                        ? 'bg-accent-subtle text-accent-text cursor-pointer hover:bg-accent-ring font-medium'
+                                        : today
+                                            ? 'text-primary font-medium'
+                                            : 'text-faint'
+                                } ${tracked || today ? 'cursor-pointer' : ''}`}
                             onClick={() => (tracked || today) && selectDay(day)}
                             tabIndex={tracked || today ? 0 : -1}
                         >
