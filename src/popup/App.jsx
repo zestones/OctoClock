@@ -169,7 +169,16 @@ export function App() {
             {/* Bottom Navigation — floating over content */}
             <div className="relative shrink-0 pointer-events-none">
                 <nav className="absolute bottom-2 left-4 right-4 pointer-events-auto">
-                    <div className="flex items-center bg-surface/80 backdrop-blur-md rounded-2xl p-1 shadow-lg border border-border-subtle">
+                    <div className="relative flex items-center bg-surface/80 backdrop-blur-md rounded-2xl p-1 shadow-lg border border-border-subtle">
+                        <div
+                            className="absolute top-1 bottom-1 rounded-xl bg-accent shadow-md pointer-events-none"
+                            style={{
+                                left: '4px',
+                                width: 'calc(25% - 2px)',
+                                transform: `translateX(${navItems.findIndex((n) => n.id === page) * 100}%)`,
+                                transition: 'transform 200ms ease-out',
+                            }}
+                        />
                         {navItems.map(({ id, icon: Icon, label }) => {
                             const active = page === id;
                             return (
@@ -177,8 +186,8 @@ export function App() {
                                     type="button"
                                     key={id}
                                     onClick={() => setPage(id)}
-                                    className={`flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-xl cursor-pointer transition-all duration-200 ${active
-                                        ? 'bg-accent text-white shadow-md'
+                                    className={`relative z-10 flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-xl cursor-pointer transition-colors duration-200 ${active
+                                        ? 'text-white'
                                         : 'text-muted hover:text-primary'
                                         }`}
                                 >
