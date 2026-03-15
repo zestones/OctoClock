@@ -201,6 +201,19 @@
   border-radius: 9999px;
 }
 
+/* Repo expand/collapse animation */
+.repo-expand {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 200ms ease-out;
+}
+.repo-expand.expanded {
+  grid-template-rows: 1fr;
+}
+.repo-expand > div {
+  overflow: hidden;
+}
+
 /* Active timer pulse */
 @keyframes pulse-dot {
   0%,

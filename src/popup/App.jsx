@@ -148,7 +148,7 @@ export function App() {
             <main className="flex-1 flex flex-col overflow-hidden">
                 <ErrorBoundary>
                     {page === 'issues' && <IssuesTab />}
-                    <div className={`flex-1 overflow-y-auto popup-scroll ${page === 'issues' ? 'hidden' : ''}`}>
+                    <div className={`flex-1 overflow-y-auto popup-scroll pb-14 ${page === 'issues' ? 'hidden' : ''}`}>
                         {page === 'stats' && <StatsTab tracked={tracked} user={user} />}
                         {page === 'calendar' && <CalendarView tracked={tracked} />}
                         {page === 'settings' && (
@@ -166,21 +166,31 @@ export function App() {
                 </ErrorBoundary>
             </main>
 
-            {/* Bottom Navigation */}
-            <nav className="flex items-center border-t border-border-subtle shrink-0">
-                {navItems.map(({ id, icon: Icon, label }) => (
-                    <button
-                        type="button"
-                        key={id}
-                        onClick={() => setPage(id)}
-                        className={`flex-1 flex flex-col items-center gap-0.5 py-2.5 cursor-pointer transition-colors ${page === id ? 'text-accent' : 'text-muted hover:text-secondary'
-                            }`}
-                    >
-                        <Icon size={18} />
-                        <span className="text-[10px] font-medium">{label}</span>
-                    </button>
-                ))}
-            </nav>
+            {/* Bottom Navigation — floating over content */}
+            <div className="relative shrink-0 pointer-events-none">
+                <nav className="absolute bottom-2 left-4 right-4 pointer-events-auto">
+                    <div className="flex items-center bg-surface/80 backdrop-blur-md rounded-2xl p-1 shadow-lg border border-border-subtle">
+                        {navItems.map(({ id, icon: Icon, label }) => {
+                            const active = page === id;
+                            return (
+                                <button
+                                    type="button"
+                                    key={id}
+                                    onClick={() => setPage(id)}
+                                    className={`flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-xl cursor-pointer transition-all duration-200 ${active
+                                        ? 'bg-accent text-white shadow-md'
+                                        : 'text-muted hover:text-primary'
+                                        }`}
+                                >
+                                    <Icon size={16} strokeWidth={active ? 2.5 : 1.75} />
+                                    <span className={`text-[9px] ${active ? 'font-bold' : 'font-medium'
+                                        }`}>{label}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </nav>
+            </div>
 
             {showClearConfirm && (
                 <Modal

@@ -6,7 +6,7 @@ export function IssueRow({ issue, isActive, onStart, onStop, trackedSeconds = 0 
     return (
         <div
             className={`relative py-1.5 px-2.5 my-0.5 rounded-xs border transition-all group ${isActive
-                ? 'bg-success-subtle/40 border-success-border shadow-sm'
+                ? 'bg-success-subtle/60 border-success-border border-l-[3px] border-l-success-dot shadow-sm'
                 : 'bg-base border-border-subtle hover:border-border-default hover:shadow-sm'
                 } ${isClosed ? 'opacity-55' : ''}`}
         >
@@ -27,7 +27,7 @@ export function IssueRow({ issue, isActive, onStart, onStop, trackedSeconds = 0 
                         <span className={isClosed ? 'line-through text-tertiary' : ''}>{issue.title}</span>
                     </span>
                 </a>
-                <span className="text-muted opacity-0 group-hover/link:opacity-60 shrink-0 mt-0.5 pointer-events-none">
+                <span className="text-muted opacity-0 group-hover:opacity-60 shrink-0 mt-0.5 pointer-events-none transition-opacity">
                     <IconExternalLink size={11} />
                 </span>
             </div>
@@ -52,7 +52,7 @@ export function IssueRow({ issue, isActive, onStart, onStop, trackedSeconds = 0 
                     onClick={() => (isActive ? onStop(issue) : onStart(issue))}
                     className={`flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-lg cursor-pointer transition-all ${isActive
                         ? 'bg-danger-subtle text-danger-text hover:bg-danger-hover'
-                        : 'bg-accent-subtle text-accent-text hover:bg-accent-ring/40 opacity-0 group-hover:opacity-100'
+                        : 'bg-accent-subtle text-accent-text hover:bg-accent-ring/40 opacity-40 group-hover:opacity-100'
                         }`}
                 >
                     {isActive ? (
