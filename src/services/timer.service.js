@@ -31,7 +31,7 @@ export class TimerService {
             const issueInfo = GitHubService.parseIssueUrl(issueUrl);
             const { owner, repo, issueNumber } = issueInfo;
             const title = issueTitle || 'Untitled';
-            const fullIssueTitle = `(${owner}) ${repo} | ${title} | #${issueNumber}`;
+            const fullIssueTitle = issue?.title || `(${owner}) ${repo} | ${title} | #${issueNumber}`;
 
             // Merge remote entries into local before starting
             await TimerService.backfillRemoteEntries(issueUrl, owner, repo, issueNumber, fullIssueTitle);
