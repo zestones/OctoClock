@@ -56,11 +56,11 @@ Pin any GitHub repository for quick access from the extension popup. Browse, sea
 
 ### Calendar
 
-An interactive monthly calendar highlights every day with tracked time. Click any day to see a full breakdown of issues worked on and total time spent. Entries are searchable and update live while a timer is running.
+An interactive monthly calendar highlights every day with tracked time. Days are shaded with a **heat map** — the more time tracked on a given day, the more intense the colour — making it easy to spot busy and quiet periods at a glance. The week starts on **Monday**. Click any day to see a full breakdown of issues worked on (including issue number and repository) and total time spent. Entries are searchable and update live while a timer is running.
 
 ### Stats and Analytics
 
-Summary cards display time tracked today, this week, and this month. A per-repository breakdown shows horizontal bar charts with percentage distribution. Drilling into a repository reveals total time, number of sessions, average session length, and days worked per issue — sortable by any of those dimensions. A custom date range picker allows filtering to any period.
+Summary cards display time tracked **today**, **this week**, **this month**, and **all time**. A per-repository breakdown shows horizontal bar charts with percentage distribution. Drilling into a repository reveals total time, number of sessions, average session length, and days worked per issue — sortable by any of those dimensions. A custom date range picker allows filtering to any period.
 
 > [!TIP]
 > Forgot to stop a timer? Go to **Stats → repository → expand an issue** and click the session duration to manually correct it. Both local storage and the synced GitHub comment are updated instantly.
