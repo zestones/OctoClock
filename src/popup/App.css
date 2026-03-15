@@ -156,6 +156,11 @@
     --color-amber-ring: var(--th-amber-ring);
 }
 
+/* Calendar day heat map */
+.day-heat {
+    background-color: color-mix(in srgb, var(--th-success-dot) calc(var(--day-opacity, 0.25) * 55%), transparent);
+}
+
 /* Custom scrollbar */
 .popup-scroll::-webkit-scrollbar {
     width: 4px;

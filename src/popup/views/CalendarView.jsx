@@ -2,6 +2,7 @@ import { useMemo, useState } from 'preact/hooks';
 import { SearchInput } from '../../components/SearchInput.jsx';
 import { useElapsedTimer } from '../../hooks/useElapsedTimer.js';
 import { IconChevronLeft, IconChevronRight, IconClock } from '../../icons.jsx';
+import { AggregationService } from '../../utils/aggregation.utils.js';
 import { TimeService } from '../../utils/time.utils.js';
 import { TrackedList } from './TrackedList.jsx';
 
@@ -22,19 +23,21 @@ export function CalendarView({ tracked }) {
     const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
     lastDayOfMonth.setHours(0, 0, 0, 0);
     const daysInMonth = lastDayOfMonth.getDate();
-    const firstDayWeekday = firstDayOfMonth.getDay();
+    const firstDayWeekday = (firstDayOfMonth.getDay() + 6) % 7; // Mon=0 ... Sun=6
     const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
     const paddingDays = Array(firstDayWeekday).fill(null);
 
-    const trackedDates = useMemo(() => {
-        const dates = new Set();
+    const trackedDays = useMemo(() => {
+        const map = {};
         tracked.forEach((entry) => {
             if (entry.date && /^\d{4}-\d{2}-\d{2}$/.test(entry.date)) {
-                dates.add(entry.date);
+                map[entry.date] = (map[entry.date] || 0) + (entry.seconds || 0);
             }
         });
-        return Array.from(dates);
+        return map;
     }, [tracked]);
+
+    const maxDaySeconds = useMemo(() => Math.max(...Object.values(trackedDays), 1), [trackedDays]);
 
     const selectedDayTracked = useMemo(() => {
         const dateStr = TimeService.getLocalDateString(selectedDate);
@@ -58,7 +61,15 @@ export function CalendarView({ tracked }) {
     const entries = useMemo(() => {
         const grouped = filteredTracked.reduce((acc, entry) => {
             if (!acc[entry.issueUrl]) {
-                acc[entry.issueUrl] = { title: entry.title, seconds: 0, issueUrl: entry.issueUrl };
+                const repo = AggregationService.parseRepo(entry.issueUrl);
+                const { issueNumber } = AggregationService.parseEntryTitle(entry.title);
+                acc[entry.issueUrl] = {
+                    title: AggregationService.extractCleanTitle(entry.title),
+                    repo,
+                    issueNumber,
+                    seconds: 0,
+                    issueUrl: entry.issueUrl,
+                };
             }
             acc[entry.issueUrl].seconds += entry.seconds;
             return acc;
@@ -82,7 +93,20 @@ export function CalendarView({ tracked }) {
         const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
         const dateStr = TimeService.getLocalDateString(date);
         const todayStr = TimeService.getLocalDateString(getLocalDate());
-        return trackedDates.includes(dateStr) || dateStr === todayStr;
+        return dateStr in trackedDays || dateStr === todayStr;
+    };
+
+    const getDayOpacity = (day) => {
+        const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+        const dateStr = TimeService.getLocalDateString(date);
+        const seconds = trackedDays[dateStr] || 0;
+        if (seconds === 0) return 0;
+        // 4 intensity levels: 0.25 / 0.5 / 0.75 / 1.0
+        const ratio = seconds / maxDaySeconds;
+        if (ratio < 0.25) return 0.25;
+        if (ratio < 0.5) return 0.5;
+        if (ratio < 0.75) return 0.75;
+        return 1;
     };
 
     const isSelectedDay = (day) => {
@@ -122,7 +146,7 @@ export function CalendarView({ tracked }) {
 
             {/* Calendar grid */}
             <div className="grid grid-cols-7 gap-0.5 text-center mb-4">
-                {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
+                {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => (
                     <div key={i} className="text-[10px] font-medium text-muted py-1">
                         {day}
                     </div>
@@ -134,19 +158,17 @@ export function CalendarView({ tracked }) {
                     const tracked = isDayTracked(day);
                     const selected = isSelectedDay(day);
                     const today = isToday(day);
+                    const opacity = getDayOpacity(day);
                     return (
                         <button
                             type="button"
                             key={day}
+                            style={tracked && !selected && opacity > 0 ? { '--day-opacity': opacity } : undefined}
                             className={`h-8 w-full flex items-center justify-center rounded-lg text-[12px] transition-colors ${
-                                selected
-                                    ? 'bg-accent text-white font-medium cursor-pointer'
-                                    : tracked
-                                      ? 'bg-accent-subtle text-accent-text cursor-pointer hover:bg-accent-ring font-medium'
-                                      : today
-                                        ? 'text-primary font-medium'
-                                        : 'text-faint'
-                            } ${tracked || today ? 'cursor-pointer' : ''}`}
+                                tracked ? 'day-heat font-medium' : today ? 'text-primary font-medium' : 'text-faint'
+                            } ${selected ? 'ring-2 ring-accent text-accent font-semibold' : tracked ? 'text-success-text hover:brightness-110' : ''} ${
+                                tracked || today ? 'cursor-pointer' : ''
+                            }`}
                             onClick={() => (tracked || today) && selectDay(day)}
                             tabIndex={tracked || today ? 0 : -1}
                         >
