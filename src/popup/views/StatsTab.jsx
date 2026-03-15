@@ -186,7 +186,7 @@ export function StatsTab({ tracked, user }) {
                 {/* Custom date range */}
                 <button
                     type="button"
-                    onClick={() => setRangeMode(rangeMode === 'custom' ? 'today' : 'custom')}
+                    onClick={() => setRangeMode(rangeMode === 'custom' ? 'all' : 'custom')}
                     className={`flex items-center gap-1.5 text-[11px] cursor-pointer transition-all font-medium px-2.5 py-1.5 rounded-lg border ${rangeMode === 'custom'
                         ? 'bg-accent-subtle text-accent border-accent-ring'
                         : 'bg-surface text-tertiary border-border-default hover:bg-raised hover:text-secondary'
