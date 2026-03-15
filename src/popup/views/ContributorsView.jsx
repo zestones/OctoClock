@@ -55,12 +55,12 @@ export function ContributorsView({ repoDetails }) {
     const maxSeconds = useMemo(() => Math.max(...contributors.map((c) => c.seconds), 1), [contributors]);
 
     const barColors = [
-        'bg-accent',
-        'bg-violet-text',
-        'bg-amber-text',
-        'bg-success-dot',
-        'bg-danger-muted',
-        'bg-accent-ring',
+        { bar: 'bg-accent', bg: 'bg-accent-subtle/50', dot: 'bg-accent' },
+        { bar: 'bg-violet-text', bg: 'bg-violet-subtle/50', dot: 'bg-violet-text' },
+        { bar: 'bg-amber-text', bg: 'bg-amber-subtle/50', dot: 'bg-amber-text' },
+        { bar: 'bg-success-dot', bg: 'bg-success-subtle/50', dot: 'bg-success-dot' },
+        { bar: 'bg-danger-muted', bg: 'bg-danger-subtle/50', dot: 'bg-danger-muted' },
+        { bar: 'bg-accent-ring', bg: 'bg-accent-subtle/30', dot: 'bg-accent-ring' },
     ];
 
     return (
@@ -76,19 +76,19 @@ export function ContributorsView({ repoDetails }) {
             ) : (
                 <div className="space-y-1.5">
                     {/* Distribution bar chart */}
-                    <div className="bg-surface border border-border-subtle rounded-xl p-2.5 mb-1">
-                        <div className="text-[10px] text-muted font-medium mb-1.5 uppercase tracking-wide">
+                    <div className="bg-surface border border-border-subtle rounded-xl p-3 mb-1">
+                        <div className="text-[11px] font-medium text-muted uppercase tracking-wider mb-2">
                             Time distribution
                         </div>
                         {/* Stacked bar */}
-                        <div className="flex h-3 rounded-full overflow-hidden bg-raised mb-2">
+                        <div className="flex h-4 rounded-lg overflow-hidden bg-raised mb-2.5">
                             {contributors.map((contrib, i) => {
                                 const pct = totalSeconds > 0 ? (contrib.seconds / totalSeconds) * 100 : 0;
                                 if (pct < 0.5) return null;
                                 return (
                                     <div
                                         key={contrib.user}
-                                        className={`${barColors[i % barColors.length]} transition-all duration-500`}
+                                        className={`${barColors[i % barColors.length].bar} transition-all duration-500`}
                                         style={{ width: `${pct}%` }}
                                         title={`${contrib.user}: ${TimeService.formatTime(contrib.seconds)} (${Math.round(pct)}%)`}
                                     />
@@ -101,7 +101,7 @@ export function ContributorsView({ repoDetails }) {
                                 const pct = totalSeconds > 0 ? Math.round((contrib.seconds / totalSeconds) * 100) : 0;
                                 return (
                                     <div key={contrib.user} className="flex items-center gap-1">
-                                        <div className={`w-2 h-2 rounded-full ${barColors[i % barColors.length]} shrink-0`} />
+                                        <div className={`w-2 h-2 rounded-full ${barColors[i % barColors.length].dot} shrink-0`} />
                                         <span className="text-[10px] text-secondary truncate max-w-20">{contrib.user}</span>
                                         <span className="text-[10px] text-faint font-mono tabular-nums">{pct}%</span>
                                     </div>
@@ -121,7 +121,7 @@ export function ContributorsView({ repoDetails }) {
                                     type="button"
                                     className={`w-full text-left rounded-xl p-2.5 cursor-pointer transition-all border ${isOpen
                                         ? 'bg-surface border-border-default shadow-sm'
-                                        : 'bg-surface border-border-subtle hover:border-border-default hover:shadow-sm'
+                                        : 'bg-base border-transparent hover:bg-surface hover:border-border-subtle'
                                         }`}
                                     onClick={() => setExpandedUser(isOpen ? null : contrib.user)}
                                 >
@@ -131,10 +131,10 @@ export function ContributorsView({ repoDetails }) {
                                             <span className={`text-muted shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`}>
                                                 <IconChevronRight size={10} />
                                             </span>
-                                            <IconUser size={12} className="text-muted" />
+                                            <div className={`w-2.5 h-2.5 rounded-full ${color.dot} shrink-0`} />
                                             <span className="text-[12px] text-primary font-medium">{contrib.user}</span>
                                         </div>
-                                        <div className="flex items-center gap-1.5">
+                                        <div className="flex items-center gap-1.5 shrink-0 ml-2">
                                             <span className="text-[11px] font-mono font-semibold tabular-nums text-accent-text">
                                                 {TimeService.formatTime(contrib.seconds)}
                                             </span>
@@ -144,10 +144,10 @@ export function ContributorsView({ repoDetails }) {
                                         </div>
                                     </div>
 
-                                    {/* Bar */}
-                                    <div className="ml-5 bg-raised rounded-full h-1.5 mb-1.5">
+                                    {/* Bar with colored track */}
+                                    <div className={`ml-5 ${color.bg} rounded-full h-1.5 mb-1.5`}>
                                         <div
-                                            className={`${color} h-1.5 rounded-full transition-all duration-500`}
+                                            className={`${color.bar} h-1.5 rounded-full transition-all duration-500`}
                                             style={{ width: `${(contrib.seconds / maxSeconds) * 100}%` }}
                                         />
                                     </div>
