@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from 'preact/hooks';
+import { useMemo, useState } from 'preact/hooks';
 import { IssueRow } from '../../components/IssueRow.jsx';
 import { PinRepoModal } from '../../components/PinRepoModal.jsx';
 import { SearchInput } from '../../components/SearchInput.jsx';
 import { useActiveTimer } from '../../hooks/useActiveTimer.js';
 import { useIssuesData } from '../../hooks/useIssuesData.js';
 import { useStorageListener } from '../../hooks/useStorageListener.js';
-import { IconChevronDown, IconChevronRight, IconPin, IconPlus, IconRefresh, IconX } from '../../icons.jsx';
+import { IconChevronRight, IconPin, IconPlus, IconRefresh, IconX } from '../../icons.jsx';
 import { IssueStorageService } from '../../services/issue-storage.service.js';
 import { TimerService } from '../../services/timer.service.js';
 import { STORAGE_KEYS } from '../../utils/constants.utils.js';
@@ -20,18 +20,7 @@ export function IssuesTab() {
     const { activeIssue } = useActiveTimer();
     const { pinnedRepos, repoIssues, loading, currentUser, refreshRepoIssues, pinRepo, unpinRepo } = useIssuesData();
 
-    // Expand all repos when pinnedRepos first loads
-    useEffect(() => {
-        if (pinnedRepos.length > 0) {
-            setExpandedRepos((prev) => {
-                const next = { ...prev };
-                for (const r of pinnedRepos) {
-                    if (!(r.fullName in next)) next[r.fullName] = true;
-                }
-                return next;
-            });
-        }
-    }, [pinnedRepos]);
+
 
     const trackedTimeByIssue = useMemo(() => {
         const map = {};
@@ -81,26 +70,38 @@ export function IssuesTab() {
 
     return (
         <div className="p-4">
-            {/* Search */}
-            <SearchInput placeholder="Search issues..." value={searchTerm} onInput={setSearchTerm} />
+            {/* Search + Pin */}
+            <div className="flex gap-2 mb-3">
+                <div className="flex-1">
+                    <SearchInput placeholder="Search issues..." value={searchTerm} onInput={setSearchTerm} className="" />
+                </div>
+                <button
+                    type="button"
+                    onClick={() => setShowPinModal(true)}
+                    className="shrink-0 w-1/3 flex items-center justify-center gap-1.5 text-[12px] font-medium text-muted hover:text-accent border border-dashed border-border-default hover:border-accent rounded-lg cursor-pointer transition-all hover:bg-accent-subtle/30"
+                    title="Pin a repository"
+                >
+                    <IconPlus size={13} />
+                    Pin a repository
+                </button>
+            </div>
 
-            {/* Filter pills */}
-            <div className="flex gap-1.5 mb-4 flex-wrap">
+            {/* Segmented filter control */}
+            <div className="flex bg-surface rounded-lg p-0.5 mb-4 border border-border-subtle">
                 {[
                     { id: 'open', label: 'Open' },
-                    { id: 'assigned', label: 'Assigned to me' },
-                    { id: 'created', label: 'Created by me' },
+                    { id: 'assigned', label: 'Assigned' },
+                    { id: 'created', label: 'Created' },
                     { id: 'closed', label: 'Closed' },
                 ].map((f) => (
                     <button
                         type="button"
                         key={f.id}
                         onClick={() => setFilter(f.id)}
-                        className={`text-[11px] px-2.5 py-1 rounded-full cursor-pointer transition-colors font-medium ${
-                            filter === f.id
-                                ? 'bg-accent-subtle text-accent-text'
-                                : 'bg-surface text-tertiary hover:bg-raised'
-                        }`}
+                        className={`flex-1 text-[11px] px-2 py-1.5 rounded-md cursor-pointer transition-all font-medium text-center ${filter === f.id
+                            ? 'bg-base text-accent-text shadow-sm'
+                            : 'text-muted hover:text-secondary'
+                            }`}
                     >
                         {f.label}
                     </button>
@@ -134,19 +135,7 @@ export function IssuesTab() {
             {/* Pinned repos */}
             {!searchTerm && (
                 <div>
-                    <div className="flex items-center justify-between mb-2">
-                        <span className="text-[11px] font-medium text-muted uppercase tracking-wider">
-                            Pinned Repos
-                        </span>
-                        <button
-                            type="button"
-                            onClick={() => setShowPinModal(true)}
-                            className="flex items-center gap-0.5 text-[11px] text-accent hover:text-accent-hover cursor-pointer font-medium"
-                        >
-                            <IconPlus size={12} />
-                            Add
-                        </button>
-                    </div>
+
 
                     {pinnedRepos.length === 0 && (
                         <div className="text-center py-10">
@@ -164,83 +153,93 @@ export function IssuesTab() {
                         </div>
                     )}
 
-                    {pinnedRepos.map((repo) => (
-                        <div key={repo.fullName} className="mb-1">
-                            <div
-                                className="flex items-center justify-between py-2 cursor-pointer hover:bg-surface rounded-lg px-2 transition-colors w-full"
-                                onClick={() =>
-                                    setExpandedRepos((prev) => ({
-                                        ...prev,
-                                        [repo.fullName]: !prev[repo.fullName],
-                                    }))
-                                }
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter' || e.key === ' ') {
-                                        e.preventDefault();
+                    {pinnedRepos.map((repo) => {
+                        const issues = (repoIssues[repo.fullName] || []).filter(filterIssue);
+                        const isExpanded = expandedRepos[repo.fullName];
+                        return (
+                            <div key={repo.fullName} className="mb-2">
+                                {/* Repo card header */}
+                                <div
+                                    className={`flex items-center justify-between py-2.5 px-3 cursor-pointer rounded-xl border transition-all ${isExpanded
+                                        ? 'bg-accent-subtle/40 border-accent-ring/30 shadow-sm'
+                                        : 'bg-surface border-border-subtle hover:border-border-default hover:shadow-sm'
+                                        }`}
+                                    onClick={() =>
                                         setExpandedRepos((prev) => ({
                                             ...prev,
                                             [repo.fullName]: !prev[repo.fullName],
-                                        }));
+                                        }))
                                     }
-                                }}
-                                role="button"
-                                tabIndex={0}
-                            >
-                                <div className="flex items-center gap-1.5">
-                                    <span className="text-muted">
-                                        {expandedRepos[repo.fullName] ? (
-                                            <IconChevronDown size={14} />
-                                        ) : (
-                                            <IconChevronRight size={14} />
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' || e.key === ' ') {
+                                            e.preventDefault();
+                                            setExpandedRepos((prev) => ({
+                                                ...prev,
+                                                [repo.fullName]: !prev[repo.fullName],
+                                            }));
+                                        }
+                                    }}
+                                    role="button"
+                                    tabIndex={0}
+                                >
+                                    <div className="flex items-center gap-2 min-w-0">
+                                        <span className="text-muted transition-transform" style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}>
+                                            <IconChevronRight size={13} />
+                                        </span>
+                                        <span className="text-[13px] font-medium text-primary truncate">{repo.fullName}</span>
+                                        {!loading[repo.fullName] && (
+                                            <span className="text-[10px] font-medium text-muted bg-raised px-1.5 py-0.5 rounded-full shrink-0">
+                                                {issues.length}
+                                            </span>
                                         )}
-                                    </span>
-                                    <span className="text-[13px] font-medium text-primary">{repo.fullName}</span>
-                                    {loading[repo.fullName] && (
-                                        <span className="text-[11px] text-muted">loading...</span>
-                                    )}
+                                        {loading[repo.fullName] && (
+                                            <div className="w-3 h-3 border border-accent border-t-transparent rounded-full animate-spin shrink-0" />
+                                        )}
+                                    </div>
+                                    <div className="flex items-center gap-0.5 shrink-0">
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                refreshRepoIssues(repo);
+                                            }}
+                                            className="text-muted hover:text-secondary cursor-pointer p-1 rounded-lg hover:bg-raised transition-colors"
+                                            title="Refresh issues"
+                                        >
+                                            <IconRefresh size={12} />
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={async (e) => {
+                                                e.stopPropagation();
+                                                await unpinRepo(repo.fullName);
+                                            }}
+                                            className="text-muted hover:text-danger-text cursor-pointer p-1 rounded-lg hover:bg-raised transition-colors"
+                                            title="Unpin repo"
+                                        >
+                                            <IconX size={12} />
+                                        </button>
+                                    </div>
                                 </div>
-                                <div className="flex items-center gap-1">
-                                    <button
-                                        type="button"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            refreshRepoIssues(repo);
-                                        }}
-                                        className="text-muted hover:text-secondary cursor-pointer p-0.5 rounded hover:bg-raised transition-colors"
-                                        title="Refresh issues"
-                                    >
-                                        <IconRefresh size={13} />
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={async (e) => {
-                                            e.stopPropagation();
-                                            await unpinRepo(repo.fullName);
-                                        }}
-                                        className="text-muted hover:text-danger-text cursor-pointer p-0.5 rounded hover:bg-raised transition-colors"
-                                        title="Unpin repo"
-                                    >
-                                        <IconX size={13} />
-                                    </button>
-                                </div>
-                            </div>
 
-                            {expandedRepos[repo.fullName] && (
-                                <div className="ml-4 pl-3 border-l-2 border-border-subtle">
-                                    {loading[repo.fullName] && !repoIssues[repo.fullName] ? (
-                                        <div className="text-[11px] text-muted py-3 pl-2">Fetching issues...</div>
-                                    ) : (repoIssues[repo.fullName] || []).filter(filterIssue).length === 0 ? (
-                                        <div className="text-[11px] text-muted py-3 pl-2">
-                                            {filter === 'closed'
-                                                ? 'No closed issues'
-                                                : filter === 'open'
-                                                  ? 'No open issues'
-                                                  : 'No matching issues'}
-                                        </div>
-                                    ) : (
-                                        (repoIssues[repo.fullName] || [])
-                                            .filter(filterIssue)
-                                            .map((issue) => (
+                                {/* Expanded issues list */}
+                                {isExpanded && (
+                                    <div className="mt-1 ml-3 pl-3 border-l border-border-subtle">
+                                        {loading[repo.fullName] && !repoIssues[repo.fullName] ? (
+                                            <div className="text-[12px] text-muted py-4 pl-2 flex items-center gap-2">
+                                                <div className="w-3 h-3 border border-accent border-t-transparent rounded-full animate-spin" />
+                                                Fetching issues…
+                                            </div>
+                                        ) : issues.length === 0 ? (
+                                            <div className="text-[12px] text-muted py-4 pl-2">
+                                                {filter === 'closed'
+                                                    ? 'No closed issues'
+                                                    : filter === 'open'
+                                                        ? 'No open issues'
+                                                        : 'No matching issues'}
+                                            </div>
+                                        ) : (
+                                            issues.map((issue) => (
                                                 <IssueRow
                                                     key={issue.issueUrl}
                                                     issue={issue}
@@ -250,11 +249,14 @@ export function IssuesTab() {
                                                     trackedSeconds={trackedTimeByIssue[issue.issueUrl] || 0}
                                                 />
                                             ))
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    ))}
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+
+
                 </div>
             )}
 
