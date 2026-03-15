@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "GitHub Time Tracker",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Track time spent on GitHub issues",
   "permissions": [
     "storage",
