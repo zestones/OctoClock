@@ -6,7 +6,7 @@ import { Settings } from '../components/Settings.jsx';
 import { useAuth } from '../hooks/useAuth.js';
 import { useStorageListener } from '../hooks/useStorageListener.js';
 import { useTheme } from '../hooks/useTheme.js';
-import { IconCalendar, IconChart, IconGitHub, IconIssues, IconSettings } from '../icons.jsx';
+import { IconCalendar, IconChart, IconIssues, IconSettings } from '../icons.jsx';
 import { IssueStorageService } from '../services/issue-storage.service.js';
 import { StorageService } from '../services/storage.service.js';
 import { syncFromGitHub } from '../services/sync.service.js';
@@ -68,10 +68,19 @@ export function App() {
             <div
                 className={`w-100 h-140 flex flex-col items-center justify-center px-10 font-['Inter',system-ui,sans-serif] bg-base ${isDark ? 'dark' : ''}`}
             >
-                <div className="text-primary mb-5">
-                    <IconGitHub size={48} />
+                <div className="mb-1">
+                    <img src="/icons/favicon.png" alt="OctoClock" className="w-26 h-26" />
                 </div>
-                <h1 className="text-xl font-semibold text-primary mb-1">Time Tracker</h1>
+                <h1 className="text-xl mb-0.5" style={{ fontFamily: "'Saira Stencil One', cursive" }}>
+                    <span style={{ color: 'var(--th-brand-octo)' }}>Octo</span>
+                    <span style={{ color: 'var(--th-brand-clock)' }}>Clock</span>
+                </h1>
+                <p
+                    className="text-[11px] text-tertiary tracking-wide mb-1"
+                    style={{ fontFamily: "'Saira Condensed', sans-serif" }}
+                >
+                    GitHub Time Tracker
+                </p>
                 <p className="text-[13px] text-tertiary text-center mb-8 leading-relaxed">
                     Track time spent on GitHub issues
                     <br />
@@ -114,7 +123,18 @@ export function App() {
         >
             {/* Header */}
             <header className="flex items-center justify-between px-4 h-11 border-b border-border-subtle shrink-0">
-                <h1 className="text-[13px] font-semibold text-primary tracking-tight">Time Tracker</h1>
+                <div className="flex items-center gap-1.5">
+                    <img src="/icons/favicon.png" alt="OctoClock" className="w-8 h-8" />
+                    <div className="flex items-baseline gap-1.5">
+                        <h1
+                            className="text-[16px] tracking-tight"
+                            style={{ fontFamily: "'Saira Stencil One', cursive" }}
+                        >
+                            <span style={{ color: 'var(--th-brand-octo)' }}>Octo</span>
+                            <span style={{ color: 'var(--th-brand-clock)' }}>Clock</span>
+                        </h1>
+                    </div>
+                </div>
                 {user?.avatar_url ? (
                     <img
                         src={user.avatar_url}
@@ -131,41 +151,61 @@ export function App() {
             <ActiveTimer />
 
             {/* Page Content */}
-            <main className="flex-1 overflow-y-auto popup-scroll">
+            <main className="flex-1 flex flex-col overflow-hidden">
                 <ErrorBoundary>
                     {page === 'issues' && <IssuesTab />}
-                    {page === 'stats' && <StatsTab tracked={tracked} user={user} />}
-                    {page === 'calendar' && <CalendarView tracked={tracked} />}
-                    {page === 'settings' && (
-                        <Settings
-                            token={token}
-                            maskedToken={maskedToken}
-                            user={user}
-                            onTokenChange={handleTokenChange}
-                            onClearData={() => setShowClearConfirm(true)}
-                            theme={theme}
-                            onThemeChange={setTheme}
-                        />
-                    )}
+                    <div className={`flex-1 overflow-y-auto popup-scroll pb-14 ${page === 'issues' ? 'hidden' : ''}`}>
+                        {page === 'stats' && <StatsTab tracked={tracked} user={user} />}
+                        {page === 'calendar' && <CalendarView tracked={tracked} />}
+                        {page === 'settings' && (
+                            <Settings
+                                token={token}
+                                maskedToken={maskedToken}
+                                user={user}
+                                onTokenChange={handleTokenChange}
+                                onClearData={() => setShowClearConfirm(true)}
+                                theme={theme}
+                                onThemeChange={setTheme}
+                            />
+                        )}
+                    </div>
                 </ErrorBoundary>
             </main>
 
-            {/* Bottom Navigation */}
-            <nav className="flex items-center border-t border-border-subtle shrink-0">
-                {navItems.map(({ id, icon: Icon, label }) => (
-                    <button
-                        type="button"
-                        key={id}
-                        onClick={() => setPage(id)}
-                        className={`flex-1 flex flex-col items-center gap-0.5 py-2.5 cursor-pointer transition-colors ${
-                            page === id ? 'text-accent' : 'text-muted hover:text-secondary'
-                        }`}
-                    >
-                        <Icon size={18} />
-                        <span className="text-[10px] font-medium">{label}</span>
-                    </button>
-                ))}
-            </nav>
+            {/* Bottom Navigation — floating over content */}
+            <div className="relative shrink-0 pointer-events-none">
+                <nav className="absolute bottom-2 left-4 right-4 pointer-events-auto">
+                    <div className="relative flex items-center bg-surface/80 backdrop-blur-md rounded-2xl p-1 shadow-lg border border-border-subtle">
+                        <div
+                            className="absolute top-1 bottom-1 rounded-xl bg-accent shadow-md pointer-events-none"
+                            style={{
+                                left: '4px',
+                                width: 'calc(25% - 2px)',
+                                transform: `translateX(${navItems.findIndex((n) => n.id === page) * 100}%)`,
+                                transition: 'transform 200ms ease-out',
+                            }}
+                        />
+                        {navItems.map(({ id, icon: Icon, label }) => {
+                            const active = page === id;
+                            return (
+                                <button
+                                    type="button"
+                                    key={id}
+                                    onClick={() => setPage(id)}
+                                    className={`relative z-10 flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-xl cursor-pointer transition-colors duration-200 ${
+                                        active ? 'text-white' : 'text-muted hover:text-primary'
+                                    }`}
+                                >
+                                    <Icon size={16} strokeWidth={active ? 2.5 : 1.75} />
+                                    <span className={`text-[9px] ${active ? 'font-bold' : 'font-medium'}`}>
+                                        {label}
+                                    </span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </nav>
+            </div>
 
             {showClearConfirm && (
                 <Modal

@@ -8,104 +8,138 @@
     font-display: swap;
 }
 
-/* ───── Light theme (default) ───── */
-:root {
-    --th-base: #ffffff;
-    --th-surface: #f8fafc;
-    --th-raised: #f1f5f9;
-    --th-overlay: #e2e8f0;
-
-    --th-txt-primary: #0f172a;
-    --th-txt-secondary: #334155;
-    --th-txt-tertiary: #64748b;
-    --th-txt-muted: #94a3b8;
-    --th-txt-faint: #cbd5e1;
-
-    --th-border-default: #e2e8f0;
-    --th-border-subtle: #f1f5f9;
-
-    --th-ring-default: #e2e8f0;
-
-    --th-accent: #4f46e5;
-    --th-accent-hover: #4338ca;
-    --th-accent-subtle: #eef2ff;
-    --th-accent-text: #4338ca;
-    --th-accent-ring: #c7d2fe;
-
-    --th-success-subtle: #ecfdf5;
-    --th-success-text: #047857;
-    --th-success-muted: rgba(4, 120, 87, 0.7);
-    --th-success-border: #d1fae5;
-    --th-success-dot: #10b981;
-    --th-success-hover: #d1fae5;
-
-    --th-danger-subtle: #fef2f2;
-    --th-danger-text: #dc2626;
-    --th-danger-hover: #fee2e2;
-    --th-danger-border: #fecaca;
-    --th-danger-muted: #ef4444;
-
-    --th-violet-subtle: #f5f3ff;
-    --th-violet-text: #7c3aed;
-    --th-violet-value: #5b21b6;
-    --th-violet-ring: #ddd6fe;
-
-    --th-amber-subtle: #fffbeb;
-    --th-amber-text: #d97706;
-    --th-amber-value: #92400e;
-    --th-amber-ring: #fde68a;
-
-    --th-scrollbar: #cbd5e1;
+@font-face {
+    font-family: "Saira Stencil One";
+    src: url("../../public/fonts/SairaStencilOne/SairaStencilOne-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
 }
 
-/* ───── Dark theme (GitHub Dark) ───── */
+@font-face {
+    font-family: "Saira Condensed";
+    src: url("../../public/fonts/SairaCondensed/SairaCondensed-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* ───── Light theme (default) ───── */
+:root {
+    --th-base: #fdfdfd;
+    --th-surface: #f4f8fb;
+    --th-raised: #e8f0f7;
+    --th-overlay: #d5e3ef;
+
+    --th-txt-primary: #1f2d3a;
+    --th-txt-secondary: #344653;
+    --th-txt-tertiary: #4f6b82;
+    --th-txt-muted: #778ca0;
+    --th-txt-faint: #96acbd;
+
+    --th-border-default: #b5ccdd;
+    --th-border-subtle: #ccdce8;
+
+    --th-ring-default: #b5ccdd;
+
+    --th-accent: #4272a3;
+    --th-accent-hover: #365f8c;
+    --th-accent-subtle: #e8f1f9;
+    --th-accent-text: #3b6fa3;
+    --th-accent-ring: #a2c8e6;
+
+    --th-success-subtle: #c4ecd3;
+    --th-success-text: #0a6e4e;
+    --th-success-muted: rgba(10, 110, 78, 0.7);
+    --th-success-border: #8fd4b0;
+    --th-success-dot: #179b65;
+    --th-success-hover: #9ad9b0;
+
+    --th-danger-subtle: #fde9e9;
+    --th-danger-text: #c42b2b;
+    --th-danger-hover: #fde0e0;
+    --th-danger-border: #f9c5c5;
+    --th-danger-muted: #cc3030;
+
+    --th-violet-subtle: #f3f0ff;
+    --th-violet-text: #7044cf;
+    --th-violet-value: #5428a8;
+    --th-violet-ring: #d7ccfa;
+
+    --th-amber-subtle: #fff9e6;
+    --th-amber-text: #9a6400;
+    --th-amber-value: #8a4a0e;
+    --th-amber-ring: #f5d97a;
+
+    --th-brand-octo: #1f2d3a;
+    --th-brand-clock: #4272a3;
+
+    --th-heat-1: #d4f0df;
+    --th-heat-2: #a5ddb8;
+    --th-heat-3: #6ec48f;
+    --th-heat-4: #3ba368;
+    --th-heat-5: #1a7f4b;
+
+    --th-scrollbar: #b5ccdd;
+}
+
+/* ───── Dark theme ───── */
 .dark {
-    --th-base: #24292e;
-    --th-surface: #2f363d;
-    --th-raised: #444d56;
-    --th-overlay: #1b1f23;
+    --th-base: #0d1117;
+    --th-surface: #161b22;
+    --th-raised: #21262d;
+    --th-overlay: #090c10;
 
-    --th-txt-primary: #e1e4e8;
-    --th-txt-secondary: #d1d5da;
-    --th-txt-tertiary: #959da5;
-    --th-txt-muted: #6a737d;
-    --th-txt-faint: #586069;
+    --th-txt-primary: #e6edf3;
+    --th-txt-secondary: #c9d1d9;
+    --th-txt-tertiary: #8b949e;
+    --th-txt-muted: #6e7681;
+    --th-txt-faint: #555d66;
 
-    --th-border-default: #444d56;
-    --th-border-subtle: #2f363d;
+    --th-border-default: #30363d;
+    --th-border-subtle: #21262d;
 
-    --th-ring-default: #444d56;
+    --th-ring-default: #30363d;
 
-    --th-accent: #2188ff;
-    --th-accent-hover: #0366d6;
-    --th-accent-subtle: #05264c;
-    --th-accent-text: #79b8ff;
-    --th-accent-ring: #044289;
+    --th-accent: #316dac;
+    --th-accent-hover: #3a7ab8;
+    --th-accent-subtle: #0d2240;
+    --th-accent-text: #58a6ff;
+    --th-accent-ring: #1f4d7c;
 
-    --th-success-subtle: #144620;
-    --th-success-text: #85e89d;
-    --th-success-muted: rgba(133, 232, 157, 0.7);
-    --th-success-border: #165c26;
-    --th-success-dot: #34d058;
-    --th-success-hover: #176f2c;
+    --th-success-subtle: #0d2117;
+    --th-success-text: #56d364;
+    --th-success-muted: rgba(86, 211, 100, 0.7);
+    --th-success-border: #196c2e;
+    --th-success-dot: #3fb950;
+    --th-success-hover: #174d28;
 
-    --th-danger-subtle: #86181d;
-    --th-danger-text: #ffdce0;
-    --th-danger-hover: #b31d28;
-    --th-danger-border: #9e1c23;
-    --th-danger-muted: #ea4a5a;
+    --th-danger-subtle: #2d0f12;
+    --th-danger-text: #f5a3ab;
+    --th-danger-hover: #4d1f24;
+    --th-danger-border: #6b2028;
+    --th-danger-muted: #c43035;
 
-    --th-violet-subtle: #29134e;
-    --th-violet-text: #b392f0;
-    --th-violet-value: #d1bcf9;
-    --th-violet-ring: #3a1d6e;
+    --th-violet-subtle: #1a1230;
+    --th-violet-text: #b89bef;
+    --th-violet-value: #d1bbf7;
+    --th-violet-ring: #352060;
 
-    --th-amber-subtle: #735c0f;
-    --th-amber-text: #ffdf5d;
-    --th-amber-value: #fff5b1;
-    --th-amber-ring: #b08800;
+    --th-amber-subtle: #261f0a;
+    --th-amber-text: #f0d050;
+    --th-amber-value: #f7e8a0;
+    --th-amber-ring: #8a6a10;
 
-    --th-scrollbar: #444d56;
+    --th-brand-octo: #e6edf3;
+    --th-brand-clock: #316dac;
+
+    --th-heat-1: #0e3d1f;
+    --th-heat-2: #135a2d;
+    --th-heat-3: #1a7a3d;
+    --th-heat-4: #28a752;
+    --th-heat-5: #3bd06a;
+
+    --th-scrollbar: #30363d;
 }
 
 /* ───── Register semantic tokens as Tailwind utilities ───── */
@@ -156,9 +190,21 @@
     --color-amber-ring: var(--th-amber-ring);
 }
 
-/* Calendar day heat map */
-.day-heat {
-    background-color: color-mix(in srgb, var(--th-success-dot) calc(var(--day-opacity, 0.25) * 55%), transparent);
+/* Calendar day heat map — 5 GitHub-style levels */
+.day-heat-1 {
+    background-color: var(--th-heat-1);
+}
+.day-heat-2 {
+    background-color: var(--th-heat-2);
+}
+.day-heat-3 {
+    background-color: var(--th-heat-3);
+}
+.day-heat-4 {
+    background-color: var(--th-heat-4);
+}
+.day-heat-5 {
+    background-color: var(--th-heat-5);
 }
 
 /* Custom scrollbar */
@@ -171,6 +217,19 @@
 .popup-scroll::-webkit-scrollbar-thumb {
     background: var(--th-scrollbar);
     border-radius: 9999px;
+}
+
+/* Repo expand/collapse animation */
+.repo-expand {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 200ms ease-out;
+}
+.repo-expand.expanded {
+    grid-template-rows: 1fr;
+}
+.repo-expand > div {
+    overflow: hidden;
 }
 
 /* Active timer pulse */

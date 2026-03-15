@@ -31,7 +31,10 @@ export class TimerService {
             const issueInfo = GitHubService.parseIssueUrl(issueUrl);
             const { owner, repo, issueNumber } = issueInfo;
             const title = issueTitle || 'Untitled';
-            const fullIssueTitle = `(${owner}) ${repo} | ${title} | #${issueNumber}`;
+            const fullIssueTitle = issue?.title || `(${owner}) ${repo} | ${title} | #${issueNumber}`;
+
+            // Merge remote entries into local before starting
+            await TimerService.backfillRemoteEntries(issueUrl, owner, repo, issueNumber, fullIssueTitle);
 
             await Promise.all([
                 StorageService.set(STORAGE_KEYS.ACTIVE_ISSUE, issueUrl),
@@ -125,6 +128,55 @@ export class TimerService {
         } catch (error) {
             console.error('Failed to update session time:', error);
             return false;
+        }
+    }
+
+    /**
+     * Fetches remote entries from the GitHub comment for this issue
+     * and merges any missing ones into local storage.
+     */
+    static async backfillRemoteEntries(issueUrl, owner, repo, issueNumber, title) {
+        try {
+            const githubToken = await GitHubStorageService.getGitHubToken();
+            if (!githubToken) return;
+
+            const username = await GitHubService.getCurrentUsername();
+            const commentIds = (await StorageService.get(STORAGE_KEYS.COMMENT_IDS)) ?? {};
+            const commentKey = `${username}:${issueUrl}`;
+
+            const comment = await GitHubService.findTrackerComment(owner, repo, issueNumber, username);
+            if (!comment) return;
+
+            commentIds[commentKey] = comment.id;
+            await StorageService.set(STORAGE_KEYS.COMMENT_IDS, commentIds);
+
+            const remoteEntries = GitHubService.parseTrackerPayload(comment.body) || [];
+            if (remoteEntries.length === 0) return;
+
+            const trackedTimes = (await StorageService.get(STORAGE_KEYS.TRACKED_TIMES)) ?? [];
+            const localKeys = new Set(
+                trackedTimes.filter((e) => e.issueUrl === issueUrl).map((e) => `${e.date}:${e.seconds}`),
+            );
+
+            let added = false;
+            for (const entry of remoteEntries) {
+                const key = `${entry.date}:${entry.seconds}`;
+                if (!localKeys.has(key)) {
+                    trackedTimes.push({
+                        issueUrl,
+                        title,
+                        seconds: entry.seconds,
+                        date: entry.date,
+                    });
+                    localKeys.add(key);
+                    added = true;
+                }
+            }
+            if (added) {
+                await StorageService.set(STORAGE_KEYS.TRACKED_TIMES, trackedTimes);
+            }
+        } catch (error) {
+            console.error('Failed to backfill remote entries:', error);
         }
     }
 
