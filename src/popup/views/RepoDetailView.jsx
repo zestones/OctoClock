@@ -1,14 +1,16 @@
 import { useMemo, useState } from 'preact/hooks';
 import { EditTimeModal } from '../../components/EditTimeModal.jsx';
 import { SearchInput } from '../../components/SearchInput.jsx';
-import { IconChevronLeft, IconChevronRight, IconClock, IconEdit, IconExternalLink } from '../../icons.jsx';
+import { IconChevronLeft, IconChevronRight, IconClock, IconEdit, IconExternalLink, IconUser } from '../../icons.jsx';
 import { TimerService } from '../../services/timer.service.js';
 import { TimeService } from '../../utils/time.utils.js';
+import { ContributorsView } from './ContributorsView.jsx';
 
 export function RepoDetailView({ repo, repoDetails, userMode, onBack }) {
     const [expandedIssue, setExpandedIssue] = useState(null);
     const [filterText, setFilterText] = useState('');
     const [editingSession, setEditingSession] = useState(null);
+    const [detailTab, setDetailTab] = useState('issues');
 
     const details = repoDetails || {};
     const issueList = useMemo(() => {
@@ -35,6 +37,12 @@ export function RepoDetailView({ repo, repoDetails, userMode, onBack }) {
     const maxIssueSeconds = useMemo(() => Math.max(...issueList.map((i) => i.totalSeconds), 1), [issueList]);
 
     const allUsers = useMemo(() => [...new Set(issueList.flatMap((i) => i.uniqueUsers))], [issueList]);
+    const showTabs = userMode === 'everyone' && allUsers.length > 1;
+    const tabOptions = [
+        { id: 'issues', label: 'Issues' },
+        { id: 'contributors', label: 'Contributors' },
+    ];
+    const activeTabIndex = tabOptions.findIndex((t) => t.id === detailTab);
 
     return (
         <div className="flex flex-col h-full">
@@ -80,123 +88,158 @@ export function RepoDetailView({ repo, repoDetails, userMode, onBack }) {
                     </div>
                     {userMode === 'everyone' && allUsers.length > 1 && (
                         <div className="flex items-center gap-1.5 bg-surface border border-border-subtle rounded-lg px-2 py-1">
+                            <IconUser size={11} className="text-accent" />
                             <span className="text-[11px] font-semibold text-primary">{allUsers.length}</span>
                             <span className="text-[10px] text-muted">contrib.</span>
                         </div>
                     )}
                 </div>
 
-                {/* Search */}
-                <SearchInput placeholder="Filter issues..." value={filterText} onInput={setFilterText} className="" />
+                {/* Tab toggle */}
+                {showTabs && (
+                    <div className="relative flex bg-surface rounded-lg p-0.5 mb-2 border border-border-subtle">
+                        <div
+                            className="absolute top-0.5 bottom-0.5 rounded-md bg-base shadow-sm pointer-events-none"
+                            style={{
+                                left: '2px',
+                                width: 'calc(50% - 1px)',
+                                transform: `translateX(${activeTabIndex * 100}%)`,
+                                transition: 'transform 200ms ease-out',
+                            }}
+                        />
+                        {tabOptions.map((t) => (
+                            <button
+                                type="button"
+                                key={t.id}
+                                onClick={() => setDetailTab(t.id)}
+                                className={`relative z-10 flex-1 text-[11px] px-2 py-1.5 rounded-md cursor-pointer transition-colors font-medium text-center ${detailTab === t.id
+                                    ? 'text-accent-text'
+                                    : 'text-muted hover:text-secondary'
+                                    }`}
+                            >
+                                {t.label}
+                            </button>
+                        ))}
+                    </div>
+                )}
+
+                {/* Search (issues tab only) */}
+                {detailTab === 'issues' && (
+                    <SearchInput placeholder="Filter issues..." value={filterText} onInput={setFilterText} className="" />
+                )}
             </div>
 
-            {/* Scrollable issue list */}
-            <div className="flex-1 overflow-y-auto popup-scroll px-4 pt-2 pb-2">
-                <div className="space-y-1">
-                    {filtered.length === 0 ? (
-                        <div className="flex flex-col items-center py-8">
-                            <div className="text-faint mb-2">
-                                <IconClock size={24} />
+            {/* Scrollable content */}
+            {detailTab === 'issues' ? (
+                <div className="flex-1 overflow-y-auto popup-scroll px-4 pt-2 pb-2">
+                    <div className="space-y-1">
+                        {filtered.length === 0 ? (
+                            <div className="flex flex-col items-center py-8">
+                                <div className="text-faint mb-2">
+                                    <IconClock size={24} />
+                                </div>
+                                <div className="text-[12px] text-muted">No issues found</div>
                             </div>
-                            <div className="text-[12px] text-muted">No issues found</div>
-                        </div>
-                    ) : (
-                        filtered.map((issue) => {
-                            const isOpen = expandedIssue === issue.url;
-                            const percentage = maxIssueSeconds > 0 ? (issue.totalSeconds / maxIssueSeconds) * 100 : 0;
+                        ) : (
+                            filtered.map((issue) => {
+                                const isOpen = expandedIssue === issue.url;
+                                const percentage = maxIssueSeconds > 0 ? (issue.totalSeconds / maxIssueSeconds) * 100 : 0;
 
-                            return (
-                                <div key={issue.url}>
-                                    {/* Issue row */}
-                                    <button
-                                        type="button"
-                                        className={`w-full text-left rounded-xl px-3 py-2 cursor-pointer transition-all border ${isOpen
-                                            ? 'bg-surface border-border-default shadow-sm'
-                                            : 'bg-base border-transparent hover:bg-surface hover:border-border-subtle'
-                                            }`}
-                                        onClick={() => setExpandedIssue(isOpen ? null : issue.url)}
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            <span
-                                                className={`text-muted shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`}
-                                            >
-                                                <IconChevronRight size={10} />
-                                            </span>
-                                            <span className="text-[12px] text-primary truncate flex-1">
-                                                {issue.issueNumber && (
-                                                    <span className="text-muted font-mono text-[11px] mr-1">
-                                                        {issue.issueNumber}
-                                                    </span>
-                                                )}
-                                                {issue.title}
-                                            </span>
-                                            <span className="text-[11px] font-mono font-semibold tabular-nums text-accent-text shrink-0">
-                                                {TimeService.formatTime(issue.totalSeconds)}
-                                            </span>
-                                        </div>
-                                        {/* Progress bar */}
-                                        <div className="mt-1.5 ml-5 bg-raised rounded-full h-1">
-                                            <div
-                                                className="bg-accent h-1 rounded-full transition-all duration-500"
-                                                style={{ width: `${percentage}%` }}
-                                            />
-                                        </div>
-                                    </button>
+                                return (
+                                    <div key={issue.url}>
+                                        {/* Issue row */}
+                                        <button
+                                            type="button"
+                                            className={`w-full text-left rounded-xl px-3 py-2 cursor-pointer transition-all border ${isOpen
+                                                ? 'bg-surface border-border-default shadow-sm'
+                                                : 'bg-base border-transparent hover:bg-surface hover:border-border-subtle'
+                                                }`}
+                                            onClick={() => setExpandedIssue(isOpen ? null : issue.url)}
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <span
+                                                    className={`text-muted shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`}
+                                                >
+                                                    <IconChevronRight size={10} />
+                                                </span>
+                                                <span className="text-[12px] text-primary truncate flex-1">
+                                                    {issue.issueNumber && (
+                                                        <span className="text-muted font-mono text-[11px] mr-1">
+                                                            {issue.issueNumber}
+                                                        </span>
+                                                    )}
+                                                    {issue.title}
+                                                </span>
+                                                <span className="text-[11px] font-mono font-semibold tabular-nums text-accent-text shrink-0">
+                                                    {TimeService.formatTime(issue.totalSeconds)}
+                                                </span>
+                                            </div>
+                                            {/* Progress bar */}
+                                            <div className="mt-1.5 ml-5 bg-raised rounded-full h-1">
+                                                <div
+                                                    className="bg-accent h-1 rounded-full transition-all duration-500"
+                                                    style={{ width: `${percentage}%` }}
+                                                />
+                                            </div>
+                                        </button>
 
-                                    {/* Expanded sessions */}
-                                    <div className={`repo-expand ${isOpen ? 'expanded' : ''}`}>
-                                        <div>
-                                            <div className="ml-7 py-1 space-y-0.5">
-                                                {issue.sessions
-                                                    .sort((a, b) => b.date.localeCompare(a.date) || b.seconds - a.seconds)
-                                                    .map((session, si) => (
-                                                        <div
-                                                            key={si}
-                                                            className="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-[11px] hover:bg-surface transition-colors"
-                                                        >
-                                                            <div className="flex items-center gap-2 text-muted">
-                                                                <span className="font-medium text-secondary">
-                                                                    {session.date}
-                                                                </span>
-                                                                {session.user && userMode === 'everyone' && (
-                                                                    <span className="text-[10px] bg-raised px-1.5 py-0.5 rounded-full">
-                                                                        {session.user}
+                                        {/* Expanded sessions */}
+                                        <div className={`repo-expand ${isOpen ? 'expanded' : ''}`}>
+                                            <div>
+                                                <div className="ml-7 py-1 space-y-0.5">
+                                                    {issue.sessions
+                                                        .sort((a, b) => b.date.localeCompare(a.date) || b.seconds - a.seconds)
+                                                        .map((session, si) => (
+                                                            <div
+                                                                key={si}
+                                                                className="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-[11px] hover:bg-surface transition-colors"
+                                                            >
+                                                                <div className="flex items-center gap-2 text-muted">
+                                                                    <span className="font-medium text-secondary">
+                                                                        {session.date}
+                                                                    </span>
+                                                                    {session.user && userMode === 'everyone' && (
+                                                                        <span className="text-[10px] bg-raised px-1.5 py-0.5 rounded-full">
+                                                                            {session.user}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                                {userMode !== 'everyone' ? (
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            setEditingSession({
+                                                                                issueUrl: issue.url,
+                                                                                date: session.date,
+                                                                                seconds: session.seconds,
+                                                                            });
+                                                                        }}
+                                                                        className="flex items-center gap-1 text-[11px] text-accent-text hover:text-accent cursor-pointer transition-colors font-mono tabular-nums"
+                                                                        title="Adjust tracked time"
+                                                                    >
+                                                                        <IconEdit size={10} />
+                                                                        {TimeService.formatTime(session.seconds)}
+                                                                    </button>
+                                                                ) : (
+                                                                    <span className="text-secondary font-mono tabular-nums">
+                                                                        {TimeService.formatTime(session.seconds)}
                                                                     </span>
                                                                 )}
                                                             </div>
-                                                            {userMode !== 'everyone' ? (
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        setEditingSession({
-                                                                            issueUrl: issue.url,
-                                                                            date: session.date,
-                                                                            seconds: session.seconds,
-                                                                        });
-                                                                    }}
-                                                                    className="flex items-center gap-1 text-[11px] text-accent-text hover:text-accent cursor-pointer transition-colors font-mono tabular-nums"
-                                                                    title="Adjust tracked time"
-                                                                >
-                                                                    <IconEdit size={10} />
-                                                                    {TimeService.formatTime(session.seconds)}
-                                                                </button>
-                                                            ) : (
-                                                                <span className="text-secondary font-mono tabular-nums">
-                                                                    {TimeService.formatTime(session.seconds)}
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    ))}
+                                                        ))}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            );
-                        })
-                    )}
+                                );
+                            })
+                        )}
+                    </div>
                 </div>
-            </div>
+            ) : (
+                <ContributorsView repoDetails={details} />
+            )}
 
             {editingSession && (
                 <EditTimeModal
