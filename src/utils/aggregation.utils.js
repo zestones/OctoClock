@@ -82,9 +82,10 @@ export class AggregationService {
 
     static getWeekEntries(trackedTimes) {
         const now = new Date();
-        const dayOfWeek = now.getDay();
+        const dayOfWeek = now.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+        const daysFromMonday = (dayOfWeek + 6) % 7; // Mon=0, Tue=1, ..., Sun=6
         const startOfWeek = new Date(now);
-        startOfWeek.setDate(now.getDate() - dayOfWeek);
+        startOfWeek.setDate(now.getDate() - daysFromMonday);
         const start = TimeService.getLocalDateString(startOfWeek);
         const end = TimeService.getLocalDateString(now);
         return AggregationService.filterByDateRange(trackedTimes, start, end);
