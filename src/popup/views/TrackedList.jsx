@@ -1,5 +1,5 @@
 import { useActiveTimer } from '../../hooks/useActiveTimer.js';
-import { IconExternalLink, IconPlay, IconStop } from '../../icons.jsx';
+import { IconClock, IconExternalLink, IconPlay, IconStop } from '../../icons.jsx';
 import { TimerService } from '../../services/timer.service.js';
 
 export function TrackedList({ entries, showTimerControls = false }) {
@@ -16,67 +16,76 @@ export function TrackedList({ entries, showTimerControls = false }) {
     const isActive = (entry) => isTimerActive(entry.issueUrl);
 
     return (
-        <div className="space-y-1">
-            {entries.map((entry, i) => (
-                <div
-                    key={entry.issueUrl || i}
-                    className="flex items-center gap-2 p-2 hover:bg-surface rounded-lg group transition-colors"
-                >
-                    <div className="flex-1 min-w-0">
-                        <div className="text-[13px] text-primary truncate leading-snug">
-                            {entry.issueNumber && (
-                                <span className="text-muted font-mono text-[11px]">{entry.issueNumber} </span>
-                            )}
-                            {entry.title}
-                        </div>
-                        <div className="flex items-center gap-2 mt-0.5 text-[11px] text-muted">
-                            <span className="font-mono tabular-nums">{entry.displayTime}</span>
-                            {entry.repo && (
-                                <>
-                                    <span className="text-faint">·</span>
-                                    <span className="text-faint truncate max-w-30">{entry.repo}</span>
-                                </>
-                            )}
-                            {entry.date && (
-                                <>
-                                    <span className="text-faint">·</span>
-                                    <span>{entry.date}</span>
-                                </>
-                            )}
+        <div className="space-y-0.5">
+            {entries.map((entry, i) => {
+                const active = isActive(entry);
+                return (
+                    <div
+                        key={entry.issueUrl || i}
+                        className={`relative py-1.5 px-2.5 my-0.5 rounded-lg border transition-all group ${active
+                            ? 'bg-success-subtle/60 border-success-border border-l-[3px] border-l-success-dot shadow-sm'
+                            : 'bg-surface border-border-subtle hover:border-border-default hover:shadow-sm'
+                            }`}
+                    >
+                        {/* Top row: number + title + open link */}
+                        <div className="flex items-start gap-1.5 mb-0.5">
                             <a
                                 href={`https://github.com${entry.issueUrl}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-0.5 text-accent hover:text-accent-hover transition-colors"
+                                className="flex-1 min-w-0 group/link"
                             >
-                                <IconExternalLink size={10} />
-                                <span>View</span>
+                                <span className="text-[13px] text-primary leading-snug line-clamp-2 group-hover/link:text-accent transition-colors">
+                                    {entry.issueNumber && (
+                                        <span className="text-muted font-mono text-[11px] mr-1">{entry.issueNumber}</span>
+                                    )}
+                                    {entry.title}
+                                </span>
                             </a>
+                            <span className="text-muted opacity-0 group-hover:opacity-60 shrink-0 mt-0.5 pointer-events-none transition-opacity">
+                                <IconExternalLink size={11} />
+                            </span>
+                        </div>
+
+                        {/* Bottom row: tracked time + repo + action button */}
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2 text-[11px] text-muted">
+                                <div className="flex items-center gap-1">
+                                    <IconClock size={11} className="text-accent" />
+                                    <span className="font-mono font-medium text-accent-text">{entry.displayTime}</span>
+                                </div>
+                                {entry.repo && (
+                                    <>
+                                        <span className="text-faint">·</span>
+                                        <span className="text-faint truncate max-w-28">{entry.repo}</span>
+                                    </>
+                                )}
+                            </div>
+
+                            {showTimerControls && (
+                                <button
+                                    type="button"
+                                    onClick={() => handleTimerClick(entry)}
+                                    className={`flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-lg cursor-pointer transition-all ${active
+                                        ? 'bg-danger-subtle text-danger-text hover:bg-danger-hover'
+                                        : 'bg-accent-subtle text-accent-text hover:bg-accent-ring/40 opacity-40 group-hover:opacity-100'
+                                        }`}
+                                >
+                                    {active ? (
+                                        <>
+                                            <IconStop size={11} /> Stop
+                                        </>
+                                    ) : (
+                                        <>
+                                            <IconPlay size={11} /> Start
+                                        </>
+                                    )}
+                                </button>
+                            )}
                         </div>
                     </div>
-                    {showTimerControls && (
-                        <button
-                            type="button"
-                            onClick={() => handleTimerClick(entry)}
-                            className={`shrink-0 flex items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-md cursor-pointer transition-all ${
-                                isActive(entry)
-                                    ? 'bg-danger-subtle text-danger-text hover:bg-danger-hover'
-                                    : 'bg-success-subtle text-success-text hover:bg-success-hover opacity-0 group-hover:opacity-100'
-                            }`}
-                        >
-                            {isActive(entry) ? (
-                                <>
-                                    <IconStop size={10} /> Stop
-                                </>
-                            ) : (
-                                <>
-                                    <IconPlay size={10} /> Start
-                                </>
-                            )}
-                        </button>
-                    )}
-                </div>
-            ))}
+                );
+            })}
         </div>
     );
 }
