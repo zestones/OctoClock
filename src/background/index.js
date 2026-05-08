@@ -7,6 +7,8 @@ import { PinnedReposService } from '../services/pinned-repos.service.js';
 import { StorageService } from '../services/storage.service.js';
 import { CACHE_REFRESH_INTERVAL, SCHEMA_VERSION, STORAGE_KEYS } from '../utils/constants.utils.js';
 
+const trackerSyncQueues = new Map();
+
 async function refreshCachedIssues() {
     const token = await GitHubStorageService.getGitHubToken();
     if (!token) return;
@@ -34,6 +36,43 @@ async function refreshCachedIssues() {
     } catch (error) {
         console.error('Background user refresh failed:', error);
     }
+}
+
+async function syncTrackerComment({ issueUrl, owner, repo, issueNumber }) {
+    const trackedTimes = (await StorageService.get(STORAGE_KEYS.TRACKED_TIMES)) ?? [];
+    const issueEntries = trackedTimes
+        .filter((entry) => entry.issueUrl === issueUrl)
+        .map((entry) => ({ date: entry.date, seconds: entry.seconds }));
+
+    const commentIds = (await StorageService.get(STORAGE_KEYS.COMMENT_IDS)) ?? {};
+    const username = await GitHubService.getCurrentUsername();
+    const commentKey = `${username}:${issueUrl}`;
+    const result = await GitHubService.createOrUpdateTrackerComment({
+        owner,
+        repo,
+        issueNumber,
+        entries: issueEntries,
+        cachedCommentId: commentIds[commentKey],
+    });
+
+    commentIds[commentKey] = result.commentId;
+    await StorageService.set(STORAGE_KEYS.COMMENT_IDS, commentIds);
+    return { commentId: result.commentId };
+}
+
+function queueTrackerCommentSync(payload) {
+    const previous = trackerSyncQueues.get(payload.issueUrl) ?? Promise.resolve();
+    const next = previous.catch(() => { }).then(() => syncTrackerComment(payload));
+
+    trackerSyncQueues.set(payload.issueUrl, next);
+
+    next.finally(() => {
+        if (trackerSyncQueues.get(payload.issueUrl) === next) {
+            trackerSyncQueues.delete(payload.issueUrl);
+        }
+    });
+
+    return next;
 }
 
 // Create the cache-refresh alarm only once — on install or extension update.
@@ -72,6 +111,18 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 // will be sent asynchronously, AND keeps the service worker alive until sendResponse
 // is called (prevents the SW from being killed mid-forwarding).
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+    if (message.action === 'syncTrackerComment') {
+        queueTrackerCommentSync(message)
+            .then((result) => {
+                sendResponse({ ok: true, ...result });
+            })
+            .catch((error) => {
+                console.error('Tracker comment sync failed:', error);
+                sendResponse({ ok: false, error: error?.message || 'Tracker comment sync failed' });
+            });
+        return true;
+    }
+
     if (message.action === 'timerStarted' || message.action === 'timerStopped') {
         chrome.tabs.query({ url: 'https://github.com/*' }, (tabs) => {
             tabs.forEach((tab) => {

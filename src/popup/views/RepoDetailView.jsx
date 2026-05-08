@@ -1,7 +1,16 @@
 import { useMemo, useState } from 'preact/hooks';
 import { EditTimeModal } from '../../components/EditTimeModal.jsx';
+import { Modal } from '../../components/Modal.jsx';
 import { SearchInput } from '../../components/SearchInput.jsx';
-import { IconChevronLeft, IconChevronRight, IconClock, IconEdit, IconExternalLink, IconUser } from '../../icons.jsx';
+import {
+    IconChevronLeft,
+    IconChevronRight,
+    IconClock,
+    IconEdit,
+    IconExternalLink,
+    IconTrash,
+    IconUser,
+} from '../../icons.jsx';
 import { TimerService } from '../../services/timer.service.js';
 import { TimeService } from '../../utils/time.utils.js';
 import { ContributorsView } from './ContributorsView.jsx';
@@ -10,6 +19,7 @@ export function RepoDetailView({ repo, repoDetails, userMode, onBack }) {
     const [expandedIssue, setExpandedIssue] = useState(null);
     const [filterText, setFilterText] = useState('');
     const [editingSession, setEditingSession] = useState(null);
+    const [deletingSession, setDeletingSession] = useState(null);
     const [detailTab, setDetailTab] = useState('issues');
 
     const details = repoDetails || {};
@@ -214,22 +224,40 @@ export function RepoDetailView({ repo, repoDetails, userMode, onBack }) {
                                                                     )}
                                                                 </div>
                                                                 {userMode !== 'everyone' ? (
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={(e) => {
-                                                                            e.stopPropagation();
-                                                                            setEditingSession({
-                                                                                issueUrl: issue.url,
-                                                                                date: session.date,
-                                                                                seconds: session.seconds,
-                                                                            });
-                                                                        }}
-                                                                        className="flex items-center gap-1 text-[11px] text-accent-text hover:text-accent cursor-pointer transition-colors font-mono tabular-nums"
-                                                                        title="Adjust tracked time"
-                                                                    >
-                                                                        <IconEdit size={10} />
-                                                                        {TimeService.formatTime(session.seconds)}
-                                                                    </button>
+                                                                    <div className="shrink-0 flex items-center gap-1.5">
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                setEditingSession({
+                                                                                    issueUrl: issue.url,
+                                                                                    date: session.date,
+                                                                                    seconds: session.seconds,
+                                                                                });
+                                                                            }}
+                                                                            className="flex items-center gap-1 px-2 py-1 rounded-md bg-base border border-transparent hover:border-accent-ring/30 hover:bg-accent-subtle/30 text-[11px] text-accent-text hover:text-accent cursor-pointer transition-colors font-mono tabular-nums"
+                                                                            title="Edit session time"
+                                                                        >
+                                                                            <IconEdit size={11} />
+                                                                            {TimeService.formatTime(session.seconds)}
+                                                                        </button>
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                setDeletingSession({
+                                                                                    issueUrl: issue.url,
+                                                                                    date: session.date,
+                                                                                    seconds: session.seconds,
+                                                                                });
+                                                                            }}
+                                                                            className="shrink-0 flex items-center justify-center w-7 h-7 rounded-md bg-base border border-border-subtle text-muted hover:text-danger-text hover:bg-danger-subtle hover:border-danger-border cursor-pointer transition-colors"
+                                                                            aria-label="Delete session"
+                                                                            title="Delete session"
+                                                                        >
+                                                                            <IconTrash size={12} />
+                                                                        </button>
+                                                                    </div>
                                                                 ) : (
                                                                     <span className="text-secondary font-mono tabular-nums">
                                                                         {TimeService.formatTime(session.seconds)}
@@ -263,6 +291,24 @@ export function RepoDetailView({ repo, repoDetails, userMode, onBack }) {
                             newSeconds,
                         );
                         setEditingSession(null);
+                    }}
+                />
+            )}
+
+            {deletingSession && (
+                <Modal
+                    title="Delete session"
+                    message={`Delete the ${TimeService.formatTime(deletingSession.seconds)} session on ${deletingSession.date}? This cannot be undone.`}
+                    confirmLabel="Delete"
+                    confirmVariant="danger"
+                    onCancel={() => setDeletingSession(null)}
+                    onConfirm={async () => {
+                        await TimerService.deleteSession(
+                            deletingSession.issueUrl,
+                            deletingSession.date,
+                            deletingSession.seconds,
+                        );
+                        setDeletingSession(null);
                     }}
                 />
             )}
