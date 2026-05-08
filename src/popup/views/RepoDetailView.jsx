@@ -1,7 +1,16 @@
-import { useMemo, useState } from 'preact/hooks';
+import { useEffect, useMemo, useState } from 'preact/hooks';
 import { EditTimeModal } from '../../components/EditTimeModal.jsx';
+import { Modal } from '../../components/Modal.jsx';
 import { SearchInput } from '../../components/SearchInput.jsx';
-import { IconChevronLeft, IconChevronRight, IconClock, IconEdit, IconExternalLink, IconUser } from '../../icons.jsx';
+import {
+    IconChevronLeft,
+    IconChevronRight,
+    IconClock,
+    IconEdit,
+    IconExternalLink,
+    IconTrash,
+    IconUser,
+} from '../../icons.jsx';
 import { TimerService } from '../../services/timer.service.js';
 import { TimeService } from '../../utils/time.utils.js';
 import { ContributorsView } from './ContributorsView.jsx';
@@ -10,6 +19,8 @@ export function RepoDetailView({ repo, repoDetails, userMode, onBack }) {
     const [expandedIssue, setExpandedIssue] = useState(null);
     const [filterText, setFilterText] = useState('');
     const [editingSession, setEditingSession] = useState(null);
+    const [deletingSession, setDeletingSession] = useState(null);
+    const [sessionStatus, setSessionStatus] = useState(null);
     const [detailTab, setDetailTab] = useState('issues');
 
     const details = repoDetails || {};
@@ -43,6 +54,12 @@ export function RepoDetailView({ repo, repoDetails, userMode, onBack }) {
         { id: 'contributors', label: 'Contributors' },
     ];
     const activeTabIndex = tabOptions.findIndex((t) => t.id === detailTab);
+
+    useEffect(() => {
+        if (!sessionStatus) return;
+        const timeoutId = setTimeout(() => setSessionStatus(null), 5000);
+        return () => clearTimeout(timeoutId);
+    }, [sessionStatus]);
 
     return (
         <div className="flex flex-col h-full">
@@ -124,12 +141,17 @@ export function RepoDetailView({ repo, repoDetails, userMode, onBack }) {
 
                 {/* Search (issues tab only) */}
                 {detailTab === 'issues' && (
-                    <SearchInput
-                        placeholder="Filter issues..."
-                        value={filterText}
-                        onInput={setFilterText}
-                        className=""
-                    />
+                    <>
+                        <SearchInput
+                            placeholder="Filter issues..."
+                            value={filterText}
+                            onInput={setFilterText}
+                            className=""
+                        />
+                        {sessionStatus && (
+                            <div className="text-[11px] mt-1.5 text-center text-danger-text">{sessionStatus}</div>
+                        )}
+                    </>
                 )}
             </div>
 
@@ -214,22 +236,40 @@ export function RepoDetailView({ repo, repoDetails, userMode, onBack }) {
                                                                     )}
                                                                 </div>
                                                                 {userMode !== 'everyone' ? (
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={(e) => {
-                                                                            e.stopPropagation();
-                                                                            setEditingSession({
-                                                                                issueUrl: issue.url,
-                                                                                date: session.date,
-                                                                                seconds: session.seconds,
-                                                                            });
-                                                                        }}
-                                                                        className="flex items-center gap-1 text-[11px] text-accent-text hover:text-accent cursor-pointer transition-colors font-mono tabular-nums"
-                                                                        title="Adjust tracked time"
-                                                                    >
-                                                                        <IconEdit size={10} />
-                                                                        {TimeService.formatTime(session.seconds)}
-                                                                    </button>
+                                                                    <div className="shrink-0 flex items-center gap-1.5">
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                setEditingSession({
+                                                                                    issueUrl: issue.url,
+                                                                                    date: session.date,
+                                                                                    seconds: session.seconds,
+                                                                                });
+                                                                            }}
+                                                                            className="flex items-center gap-1 px-2 py-1 rounded-md bg-base border border-transparent hover:border-accent-ring/30 hover:bg-accent-subtle/30 text-[11px] text-accent-text hover:text-accent cursor-pointer transition-colors font-mono tabular-nums"
+                                                                            title="Edit session time"
+                                                                        >
+                                                                            <IconEdit size={11} />
+                                                                            {TimeService.formatTime(session.seconds)}
+                                                                        </button>
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                setDeletingSession({
+                                                                                    issueUrl: issue.url,
+                                                                                    date: session.date,
+                                                                                    seconds: session.seconds,
+                                                                                });
+                                                                            }}
+                                                                            className="shrink-0 flex items-center justify-center w-7 h-7 rounded-md bg-base border border-border-subtle text-muted hover:text-danger-text hover:bg-danger-subtle hover:border-danger-border cursor-pointer transition-colors"
+                                                                            aria-label="Delete session"
+                                                                            title="Delete session"
+                                                                        >
+                                                                            <IconTrash size={12} />
+                                                                        </button>
+                                                                    </div>
                                                                 ) : (
                                                                     <span className="text-secondary font-mono tabular-nums">
                                                                         {TimeService.formatTime(session.seconds)}
@@ -256,13 +296,51 @@ export function RepoDetailView({ repo, repoDetails, userMode, onBack }) {
                     seconds={editingSession.seconds}
                     onCancel={() => setEditingSession(null)}
                     onConfirm={async (newSeconds) => {
-                        await TimerService.updateSessionTime(
+                        const result = await TimerService.updateSessionTime(
                             editingSession.issueUrl,
                             editingSession.date,
                             editingSession.seconds,
                             newSeconds,
                         );
+                        if (!result.ok) {
+                            setSessionStatus('Could not update the session. Try again.');
+                            return;
+                        }
                         setEditingSession(null);
+                        setSessionStatus(
+                            result.syncStatus === 'failed'
+                                ? `Saved locally, comment sync failed: ${result.syncError || 'unknown error'}`
+                                : null,
+                        );
+                    }}
+                />
+            )}
+
+            {deletingSession && (
+                <Modal
+                    title="Delete session"
+                    message={`Delete the ${TimeService.formatTime(deletingSession.seconds)} session on ${deletingSession.date}? This cannot be undone.`}
+                    confirmLabel="Delete"
+                    confirmVariant="danger"
+                    onCancel={() => setDeletingSession(null)}
+                    onConfirm={async () => {
+                        const pendingDelete = deletingSession;
+                        setDeletingSession(null);
+
+                        const result = await TimerService.deleteSession(
+                            pendingDelete.issueUrl,
+                            pendingDelete.date,
+                            pendingDelete.seconds,
+                        );
+                        if (!result.ok) {
+                            setSessionStatus('Could not delete the session. Try again.');
+                            return;
+                        }
+                        setSessionStatus(
+                            result.syncStatus === 'failed'
+                                ? `Saved locally, comment sync failed: ${result.syncError || 'unknown error'}`
+                                : null,
+                        );
                     }}
                 />
             )}

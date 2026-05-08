@@ -5,6 +5,34 @@ import { GitHubStorageService } from './github-storage.service.js';
 import { IssueStorageService } from './issue-storage.service.js';
 import { StorageService } from './storage.service.js';
 
+const TRACKER_SYNC_LOG_PREFIX = '[TrackerSync][popup]';
+
+function getErrorMessage(error) {
+    if (error instanceof Error) return error.message;
+    return String(error);
+}
+
+function normalizeSyncErrorMessage(error) {
+    const message = getErrorMessage(error);
+
+    if (message === 'The message port closed before a response was received.') {
+        return 'Background worker did not answer. Reload the extension and try again.';
+    }
+
+    if (message === 'Could not establish connection. Receiving end does not exist.') {
+        return 'Background worker is not loaded. Reload the extension and try again.';
+    }
+
+    return message;
+}
+
+/**
+ * @typedef {Object} SessionMutationResult
+ * @property {boolean} ok
+ * @property {'synced' | 'skipped' | 'failed'} syncStatus
+ * @property {string | null} syncError
+ */
+
 export class TimerService {
     /** @param {string} issueUrl @returns {Promise<number>} Total seconds */
     static async getTotalTimeForIssue(issueUrl) {
@@ -13,6 +41,56 @@ export class TimerService {
         return trackedTimes
             .filter((entry) => entry.issueUrl === issueUrl)
             .reduce((total, entry) => total + (entry.seconds || 0), 0);
+    }
+
+    /**
+     * Queue tracker-comment sync through the background worker so it can outlive
+     * the popup lifecycle and serialize updates for the same issue.
+     */
+    static async syncComment(issueUrl, owner, repo, issueNumber) {
+        return new Promise((resolve, reject) => {
+            console.info(TRACKER_SYNC_LOG_PREFIX, 'Requesting background tracker sync', {
+                issueUrl,
+                owner,
+                repo,
+                issueNumber,
+            });
+            chrome.runtime.sendMessage(
+                {
+                    action: 'syncTrackerComment',
+                    issueUrl,
+                    owner,
+                    repo,
+                    issueNumber,
+                },
+                (response) => {
+                    if (chrome.runtime.lastError) {
+                        const message = normalizeSyncErrorMessage(chrome.runtime.lastError);
+                        console.error(TRACKER_SYNC_LOG_PREFIX, 'Background message failed', {
+                            issueUrl,
+                            error: message,
+                        });
+                        reject(new Error(message));
+                        return;
+                    }
+                    if (!response?.ok) {
+                        const message = response?.error || 'Tracker comment sync failed';
+                        console.error(TRACKER_SYNC_LOG_PREFIX, 'Background sync failed', {
+                            issueUrl,
+                            error: message,
+                            response,
+                        });
+                        reject(new Error(message));
+                        return;
+                    }
+                    console.info(TRACKER_SYNC_LOG_PREFIX, 'Background sync completed', {
+                        issueUrl,
+                        commentId: response.commentId,
+                    });
+                    resolve(response);
+                },
+            );
+        });
     }
 
     /** @param {string} issueUrl @param {string|null} [issueTitle] @returns {Promise<import('../utils/schema.utils.js').TimerResult>} */
@@ -94,9 +172,11 @@ export class TimerService {
 
             const totalTime = await TimerService.getTotalTimeForIssue(issueUrl);
 
-            // Sync to GitHub in the background (non-blocking)
+            // Sync to GitHub in the background worker (non-blocking)
             if (githubToken) {
-                TimerService.syncCommentInBackground(issueUrl, owner, repo, issueNumber, updatedTrackedTimes);
+                void TimerService.syncComment(issueUrl, owner, repo, issueNumber).catch((error) => {
+                    console.error('Background sync failed:', error);
+                });
             }
 
             chrome.runtime.sendMessage({ action: 'timerStopped', issueUrl });
@@ -107,27 +187,124 @@ export class TimerService {
         }
     }
 
-    /** @param {string} issueUrl @param {string} date @param {number} oldSeconds @param {number} newSeconds @returns {Promise<boolean>} */
+    /** @param {string} issueUrl @param {string} date @param {number} seconds @returns {Promise<SessionMutationResult>} */
+    static async deleteSession(issueUrl, date, seconds) {
+        try {
+            const trackedTimes = (await StorageService.get(STORAGE_KEYS.TRACKED_TIMES)) ?? [];
+            const idx = trackedTimes.findIndex(
+                (e) => e.issueUrl === issueUrl && e.date === date && e.seconds === seconds,
+            );
+            if (idx === -1) {
+                console.warn(TRACKER_SYNC_LOG_PREFIX, 'Delete session target not found', {
+                    issueUrl,
+                    date,
+                    seconds,
+                });
+                return { ok: false, syncStatus: 'skipped', syncError: null };
+            }
+
+            trackedTimes.splice(idx, 1);
+            await StorageService.set(STORAGE_KEYS.TRACKED_TIMES, trackedTimes);
+
+            console.info(TRACKER_SYNC_LOG_PREFIX, 'Deleted session locally', {
+                issueUrl,
+                date,
+                seconds,
+                remainingIssueEntries: trackedTimes.filter((entry) => entry.issueUrl === issueUrl).length,
+            });
+
+            const githubToken = await GitHubStorageService.getGitHubToken();
+            /** @type {SessionMutationResult['syncStatus']} */
+            let syncStatus = 'skipped';
+            /** @type {SessionMutationResult['syncError']} */
+            let syncError = null;
+            if (githubToken) {
+                const { owner, repo, issueNumber } = GitHubService.parseIssueUrl(issueUrl);
+                try {
+                    await TimerService.syncComment(issueUrl, owner, repo, issueNumber);
+                    syncStatus = 'synced';
+                } catch (error) {
+                    syncError = getErrorMessage(error);
+                    console.error(TRACKER_SYNC_LOG_PREFIX, 'Failed to sync tracker comment after deleting session', {
+                        issueUrl,
+                        date,
+                        seconds,
+                        error: syncError,
+                    });
+                    syncStatus = 'failed';
+                }
+            }
+            return { ok: true, syncStatus, syncError };
+        } catch (error) {
+            console.error(TRACKER_SYNC_LOG_PREFIX, 'Failed to delete session locally', {
+                issueUrl,
+                date,
+                seconds,
+                error: getErrorMessage(error),
+            });
+            return { ok: false, syncStatus: 'skipped', syncError: null };
+        }
+    }
+
+    /** @param {string} issueUrl @param {string} date @param {number} oldSeconds @param {number} newSeconds @returns {Promise<SessionMutationResult>} */
     static async updateSessionTime(issueUrl, date, oldSeconds, newSeconds) {
         try {
             const trackedTimes = (await StorageService.get(STORAGE_KEYS.TRACKED_TIMES)) ?? [];
             const idx = trackedTimes.findIndex(
                 (e) => e.issueUrl === issueUrl && e.date === date && e.seconds === oldSeconds,
             );
-            if (idx === -1) return false;
+            if (idx === -1) {
+                console.warn(TRACKER_SYNC_LOG_PREFIX, 'Update session target not found', {
+                    issueUrl,
+                    date,
+                    oldSeconds,
+                    newSeconds,
+                });
+                return { ok: false, syncStatus: 'skipped', syncError: null };
+            }
 
             trackedTimes[idx] = { ...trackedTimes[idx], seconds: newSeconds };
             await StorageService.set(STORAGE_KEYS.TRACKED_TIMES, trackedTimes);
 
+            console.info(TRACKER_SYNC_LOG_PREFIX, 'Updated session locally', {
+                issueUrl,
+                date,
+                oldSeconds,
+                newSeconds,
+            });
+
             const githubToken = await GitHubStorageService.getGitHubToken();
+            /** @type {SessionMutationResult['syncStatus']} */
+            let syncStatus = 'skipped';
+            /** @type {SessionMutationResult['syncError']} */
+            let syncError = null;
             if (githubToken) {
                 const { owner, repo, issueNumber } = GitHubService.parseIssueUrl(issueUrl);
-                TimerService.syncCommentInBackground(issueUrl, owner, repo, issueNumber, trackedTimes);
+                try {
+                    await TimerService.syncComment(issueUrl, owner, repo, issueNumber);
+                    syncStatus = 'synced';
+                } catch (error) {
+                    syncError = getErrorMessage(error);
+                    console.error(TRACKER_SYNC_LOG_PREFIX, 'Failed to sync tracker comment after updating session', {
+                        issueUrl,
+                        date,
+                        oldSeconds,
+                        newSeconds,
+                        error: syncError,
+                    });
+                    syncStatus = 'failed';
+                }
             }
-            return true;
+            return { ok: true, syncStatus, syncError };
         } catch (error) {
-            console.error('Failed to update session time:', error);
-            return false;
+            console.error(TRACKER_SYNC_LOG_PREFIX, 'Failed to update session locally', {
+                issueUrl,
+                date,
+                oldSeconds,
+                newSeconds,
+                error: getErrorMessage(error),
+            });
+            return { ok: false, syncStatus: 'skipped', syncError: null };
         }
     }
 
@@ -178,31 +355,5 @@ export class TimerService {
         } catch (error) {
             console.error('Failed to backfill remote entries:', error);
         }
-    }
-
-    static syncCommentInBackground(issueUrl, owner, repo, issueNumber, trackedTimes) {
-        (async () => {
-            try {
-                const issueEntries = trackedTimes
-                    .filter((e) => e.issueUrl === issueUrl)
-                    .map((e) => ({ date: e.date, seconds: e.seconds }));
-
-                const commentIds = (await StorageService.get(STORAGE_KEYS.COMMENT_IDS)) ?? {};
-                const username = await GitHubService.getCurrentUsername();
-                const commentKey = `${username}:${issueUrl}`;
-                const result = await GitHubService.createOrUpdateTrackerComment({
-                    owner,
-                    repo,
-                    issueNumber,
-                    entries: issueEntries,
-                    cachedCommentId: commentIds[commentKey],
-                });
-
-                commentIds[commentKey] = result.commentId;
-                await StorageService.set(STORAGE_KEYS.COMMENT_IDS, commentIds);
-            } catch (error) {
-                console.error('Background sync failed:', error);
-            }
-        })();
     }
 }
