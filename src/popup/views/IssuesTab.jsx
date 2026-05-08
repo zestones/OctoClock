@@ -10,11 +10,11 @@ import { IssueStorageService } from '../../services/issue-storage.service.js';
 import { TimerService } from '../../services/timer.service.js';
 import { STORAGE_KEYS } from '../../utils/constants.utils.js';
 
-export function IssuesTab() {
+export function IssuesTab({ filter, onFilterChange }) {
     const [expandedRepos, setExpandedRepos] = useState({});
     const [searchTerm, setSearchTerm] = useState('');
     const [showPinModal, setShowPinModal] = useState(false);
-    const [filter, setFilter] = useState('open');
+
     const filterOptions = [
         { id: 'open', label: 'Open' },
         { id: 'assigned', label: 'Assigned' },
@@ -113,7 +113,7 @@ export function IssuesTab() {
                         <button
                             type="button"
                             key={f.id}
-                            onClick={() => setFilter(f.id)}
+                            onClick={() => onFilterChange(f.id)}
                             className={`relative z-10 flex-1 text-[11px] px-2 py-1.5 rounded-md cursor-pointer transition-colors font-medium text-center ${
                                 filter === f.id ? 'text-accent-text' : 'text-muted hover:text-secondary'
                             }`}

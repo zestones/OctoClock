@@ -6,6 +6,7 @@ import { Settings } from '../components/Settings.jsx';
 import { useAuth } from '../hooks/useAuth.js';
 import { useStorageListener } from '../hooks/useStorageListener.js';
 import { useTheme } from '../hooks/useTheme.js';
+import { useUIState } from '../hooks/useUIState.js';
 import { IconCalendar, IconChart, IconIssues, IconSettings } from '../icons.jsx';
 import { IssueStorageService } from '../services/issue-storage.service.js';
 import { StorageService } from '../services/storage.service.js';
@@ -17,9 +18,9 @@ import { StatsTab } from './views/StatsTab.jsx';
 import './App.css';
 
 export function App() {
-    const [page, setPage] = useState('issues');
     const [showClearConfirm, setShowClearConfirm] = useState(false);
 
+    const { page, setPage, issuesFilter, setIssuesFilter, loaded } = useUIState();
     const tracked = useStorageListener(STORAGE_KEYS.TRACKED_TIMES, []);
     const { theme, isDark, setTheme } = useTheme();
     const {
@@ -51,7 +52,7 @@ export function App() {
         setShowClearConfirm(false);
     };
 
-    if (!tokenLoaded)
+    if (!tokenLoaded || !loaded)
         return (
             <div
                 className={`w-100 h-140 flex items-center justify-center font-['Inter',system-ui,sans-serif] bg-base ${isDark ? 'dark' : ''}`}
@@ -153,7 +154,7 @@ export function App() {
             {/* Page Content */}
             <main className="flex-1 flex flex-col overflow-hidden">
                 <ErrorBoundary>
-                    {page === 'issues' && <IssuesTab />}
+                    {page === 'issues' && <IssuesTab filter={issuesFilter} onFilterChange={setIssuesFilter} />}
                     <div className={`flex-1 overflow-y-auto popup-scroll pb-14 ${page === 'issues' ? 'hidden' : ''}`}>
                         {page === 'stats' && <StatsTab tracked={tracked} user={user} />}
                         {page === 'calendar' && <CalendarView tracked={tracked} />}
