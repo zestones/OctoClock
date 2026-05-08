@@ -13,6 +13,8 @@ export const STORAGE_KEYS = {
     AUTO_SYNC: 'autoSync',
     THEME: 'theme',
     EVERYONE_DATA: 'everyoneData',
+    LAST_PAGE: 'lastPage',
+    ISSUES_FILTER: 'issuesFilter',
 };
 export const CACHE_PREFIX = 'cache:';
 export const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
