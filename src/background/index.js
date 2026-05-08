@@ -8,6 +8,12 @@ import { StorageService } from '../services/storage.service.js';
 import { CACHE_REFRESH_INTERVAL, SCHEMA_VERSION, STORAGE_KEYS } from '../utils/constants.utils.js';
 
 const trackerSyncQueues = new Map();
+const TRACKER_SYNC_LOG_PREFIX = '[TrackerSync][background]';
+
+function getErrorMessage(error) {
+    if (error instanceof Error) return error.message;
+    return String(error);
+}
 
 async function refreshCachedIssues() {
     const token = await GitHubStorageService.getGitHubToken();
@@ -39,6 +45,13 @@ async function refreshCachedIssues() {
 }
 
 async function syncTrackerComment({ issueUrl, owner, repo, issueNumber }) {
+    console.info(TRACKER_SYNC_LOG_PREFIX, 'Starting tracker sync job', {
+        issueUrl,
+        owner,
+        repo,
+        issueNumber,
+    });
+
     const trackedTimes = (await StorageService.get(STORAGE_KEYS.TRACKED_TIMES)) ?? [];
     const issueEntries = trackedTimes
         .filter((entry) => entry.issueUrl === issueUrl)
@@ -57,12 +70,36 @@ async function syncTrackerComment({ issueUrl, owner, repo, issueNumber }) {
 
     commentIds[commentKey] = result.commentId;
     await StorageService.set(STORAGE_KEYS.COMMENT_IDS, commentIds);
+
+    console.info(TRACKER_SYNC_LOG_PREFIX, 'Tracker sync job completed', {
+        issueUrl,
+        issueEntriesCount: issueEntries.length,
+        commentId: result.commentId,
+    });
+
     return { commentId: result.commentId };
 }
 
 function queueTrackerCommentSync(payload) {
     const previous = trackerSyncQueues.get(payload.issueUrl) ?? Promise.resolve();
-    const next = previous.catch(() => { }).then(() => syncTrackerComment(payload));
+    const hadPendingJob = trackerSyncQueues.has(payload.issueUrl);
+
+    console.info(
+        TRACKER_SYNC_LOG_PREFIX,
+        hadPendingJob ? 'Queueing tracker sync behind pending job' : 'Queueing tracker sync',
+        {
+            issueUrl: payload.issueUrl,
+        },
+    );
+
+    const next = previous
+        .catch((error) => {
+            console.warn(TRACKER_SYNC_LOG_PREFIX, 'Previous tracker sync failed; continuing queue', {
+                issueUrl: payload.issueUrl,
+                error: getErrorMessage(error),
+            });
+        })
+        .then(() => syncTrackerComment(payload));
 
     trackerSyncQueues.set(payload.issueUrl, next);
 
@@ -70,6 +107,10 @@ function queueTrackerCommentSync(payload) {
         if (trackerSyncQueues.get(payload.issueUrl) === next) {
             trackerSyncQueues.delete(payload.issueUrl);
         }
+
+        console.info(TRACKER_SYNC_LOG_PREFIX, 'Tracker sync queue drained for issue', {
+            issueUrl: payload.issueUrl,
+        });
     });
 
     return next;
@@ -112,13 +153,24 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 // is called (prevents the SW from being killed mid-forwarding).
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     if (message.action === 'syncTrackerComment') {
+        console.info(TRACKER_SYNC_LOG_PREFIX, 'Received syncTrackerComment message', {
+            issueUrl: message.issueUrl,
+            owner: message.owner,
+            repo: message.repo,
+            issueNumber: message.issueNumber,
+        });
+
         queueTrackerCommentSync(message)
             .then((result) => {
                 sendResponse({ ok: true, ...result });
             })
             .catch((error) => {
-                console.error('Tracker comment sync failed:', error);
-                sendResponse({ ok: false, error: error?.message || 'Tracker comment sync failed' });
+                const errorMessage = getErrorMessage(error);
+                console.error(TRACKER_SYNC_LOG_PREFIX, 'Tracker comment sync failed', {
+                    issueUrl: message.issueUrl,
+                    error: errorMessage,
+                });
+                sendResponse({ ok: false, error: errorMessage });
             });
         return true;
     }

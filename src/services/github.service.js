@@ -8,6 +8,13 @@ import { TimeService } from '../utils/time.utils.js';
 import { CacheService } from './cache.service.js';
 import { GitHubStorageService } from './github-storage.service.js';
 
+const TRACKER_SYNC_LOG_PREFIX = '[TrackerSync][github]';
+
+function getErrorMessage(error) {
+    if (error instanceof Error) return error.message;
+    return String(error);
+}
+
 export class GitHubService {
     static parseIssueUrl(url) {
         const match = url.match(/^\/([^/]+)\/([^/]+)\/issues\/(\d+)/);
@@ -131,6 +138,14 @@ export class GitHubService {
         const username = await GitHubService.getCurrentUsername();
         const body = GitHubService.buildTrackerCommentBody(entries, username);
 
+        console.info(TRACKER_SYNC_LOG_PREFIX, 'Preparing tracker comment sync', {
+            owner,
+            repo,
+            issueNumber,
+            entryCount: entries.length,
+            cachedCommentId: cachedCommentId ?? null,
+        });
+
         // Try cached comment ID first — verify ownership before patching
         if (cachedCommentId) {
             try {
@@ -138,6 +153,12 @@ export class GitHubService {
                     `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/issues/comments/${cachedCommentId}`,
                 );
                 if (existing.user?.login === username && matchesTrackerMarker(existing.body || '', username)) {
+                    console.info(TRACKER_SYNC_LOG_PREFIX, 'Updating tracker comment via cached comment id', {
+                        owner,
+                        repo,
+                        issueNumber,
+                        commentId: cachedCommentId,
+                    });
                     const result = await GitHubService.apiRequest(
                         `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/issues/comments/${cachedCommentId}`,
                         { method: 'PATCH', body: JSON.stringify({ body }) },
@@ -145,7 +166,14 @@ export class GitHubService {
                     return { comment: result, commentId: result.id };
                 }
                 // Cached comment belongs to different user, search for own comment
-            } catch (_e) {
+            } catch (error) {
+                console.warn(TRACKER_SYNC_LOG_PREFIX, 'Cached comment lookup failed; falling back to search', {
+                    owner,
+                    repo,
+                    issueNumber,
+                    commentId: cachedCommentId,
+                    error: getErrorMessage(error),
+                });
                 // Cached comment ID failed, fall through to search
             }
         }
@@ -154,17 +182,35 @@ export class GitHubService {
         const existing = await GitHubService.findTrackerComment(owner, repo, issueNumber, username);
         if (existing && existing.user?.login === username) {
             try {
+                console.info(TRACKER_SYNC_LOG_PREFIX, 'Updating tracker comment after search', {
+                    owner,
+                    repo,
+                    issueNumber,
+                    commentId: existing.id,
+                });
                 const result = await GitHubService.apiRequest(
                     `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/issues/comments/${existing.id}`,
                     { method: 'PATCH', body: JSON.stringify({ body }) },
                 );
                 return { comment: result, commentId: result.id };
             } catch (e) {
-                console.error('Failed to update existing tracker comment:', e);
+                console.error(TRACKER_SYNC_LOG_PREFIX, 'Failed to update existing tracker comment', {
+                    owner,
+                    repo,
+                    issueNumber,
+                    commentId: existing.id,
+                    error: getErrorMessage(e),
+                });
             }
         }
 
         // Create new comment
+        console.info(TRACKER_SYNC_LOG_PREFIX, 'Creating new tracker comment', {
+            owner,
+            repo,
+            issueNumber,
+            entryCount: entries.length,
+        });
         const result = await GitHubService.apiRequest(
             `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/issues/${issueNumber}/comments`,
             { method: 'POST', body: JSON.stringify({ body }) },

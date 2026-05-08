@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'preact/hooks';
+import { useEffect, useMemo, useState } from 'preact/hooks';
 import { EditTimeModal } from '../../components/EditTimeModal.jsx';
 import { Modal } from '../../components/Modal.jsx';
 import { SearchInput } from '../../components/SearchInput.jsx';
@@ -20,6 +20,7 @@ export function RepoDetailView({ repo, repoDetails, userMode, onBack }) {
     const [filterText, setFilterText] = useState('');
     const [editingSession, setEditingSession] = useState(null);
     const [deletingSession, setDeletingSession] = useState(null);
+    const [sessionStatus, setSessionStatus] = useState(null);
     const [detailTab, setDetailTab] = useState('issues');
 
     const details = repoDetails || {};
@@ -53,6 +54,12 @@ export function RepoDetailView({ repo, repoDetails, userMode, onBack }) {
         { id: 'contributors', label: 'Contributors' },
     ];
     const activeTabIndex = tabOptions.findIndex((t) => t.id === detailTab);
+
+    useEffect(() => {
+        if (!sessionStatus) return;
+        const timeoutId = setTimeout(() => setSessionStatus(null), 5000);
+        return () => clearTimeout(timeoutId);
+    }, [sessionStatus]);
 
     return (
         <div className="flex flex-col h-full">
@@ -134,12 +141,17 @@ export function RepoDetailView({ repo, repoDetails, userMode, onBack }) {
 
                 {/* Search (issues tab only) */}
                 {detailTab === 'issues' && (
-                    <SearchInput
-                        placeholder="Filter issues..."
-                        value={filterText}
-                        onInput={setFilterText}
-                        className=""
-                    />
+                    <>
+                        <SearchInput
+                            placeholder="Filter issues..."
+                            value={filterText}
+                            onInput={setFilterText}
+                            className=""
+                        />
+                        {sessionStatus && (
+                            <div className="text-[11px] mt-1.5 text-center text-danger-text">{sessionStatus}</div>
+                        )}
+                    </>
                 )}
             </div>
 
@@ -284,13 +296,22 @@ export function RepoDetailView({ repo, repoDetails, userMode, onBack }) {
                     seconds={editingSession.seconds}
                     onCancel={() => setEditingSession(null)}
                     onConfirm={async (newSeconds) => {
-                        await TimerService.updateSessionTime(
+                        const result = await TimerService.updateSessionTime(
                             editingSession.issueUrl,
                             editingSession.date,
                             editingSession.seconds,
                             newSeconds,
                         );
+                        if (!result.ok) {
+                            setSessionStatus('Could not update the session. Try again.');
+                            return;
+                        }
                         setEditingSession(null);
+                        setSessionStatus(
+                            result.syncStatus === 'failed'
+                                ? `Saved locally, comment sync failed: ${result.syncError || 'unknown error'}`
+                                : null,
+                        );
                     }}
                 />
             )}
@@ -303,12 +324,23 @@ export function RepoDetailView({ repo, repoDetails, userMode, onBack }) {
                     confirmVariant="danger"
                     onCancel={() => setDeletingSession(null)}
                     onConfirm={async () => {
-                        await TimerService.deleteSession(
-                            deletingSession.issueUrl,
-                            deletingSession.date,
-                            deletingSession.seconds,
-                        );
+                        const pendingDelete = deletingSession;
                         setDeletingSession(null);
+
+                        const result = await TimerService.deleteSession(
+                            pendingDelete.issueUrl,
+                            pendingDelete.date,
+                            pendingDelete.seconds,
+                        );
+                        if (!result.ok) {
+                            setSessionStatus('Could not delete the session. Try again.');
+                            return;
+                        }
+                        setSessionStatus(
+                            result.syncStatus === 'failed'
+                                ? `Saved locally, comment sync failed: ${result.syncError || 'unknown error'}`
+                                : null,
+                        );
                     }}
                 />
             )}
