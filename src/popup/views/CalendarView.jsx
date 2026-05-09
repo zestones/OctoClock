@@ -196,13 +196,15 @@ export function CalendarView({ tracked }) {
                                 <button
                                     type="button"
                                     key={day}
-                                    className={`h-7 w-full flex items-center justify-center rounded-md text-[11px] transition-all ${heatLevel > 0
+                                    className={`h-7 w-full flex items-center justify-center rounded-md text-[11px] transition-all ${
+                                        heatLevel > 0
                                             ? `day-heat-${heatLevel} font-medium`
                                             : today
-                                                ? 'text-primary font-medium bg-raised/50'
-                                                : 'text-faint'
-                                        } ${selected ? `ring-2 ring-accent font-semibold ${heatLevel > 0 ? 'text-white' : 'text-accent'}` : heatLevel > 0 ? `${heatLevel >= 3 ? 'text-white' : 'text-success-text'} hover:brightness-110` : ''} ${hasTracked || today ? 'cursor-pointer' : ''
-                                        }`}
+                                              ? 'text-primary font-medium bg-raised/50'
+                                              : 'text-faint'
+                                    } ${selected ? `ring-2 ring-accent font-semibold ${heatLevel > 0 ? 'text-white' : 'text-accent'}` : heatLevel > 0 ? `${heatLevel >= 3 ? 'text-white' : 'text-success-text'} hover:brightness-110` : ''} ${
+                                        hasTracked || today ? 'cursor-pointer' : ''
+                                    }`}
                                     onClick={() => (hasTracked || today) && selectDay(day)}
                                     tabIndex={hasTracked || today ? 0 : -1}
                                 >

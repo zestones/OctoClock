@@ -123,10 +123,11 @@ export function ContributorsView({ repoDetails }) {
                             <div key={contrib.user}>
                                 <button
                                     type="button"
-                                    className={`w-full text-left rounded-xl p-2.5 cursor-pointer transition-all border ${isOpen
+                                    className={`w-full text-left rounded-xl p-2.5 cursor-pointer transition-all border ${
+                                        isOpen
                                             ? 'bg-surface border-border-default shadow-sm'
                                             : 'bg-base border-transparent hover:bg-surface hover:border-border-subtle'
-                                        }`}
+                                    }`}
                                     onClick={() => setExpandedUser(isOpen ? null : contrib.user)}
                                 >
                                     {/* Name + time row */}
