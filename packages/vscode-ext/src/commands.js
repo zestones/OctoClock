@@ -10,6 +10,23 @@ import { GitHubService } from '../../core/src/services/github.service.js';
 import { StorageService } from '../../core/src/services/storage.service.js';
 import { TimerService } from '../../core/src/services/timer.service.js';
 import { STORAGE_KEYS } from '../../core/src/utils/constants.utils.js';
+import { TimeService } from '../../core/src/utils/time.utils.js';
+
+/**
+ * Parses a "HH:MM:SS" string into total seconds.
+ * Returns null if the format is invalid or the resulting duration is zero.
+ *
+ * Exported for unit testing.
+ *
+ * @param {string} raw
+ * @returns {number | null}
+ */
+export function parseDuration(raw) {
+    const match = raw.trim().match(/^(\d{1,2}):(\d{2}):(\d{2})$/);
+    if (!match) return null;
+    const total = Number(match[1]) * 3600 + Number(match[2]) * 60 + Number(match[3]);
+    return total > 0 ? total : null;
+}
 
 /**
  * Converts a raw user-supplied string into the path form that internal
@@ -127,6 +144,71 @@ export function registerCommands(context) {
             } catch (error) {
                 vscode.window.showErrorMessage(
                     `OctoClock: Sync failed — ${error instanceof Error ? error.message : String(error)}`,
+                );
+            }
+        }),
+
+        // ----------------------------------------------------------------
+        // octoclock.deleteSession
+        // Remove a single session from TRACKED_TIMES via the tree-view
+        // context menu. The item argument is the SessionNode that was
+        // right-clicked — VS Code passes it automatically.
+        // ----------------------------------------------------------------
+        vscode.commands.registerCommand('octoclock.deleteSession', async (item) => {
+            if (!item?.issueUrl || !item?.date || item?.seconds === undefined) return;
+            try {
+                const result = await TimerService.deleteSession(item.issueUrl, item.date, item.seconds);
+                if (result.ok) {
+                    vscode.window.showInformationMessage('OctoClock: Session deleted');
+                } else {
+                    vscode.window.showWarningMessage('OctoClock: Session not found');
+                }
+            } catch (error) {
+                vscode.window.showErrorMessage(
+                    `OctoClock: ${error instanceof Error ? error.message : String(error)}`,
+                );
+            }
+        }),
+
+        // ----------------------------------------------------------------
+        // octoclock.editSession
+        // Update a single session duration via the tree-view context menu.
+        // Pre-fills the input box with the current HH:MM:SS value.
+        // ----------------------------------------------------------------
+        vscode.commands.registerCommand('octoclock.editSession', async (item) => {
+            if (!item?.issueUrl || !item?.date || item?.seconds === undefined) return;
+            const raw = await vscode.window.showInputBox({
+                prompt: 'Enter new duration (HH:MM:SS)',
+                value: TimeService.formatTime(item.seconds),
+                validateInput(v) {
+                    return parseDuration(v) === null
+                        ? 'Expected HH:MM:SS format with duration greater than zero'
+                        : null;
+                },
+            });
+            if (!raw) return;
+            const newSeconds = parseDuration(raw);
+            if (newSeconds === null) {
+                vscode.window.showErrorMessage(
+                    'OctoClock: Invalid duration — use HH:MM:SS format',
+                );
+                return;
+            }
+            try {
+                const result = await TimerService.updateSessionTime(
+                    item.issueUrl,
+                    item.date,
+                    item.seconds,
+                    newSeconds,
+                );
+                if (result.ok) {
+                    vscode.window.showInformationMessage('OctoClock: Session updated');
+                } else {
+                    vscode.window.showWarningMessage('OctoClock: Session not found');
+                }
+            } catch (error) {
+                vscode.window.showErrorMessage(
+                    `OctoClock: ${error instanceof Error ? error.message : String(error)}`,
                 );
             }
         }),

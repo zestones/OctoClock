@@ -19,7 +19,7 @@ import { GitHubService } from '../../core/src/services/github.service.js';
 import { StorageService } from '../../core/src/services/storage.service.js';
 import { TimerService } from '../../core/src/services/timer.service.js';
 import { STORAGE_KEYS } from '../../core/src/utils/constants.utils.js';
-import { normalizeIssueUrl, registerCommands } from '../src/commands.js';
+import { normalizeIssueUrl, parseDuration, registerCommands } from '../src/commands.js';
 
 // ---------------------------------------------------------------------------
 // In-memory storage for tests
@@ -94,6 +94,10 @@ describe('OctoClock commands', () => {
     /** @type {any} */
     let syncCommentSpy;
     /** @type {any} */
+    let deleteSessionSpy;
+    /** @type {any} */
+    let updateSessionTimeSpy;
+    /** @type {any} */
     const win = vscode.window;
 
     beforeEach(() => {
@@ -109,6 +113,10 @@ describe('OctoClock commands', () => {
         stopTimerSpy.mockResolvedValue({ issueUrl: '/o/r/issues/1', totalTime: 30, isRunning: false });
         syncCommentSpy = vi.spyOn(TimerService, 'syncComment');
         syncCommentSpy.mockResolvedValue({ commentId: 7 });
+        deleteSessionSpy = vi.spyOn(TimerService, 'deleteSession');
+        deleteSessionSpy.mockResolvedValue({ ok: true, syncStatus: 'synced', syncError: null });
+        updateSessionTimeSpy = vi.spyOn(TimerService, 'updateSessionTime');
+        updateSessionTimeSpy.mockResolvedValue({ ok: true, syncStatus: 'synced', syncError: null });
 
         registerCommands(makeContext());
     });
@@ -265,6 +273,197 @@ describe('OctoClock commands', () => {
             expect(win.showErrorMessage).toHaveBeenCalledWith(
                 expect.stringContaining('rate limited'),
             );
+        });
+    });
+});
+
+// ---------------------------------------------------------------------------
+// parseDuration — unit tests
+// ---------------------------------------------------------------------------
+describe('parseDuration', () => {
+    it('parses a standard HH:MM:SS string', () => {
+        expect(parseDuration('01:30:00')).toBe(5400);
+    });
+
+    it('parses single-digit hours', () => {
+        expect(parseDuration('0:01:30')).toBe(90);
+    });
+
+    it('returns null for zero duration', () => {
+        expect(parseDuration('00:00:00')).toBeNull();
+    });
+
+    it('returns null for non-numeric input', () => {
+        expect(parseDuration('1h30m')).toBeNull();
+    });
+
+    it('returns null for an empty string', () => {
+        expect(parseDuration('')).toBeNull();
+    });
+
+    it('trims surrounding whitespace before parsing', () => {
+        expect(parseDuration('  00:45:00  ')).toBe(2700);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// octoclock.deleteSession / octoclock.editSession
+// ---------------------------------------------------------------------------
+describe('OctoClock session commands', () => {
+    let storage;
+    /** @type {any} */
+    let deleteSessionSpy2;
+    /** @type {any} */
+    let updateSessionTimeSpy2;
+    /** @type {any} */
+    const win2 = vscode.window;
+
+    /** A minimal SessionNode-like object that commands receive from VS Code */
+    const makeItem = (overrides = {}) => ({
+        issueUrl: '/owner/repo/issues/7',
+        date: '2025-05-09',
+        seconds: 3600,
+        ...overrides,
+    });
+
+    beforeEach(() => {
+        storage = new InMemoryStorage();
+        StorageService.setAdapter(storage);
+        vi.clearAllMocks();
+
+        deleteSessionSpy2 = vi.spyOn(TimerService, 'deleteSession');
+        deleteSessionSpy2.mockResolvedValue({ ok: true, syncStatus: 'synced', syncError: null });
+        updateSessionTimeSpy2 = vi.spyOn(TimerService, 'updateSessionTime');
+        updateSessionTimeSpy2.mockResolvedValue({ ok: true, syncStatus: 'synced', syncError: null });
+
+        registerCommands(makeContext());
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
+        StorageService.setAdapter(null);
+    });
+
+    // -----------------------------------------------------------------------
+    // octoclock.deleteSession
+    // -----------------------------------------------------------------------
+    describe('octoclock.deleteSession', () => {
+        it('is registered', () => {
+            expect(vscode.commands.registerCommand).toHaveBeenCalledWith(
+                'octoclock.deleteSession',
+                expect.any(Function),
+            );
+        });
+
+        it('calls TimerService.deleteSession with issueUrl, date, seconds', async () => {
+            const item = makeItem();
+            await getHandler('octoclock.deleteSession')(item);
+
+            expect(deleteSessionSpy2).toHaveBeenCalledWith(
+                '/owner/repo/issues/7',
+                '2025-05-09',
+                3600,
+            );
+            expect(win2.showInformationMessage).toHaveBeenCalledWith(
+                expect.stringContaining('deleted'),
+            );
+        });
+
+        it('shows a warning when the session is not found (ok: false)', async () => {
+            deleteSessionSpy2.mockResolvedValue({ ok: false, syncStatus: 'skipped', syncError: null });
+            await getHandler('octoclock.deleteSession')(makeItem());
+
+            expect(win2.showWarningMessage).toHaveBeenCalledWith(
+                expect.stringContaining('not found'),
+            );
+        });
+
+        it('shows an error when TimerService.deleteSession throws', async () => {
+            deleteSessionSpy2.mockRejectedValue(new Error('disk full'));
+            await getHandler('octoclock.deleteSession')(makeItem());
+
+            expect(win2.showErrorMessage).toHaveBeenCalledWith(
+                expect.stringContaining('disk full'),
+            );
+        });
+
+        it('returns early when item is undefined', async () => {
+            await getHandler('octoclock.deleteSession')(undefined);
+            expect(deleteSessionSpy2).not.toHaveBeenCalled();
+        });
+
+        it('returns early when item is missing required properties', async () => {
+            await getHandler('octoclock.deleteSession')({ issueUrl: '/o/r/issues/1' });
+            expect(deleteSessionSpy2).not.toHaveBeenCalled();
+        });
+    });
+
+    // -----------------------------------------------------------------------
+    // octoclock.editSession
+    // -----------------------------------------------------------------------
+    describe('octoclock.editSession', () => {
+        it('is registered', () => {
+            expect(vscode.commands.registerCommand).toHaveBeenCalledWith(
+                'octoclock.editSession',
+                expect.any(Function),
+            );
+        });
+
+        it('calls TimerService.updateSessionTime with parsed newSeconds', async () => {
+            win2.showInputBox.mockResolvedValue('02:00:00'); // 7200 seconds
+            await getHandler('octoclock.editSession')(makeItem());
+
+            expect(updateSessionTimeSpy2).toHaveBeenCalledWith(
+                '/owner/repo/issues/7',
+                '2025-05-09',
+                3600,
+                7200,
+            );
+            expect(win2.showInformationMessage).toHaveBeenCalledWith(
+                expect.stringContaining('updated'),
+            );
+        });
+
+        it('shows a warning when the session is not found (ok: false)', async () => {
+            win2.showInputBox.mockResolvedValue('00:30:00');
+            updateSessionTimeSpy2.mockResolvedValue({ ok: false, syncStatus: 'skipped', syncError: null });
+            await getHandler('octoclock.editSession')(makeItem());
+
+            expect(win2.showWarningMessage).toHaveBeenCalledWith(
+                expect.stringContaining('not found'),
+            );
+        });
+
+        it('shows an error for an invalid duration string', async () => {
+            win2.showInputBox.mockResolvedValue('not-a-duration');
+            await getHandler('octoclock.editSession')(makeItem());
+
+            expect(updateSessionTimeSpy2).not.toHaveBeenCalled();
+            expect(win2.showErrorMessage).toHaveBeenCalledWith(
+                expect.stringContaining('Invalid duration'),
+            );
+        });
+
+        it('returns early when user cancels the input box (undefined)', async () => {
+            win2.showInputBox.mockResolvedValue(undefined);
+            await getHandler('octoclock.editSession')(makeItem());
+
+            expect(updateSessionTimeSpy2).not.toHaveBeenCalled();
+        });
+
+        it('shows an error when TimerService.updateSessionTime throws', async () => {
+            win2.showInputBox.mockResolvedValue('00:10:00');
+            updateSessionTimeSpy2.mockRejectedValue(new Error('write failed'));
+            await getHandler('octoclock.editSession')(makeItem());
+
+            expect(win2.showErrorMessage).toHaveBeenCalledWith(
+                expect.stringContaining('write failed'),
+            );
+        });
+
+        it('returns early when item is undefined', async () => {
+            await getHandler('octoclock.editSession')(undefined);
+            expect(win2.showInputBox).not.toHaveBeenCalled();
         });
     });
 });

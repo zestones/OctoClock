@@ -39,8 +39,32 @@
                 "command": "octoclock.syncNow",
                 "title": "Sync tracker comments now",
                 "category": "OctoClock"
+            },
+            {
+                "command": "octoclock.deleteSession",
+                "title": "Delete session",
+                "category": "OctoClock"
+            },
+            {
+                "command": "octoclock.editSession",
+                "title": "Edit session duration",
+                "category": "OctoClock"
             }
-        ]
+        ],
+        "menus": {
+            "view/item/context": [
+                {
+                    "command": "octoclock.deleteSession",
+                    "when": "viewItem == octoclock.session",
+                    "group": "octoclock@1"
+                },
+                {
+                    "command": "octoclock.editSession",
+                    "when": "viewItem == octoclock.session",
+                    "group": "octoclock@2"
+                }
+            ]
+        }
     },
     "dependencies": {
         "@octoclock/core": "workspace:*"
