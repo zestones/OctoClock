@@ -29,7 +29,9 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.6",
+    "@testing-library/preact": "^3.2.4",
     "@types/chrome": "^0.1.37",
+    "happy-dom": "^20.9.0",
     "nodemon": "^3.1.10",
     "typescript": "^5.9.3",
     "vite": "^6.3.5",

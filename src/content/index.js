@@ -2,6 +2,7 @@
 
 import { ChromeStorageAdapter } from '../../packages/browser-ext/src/adapters/chrome-storage.adapter.js';
 import { StorageService } from '../services/storage.service.js';
+import { storageEvents } from '../services/storage-events.js';
 import {
     CONTAINER_CHECK_INTERVAL_MS,
     CONTAINER_CHECK_MAX_ATTEMPTS,
@@ -12,7 +13,7 @@ import { isIssuePage } from './helpers.js';
 import { injectTimerButton, resetInjectedFlag } from './injectTimerButton.js';
 
 // TODO(#14): move to a dedicated browser bootstrap module
-StorageService.setAdapter(new ChromeStorageAdapter());
+StorageService.setAdapter(new ChromeStorageAdapter(storageEvents));
 
 function debounce(fn, delay) {
     let timeoutId;
@@ -40,15 +41,18 @@ if (isIssuePage()) {
     checkContainer();
 }
 
-// React to storage changes for timer state (replaces polling)
-chrome.storage.onChanged.addListener((changes, area) => {
-    if (area !== 'local') return;
-    if (changes[STORAGE_KEYS.ACTIVE_ISSUE] || changes[STORAGE_KEYS.START_TIME]) {
-        if (isIssuePage()) {
-            const buttonExists = document.querySelector('#track-time-btn');
-            if (!buttonExists) {
-                checkContainer();
-            }
+// React to storage changes for timer state — bridged from popup/background via
+// the ChromeStorageAdapter's chrome.storage.onChanged subscription.
+storageEvents.subscribe((event) => {
+    const timerKeys = [STORAGE_KEYS.ACTIVE_ISSUE, STORAGE_KEYS.START_TIME];
+    const affected =
+        (event.type === 'set' && timerKeys.includes(event.key)) ||
+        (event.type === 'remove' && timerKeys.includes(event.key)) ||
+        (event.type === 'removeMultiple' && event.keys.some((k) => timerKeys.includes(k)));
+    if (affected && isIssuePage()) {
+        const buttonExists = document.querySelector('#track-time-btn');
+        if (!buttonExists) {
+            checkContainer();
         }
     }
 });

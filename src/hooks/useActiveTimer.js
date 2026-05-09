@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'preact/hooks';
 import { StorageService } from '../services/storage.service.js';
+import { storageEvents } from '../services/storage-events.js';
 import { TimerService } from '../services/timer.service.js';
 import { STORAGE_KEYS } from '../utils/constants.utils.js';
 
-export function useActiveTimer() {
+/**
+ * @param {import('../../packages/core/src/ports/storage-events.port.js').StorageEventsPort} [eventsPort]
+ */
+export function useActiveTimer(eventsPort = storageEvents) {
     const [activeIssue, setActiveIssue] = useState(null);
     const [startTime, setStartTime] = useState(null);
 
@@ -18,18 +22,20 @@ export function useActiveTimer() {
         };
         load();
 
-        const listener = (changes, area) => {
-            if (area !== 'local') return;
-            if (changes[STORAGE_KEYS.ACTIVE_ISSUE]) {
-                setActiveIssue(changes[STORAGE_KEYS.ACTIVE_ISSUE].newValue ?? null);
+        const unsubscribe = eventsPort.subscribe((event) => {
+            if (event.type === 'set') {
+                if (event.key === STORAGE_KEYS.ACTIVE_ISSUE) setActiveIssue(event.value ?? null);
+                if (event.key === STORAGE_KEYS.START_TIME) setStartTime(event.value ?? null);
+            } else if (event.type === 'remove') {
+                if (event.key === STORAGE_KEYS.ACTIVE_ISSUE) setActiveIssue(null);
+                if (event.key === STORAGE_KEYS.START_TIME) setStartTime(null);
+            } else if (event.type === 'removeMultiple') {
+                if (event.keys.includes(STORAGE_KEYS.ACTIVE_ISSUE)) setActiveIssue(null);
+                if (event.keys.includes(STORAGE_KEYS.START_TIME)) setStartTime(null);
             }
-            if (changes[STORAGE_KEYS.START_TIME]) {
-                setStartTime(changes[STORAGE_KEYS.START_TIME].newValue ?? null);
-            }
-        };
-        chrome.storage.onChanged.addListener(listener);
-        return () => chrome.storage.onChanged.removeListener(listener);
-    }, []);
+        });
+        return unsubscribe;
+    }, [eventsPort]);
 
     const isActive = (issueUrl) =>
         issueUrl === activeIssue && startTime && !Number.isNaN(new Date(startTime).getTime());
