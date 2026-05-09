@@ -12,6 +12,7 @@ import { VSCodeMessagingAdapter } from './adapters/vscode-messaging.adapter.js';
 import { VSCodeStorageAdapter } from './adapters/vscode-storage.adapter.js';
 import { registerCommands } from './commands.js';
 import { createStatusBarController } from './status-bar.js';
+import { RepoTreeProvider } from './tree-view.js';
 
 /**
  * Called by VS Code when the extension is activated.
@@ -41,6 +42,12 @@ export function activate(context) {
 
     const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
     context.subscriptions.push(createStatusBarController(statusBarItem, storageEvents));
+
+    const treeProvider = new RepoTreeProvider(storageEvents);
+    context.subscriptions.push(
+        vscode.window.createTreeView('octoclock.repoTree', { treeDataProvider: treeProvider }),
+        treeProvider,
+    );
 
     console.log('OctoClock: activated');
 }

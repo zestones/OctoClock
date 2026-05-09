@@ -16,6 +16,14 @@
     ],
     "main": "./dist/extension.js",
     "contributes": {
+        "views": {
+            "explorer": [
+                {
+                    "id": "octoclock.repoTree",
+                    "name": "OctoClock"
+                }
+            ]
+        },
         "commands": [
             {
                 "command": "octoclock.startTimer",
