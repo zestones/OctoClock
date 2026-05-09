@@ -16,7 +16,23 @@
     ],
     "main": "./dist/extension.js",
     "contributes": {
-        "commands": []
+        "commands": [
+            {
+                "command": "octoclock.startTimer",
+                "title": "Start timer for issue",
+                "category": "OctoClock"
+            },
+            {
+                "command": "octoclock.stopTimer",
+                "title": "Stop current timer",
+                "category": "OctoClock"
+            },
+            {
+                "command": "octoclock.syncNow",
+                "title": "Sync tracker comments now",
+                "category": "OctoClock"
+            }
+        ]
     },
     "dependencies": {
         "@octoclock/core": "workspace:*"

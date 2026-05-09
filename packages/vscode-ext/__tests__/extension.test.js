@@ -1,11 +1,26 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { activate, deactivate } from '../src/extension.js';
+
+// commands.js imports 'vscode' — provide a minimal mock so activate() can run
+// in the test environment without the VS Code extension host.
+vi.mock('vscode', () => ({
+    commands: {
+        registerCommand: vi.fn(() => ({ dispose: vi.fn() })),
+    },
+    window: {
+        showInputBox: vi.fn(),
+        showErrorMessage: vi.fn(),
+        showInformationMessage: vi.fn(),
+        showWarningMessage: vi.fn(),
+    },
+}));
 
 const makeContext = (overrides = {}) =>
     /** @type {import('vscode').ExtensionContext} */(
         /** @type {any} */ ({
         globalState: { get: () => undefined, update: async () => { } },
         secrets: { get: async () => undefined, store: async () => { }, delete: async () => { } },
+        subscriptions: [],
         ...overrides,
     })
 );
