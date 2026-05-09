@@ -18,7 +18,8 @@
     "lint": "biome lint ./src",
     "format": "biome format --write ./src",
     "check": "biome check --write ./src",
-    "validate": "npm run typecheck && biome check ./src"
+    "validate": "npm run typecheck && biome check ./src",
+    "test": "vitest run"
   },
   "dependencies": {
     "@preact/preset-vite": "^2.5.0",
@@ -33,6 +34,7 @@
     "typescript": "^5.9.3",
     "vite": "^6.3.5",
     "vite-plugin-css-injected-by-js": "^3.5.2",
-    "vite-plugin-static-copy": "^2.3.1"
+    "vite-plugin-static-copy": "^2.3.1",
+    "vitest": "^4.1.5"
   }
 }

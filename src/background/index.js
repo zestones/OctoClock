@@ -1,10 +1,15 @@
 // background/index.js
 
+import { ChromeStorageAdapter } from '../../packages/browser-ext/src/adapters/chrome-storage.adapter.js';
 import { CacheService } from '../services/cache.service.js';
 import { GitHubService } from '../services/github.service.js';
 import { GitHubStorageService } from '../services/github-storage.service.js';
 import { PinnedReposService } from '../services/pinned-repos.service.js';
 import { StorageService } from '../services/storage.service.js';
+
+// TODO(#14): move to a dedicated browser bootstrap module
+StorageService.setAdapter(new ChromeStorageAdapter());
+
 import { CACHE_REFRESH_INTERVAL, SCHEMA_VERSION, STORAGE_KEYS } from '../utils/constants.utils.js';
 
 const trackerSyncQueues = new Map();
