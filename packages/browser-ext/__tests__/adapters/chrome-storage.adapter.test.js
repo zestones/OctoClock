@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { StorageEventsPort } from '../../../core/src/ports/storage-events.port.js';
 import { ChromeStorageAdapter } from '../../src/adapters/chrome-storage.adapter.js';
 
 // ---------------------------------------------------------------------------
-// Fake chrome.storage.local
+// Fake chrome.storage.local + onChanged
 // ---------------------------------------------------------------------------
 function makeFakeStorage() {
     const store = {};
@@ -33,12 +34,21 @@ function makeFakeStorage() {
 }
 
 let fakeStorage;
+let fakeEvents;
 let adapter;
 
 beforeEach(() => {
     fakeStorage = makeFakeStorage();
-    vi.stubGlobal('chrome', { storage: { local: fakeStorage } });
-    adapter = new ChromeStorageAdapter();
+    fakeEvents = new StorageEventsPort();
+    // The fake chrome has no real onChanged; stub it as a no-op so the
+    // constructor's addListener call doesn't throw.
+    vi.stubGlobal('chrome', {
+        storage: {
+            local: fakeStorage,
+            onChanged: { addListener: vi.fn(), removeListener: vi.fn() },
+        },
+    });
+    adapter = new ChromeStorageAdapter(fakeEvents);
 });
 
 // ---------------------------------------------------------------------------
@@ -63,6 +73,16 @@ describe('set', () => {
         await adapter.set('count', 42);
         expect(await adapter.get('count')).toBe(42);
     });
+
+    it('emits exactly { type: "set", key, value }', async () => {
+        const listener = vi.fn();
+        fakeEvents.subscribe(listener);
+
+        await adapter.set('theme', 'dark');
+
+        expect(listener).toHaveBeenCalledOnce();
+        expect(listener).toHaveBeenCalledWith({ type: 'set', key: 'theme', value: 'dark' });
+    });
 });
 
 // ---------------------------------------------------------------------------
@@ -73,6 +93,16 @@ describe('remove', () => {
         fakeStorage.store.x = 1;
         await adapter.remove('x');
         expect(await adapter.get('x')).toBeNull();
+    });
+
+    it('emits exactly { type: "remove", key }', async () => {
+        const listener = vi.fn();
+        fakeEvents.subscribe(listener);
+
+        await adapter.remove('activeIssue');
+
+        expect(listener).toHaveBeenCalledOnce();
+        expect(listener).toHaveBeenCalledWith({ type: 'remove', key: 'activeIssue' });
     });
 });
 
@@ -105,5 +135,18 @@ describe('removeMultiple', () => {
         // Chrome remove was called exactly once (not twice)
         expect(fakeStorage.remove).toHaveBeenCalledTimes(1);
         expect(fakeStorage.remove).toHaveBeenCalledWith(['k1', 'k2']);
+    });
+
+    it('emits one { type: "removeMultiple", keys } event — not two separate remove events', async () => {
+        const listener = vi.fn();
+        fakeEvents.subscribe(listener);
+
+        await adapter.removeMultiple(['activeIssue', 'startTime']);
+
+        expect(listener).toHaveBeenCalledOnce();
+        expect(listener).toHaveBeenCalledWith({
+            type: 'removeMultiple',
+            keys: ['activeIssue', 'startTime'],
+        });
     });
 });

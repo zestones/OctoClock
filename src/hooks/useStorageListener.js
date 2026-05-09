@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { StorageService } from '../services/storage.service.js';
+import { storageEvents } from '../services/storage-events.js';
 
-export function useStorageListener(key, initialValue = null) {
+/**
+ * @param {string} key
+ * @param {any} [initialValue]
+ * @param {import('../../packages/core/src/ports/storage-events.port.js').StorageEventsPort} [eventsPort]
+ */
+export function useStorageListener(key, initialValue = null, eventsPort = storageEvents) {
     const [data, setData] = useState(initialValue);
     const initialRef = useRef(initialValue);
 
@@ -13,15 +19,18 @@ export function useStorageListener(key, initialValue = null) {
 
         fetchData();
 
-        const listener = (changes, area) => {
-            if (area === 'local' && changes[key]) {
-                setData(changes[key].newValue ?? initialRef.current);
+        const unsubscribe = eventsPort.subscribe((event) => {
+            if (event.type === 'set' && event.key === key) {
+                setData(event.value ?? initialRef.current);
+            } else if (event.type === 'remove' && event.key === key) {
+                setData(initialRef.current);
+            } else if (event.type === 'removeMultiple' && event.keys.includes(key)) {
+                setData(initialRef.current);
             }
-        };
-        chrome.storage.onChanged.addListener(listener);
+        });
 
-        return () => chrome.storage.onChanged.removeListener(listener);
-    }, [key]);
+        return unsubscribe;
+    }, [key, eventsPort]);
 
     return data;
 }

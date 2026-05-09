@@ -6,9 +6,10 @@ import { GitHubService } from '../services/github.service.js';
 import { GitHubStorageService } from '../services/github-storage.service.js';
 import { PinnedReposService } from '../services/pinned-repos.service.js';
 import { StorageService } from '../services/storage.service.js';
+import { storageEvents } from '../services/storage-events.js';
 
 // TODO(#14): move to a dedicated browser bootstrap module
-StorageService.setAdapter(new ChromeStorageAdapter());
+StorageService.setAdapter(new ChromeStorageAdapter(storageEvents));
 
 import { CACHE_REFRESH_INTERVAL, SCHEMA_VERSION, STORAGE_KEYS } from '../utils/constants.utils.js';
 
