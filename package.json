@@ -1,34 +1,34 @@
 {
-  "name": "github-time-tracker",
-  "private": true,
-  "version": "1.0.3",
-  "type": "module",
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild"
-    ]
-  },
-  "scripts": {
-    "build:popup": "pnpm --filter @octoclock/browser-ext run build:popup",
-    "build:background": "pnpm --filter @octoclock/browser-ext run build:background",
-    "build:content": "pnpm --filter @octoclock/browser-ext run build:content",
-    "build:vscode": "vite build --config vite.config.vscode.js",
-    "build": "pnpm --filter @octoclock/browser-ext run build",
-    "typecheck": "tsc -p jsconfig.json --noEmit",
-    "lint": "biome lint .",
-    "format": "biome format --write .",
-    "check": "biome check --write .",
-    "validate": "npm run typecheck && biome check .",
-    "test": "vitest run"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "2.4.6",
-    "@testing-library/preact": "^3.2.4",
-    "@types/chrome": "^0.1.37",
-    "@types/vscode": "^1.118.0",
-    "happy-dom": "^20.9.0",
-    "typescript": "^5.9.3",
-    "vite": "^6.3.5",
-    "vitest": "^4.1.5"
-  }
+    "name": "github-time-tracker",
+    "private": true,
+    "version": "1.0.3",
+    "type": "module",
+    "pnpm": {
+        "onlyBuiltDependencies": [
+            "esbuild"
+        ]
+    },
+    "scripts": {
+        "build:popup": "pnpm --filter @octoclock/browser-ext run build:popup",
+        "build:background": "pnpm --filter @octoclock/browser-ext run build:background",
+        "build:content": "pnpm --filter @octoclock/browser-ext run build:content",
+        "build:vscode": "vite build --config vite.config.vscode.js",
+        "build": "pnpm --filter @octoclock/browser-ext run build",
+        "typecheck": "tsc -p jsconfig.json --noEmit",
+        "lint": "biome lint .",
+        "format": "biome format --write .",
+        "check": "biome check --write .",
+        "validate": "npm run typecheck && biome check .",
+        "test": "vitest run"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "2.4.6",
+        "@testing-library/preact": "^3.2.4",
+        "@types/chrome": "^0.1.37",
+        "@types/vscode": "^1.118.0",
+        "happy-dom": "^20.9.0",
+        "typescript": "^5.9.3",
+        "vite": "^6.3.5",
+        "vitest": "^4.1.5"
+    }
 }
