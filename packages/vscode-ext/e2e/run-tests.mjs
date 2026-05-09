@@ -9,9 +9,9 @@
 // The extension must be built before running:
 //   pnpm run build:vscode
 
-import { runTests } from '@vscode/test-electron';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { runTests } from '@vscode/test-electron';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -29,7 +29,7 @@ try {
 
         launchArgs: [
             '--disable-extensions', // only our extension — no interference
-            '--no-sandbox',         // required in some CI / remote-SSH envs
+            '--no-sandbox', // required in some CI / remote-SSH envs
         ],
     });
 } catch (err) {
