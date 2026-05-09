@@ -9,24 +9,17 @@
     ]
   },
   "scripts": {
-    "watch": "nodemon --watch src --ext js,jsx,html,css,json --exec \"npm run build\"",
-    "build:popup": "vite build --config vite.config.popup.js",
-    "build:background": "vite build --config vite.config.background.js",
-    "build:content": "vite build --config vite.config.content.js",
+    "build:popup": "pnpm --filter @octoclock/browser-ext run build:popup",
+    "build:background": "pnpm --filter @octoclock/browser-ext run build:background",
+    "build:content": "pnpm --filter @octoclock/browser-ext run build:content",
     "build:vscode": "vite build --config vite.config.vscode.js",
-    "build": "rm -rf dist && pnpm run build:popup && pnpm run build:background && pnpm run build:content",
+    "build": "pnpm --filter @octoclock/browser-ext run build",
     "typecheck": "tsc -p jsconfig.json --noEmit",
-    "lint": "biome lint ./src",
-    "format": "biome format --write ./src",
-    "check": "biome check --write ./src",
-    "validate": "npm run typecheck && biome check ./src",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "check": "biome check --write .",
+    "validate": "npm run typecheck && biome check .",
     "test": "vitest run"
-  },
-  "dependencies": {
-    "@preact/preset-vite": "^2.5.0",
-    "@tailwindcss/vite": "^4.1.6",
-    "preact": "^10.19.3",
-    "tailwindcss": "^4.1.6"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.6",
@@ -34,11 +27,8 @@
     "@types/chrome": "^0.1.37",
     "@types/vscode": "^1.118.0",
     "happy-dom": "^20.9.0",
-    "nodemon": "^3.1.10",
     "typescript": "^5.9.3",
     "vite": "^6.3.5",
-    "vite-plugin-css-injected-by-js": "^3.5.2",
-    "vite-plugin-static-copy": "^2.3.1",
     "vitest": "^4.1.5"
   }
 }

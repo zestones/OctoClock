@@ -11,8 +11,8 @@
 //     .getMultiple().then() run before any assertion.
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { StorageEventsPort } from '../../core/src/ports/storage-events.port.js';
 import { StoragePort } from '../../core/src/ports/storage.port.js';
+import { StorageEventsPort } from '../../core/src/ports/storage-events.port.js';
 import { StorageService } from '../../core/src/services/storage.service.js';
 import { STORAGE_KEYS } from '../../core/src/utils/constants.utils.js';
 import { createStatusBarController } from '../src/status-bar.js';
@@ -23,11 +23,21 @@ import { createStatusBarController } from '../src/status-bar.js';
 class InMemoryStorage extends StoragePort {
     #store = new Map();
 
-    async get(key) { return this.#store.get(key) ?? null; }
-    async set(key, value) { this.#store.set(key, value); }
-    async remove(key) { this.#store.delete(key); }
-    async getMultiple(keys) { return Object.fromEntries(keys.map((k) => [k, this.#store.get(k) ?? null])); }
-    async removeMultiple(keys) { for (const k of keys) this.#store.delete(k); }
+    async get(key) {
+        return this.#store.get(key) ?? null;
+    }
+    async set(key, value) {
+        this.#store.set(key, value);
+    }
+    async remove(key) {
+        this.#store.delete(key);
+    }
+    async getMultiple(keys) {
+        return Object.fromEntries(keys.map((k) => [k, this.#store.get(k) ?? null]));
+    }
+    async removeMultiple(keys) {
+        for (const k of keys) this.#store.delete(k);
+    }
 }
 
 // ---------------------------------------------------------------------------

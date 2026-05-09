@@ -56,10 +56,7 @@ describe('VSCodeStorageAdapter', () => {
             const token = 'ghp_' + 'a'.repeat(36);
             await adapter.set(STORAGE_KEYS.GITHUB_TOKEN, token);
 
-            expect(secrets.store).toHaveBeenCalledWith(
-                STORAGE_KEYS.GITHUB_TOKEN,
-                JSON.stringify(token),
-            );
+            expect(secrets.store).toHaveBeenCalledWith(STORAGE_KEYS.GITHUB_TOKEN, JSON.stringify(token));
             expect(globalState.update).not.toHaveBeenCalled();
         });
 
@@ -93,10 +90,7 @@ describe('VSCodeStorageAdapter', () => {
         it('set(otherKey) writes to globalState, not secrets', async () => {
             await adapter.set(STORAGE_KEYS.ACTIVE_ISSUE, '/owner/repo/issues/1');
 
-            expect(globalState.update).toHaveBeenCalledWith(
-                STORAGE_KEYS.ACTIVE_ISSUE,
-                '/owner/repo/issues/1',
-            );
+            expect(globalState.update).toHaveBeenCalledWith(STORAGE_KEYS.ACTIVE_ISSUE, '/owner/repo/issues/1');
             expect(secrets.store).not.toHaveBeenCalled();
         });
 

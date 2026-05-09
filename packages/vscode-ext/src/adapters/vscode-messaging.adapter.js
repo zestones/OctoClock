@@ -90,11 +90,9 @@ export class VSCodeMessagingAdapter extends MessagingPort {
     syncComment(issueUrl, owner, repo, issueNumber) {
         const hadPendingJob = this.#queue.has(issueUrl);
 
-        console.info(
-            LOG_PREFIX,
-            hadPendingJob ? 'Queueing tracker sync behind pending job' : 'Queueing tracker sync',
-            { issueUrl },
-        );
+        console.info(LOG_PREFIX, hadPendingJob ? 'Queueing tracker sync behind pending job' : 'Queueing tracker sync', {
+            issueUrl,
+        });
 
         const next = this.#queue.enqueue(issueUrl, () =>
             this.#syncTrackerComment({ issueUrl, owner, repo, issueNumber }),
@@ -102,7 +100,7 @@ export class VSCodeMessagingAdapter extends MessagingPort {
 
         next.finally(() => {
             console.info(LOG_PREFIX, 'Tracker sync queue drained for issue', { issueUrl });
-        }).catch(() => { }); // suppress unhandled rejection on the finally-chain
+        }).catch(() => {}); // suppress unhandled rejection on the finally-chain
 
         return next;
     }
@@ -111,11 +109,11 @@ export class VSCodeMessagingAdapter extends MessagingPort {
      * No-op — VS Code has no browser tabs to notify.
      * @param {string} _issueUrl
      */
-    notifyTimerStarted(_issueUrl) { }
+    notifyTimerStarted(_issueUrl) {}
 
     /**
      * No-op — VS Code has no browser tabs to notify.
      * @param {string} _issueUrl
      */
-    notifyTimerStopped(_issueUrl) { }
+    notifyTimerStopped(_issueUrl) {}
 }

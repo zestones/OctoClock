@@ -79,9 +79,18 @@ describe('VSCodeMessagingAdapter', () => {
             const order = [];
 
             mockCreateOrUpdate
-                .mockImplementationOnce(async () => { order.push(1); return { comment: {}, commentId: 10 }; })
-                .mockImplementationOnce(async () => { order.push(2); return { comment: {}, commentId: 11 }; })
-                .mockImplementationOnce(async () => { order.push(3); return { comment: {}, commentId: 12 }; });
+                .mockImplementationOnce(async () => {
+                    order.push(1);
+                    return { comment: {}, commentId: 10 };
+                })
+                .mockImplementationOnce(async () => {
+                    order.push(2);
+                    return { comment: {}, commentId: 11 };
+                })
+                .mockImplementationOnce(async () => {
+                    order.push(3);
+                    return { comment: {}, commentId: 12 };
+                });
 
             // Fire three calls without awaiting the previous — they must still
             // run in FIFO order because they share the same issueUrl key.
@@ -120,9 +129,7 @@ describe('VSCodeMessagingAdapter', () => {
                 .mockResolvedValueOnce({ comment: {}, commentId: 55 });
 
             // First call rejects
-            await expect(
-                adapter.syncComment(ISSUE_URL, OWNER, REPO, ISSUE_NUMBER),
-            ).rejects.toThrow('network error');
+            await expect(adapter.syncComment(ISSUE_URL, OWNER, REPO, ISSUE_NUMBER)).rejects.toThrow('network error');
 
             // Second call should still succeed
             const result = await adapter.syncComment(ISSUE_URL, OWNER, REPO, ISSUE_NUMBER);

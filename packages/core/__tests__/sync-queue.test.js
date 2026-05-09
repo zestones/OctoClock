@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SyncQueue } from '../src/sync-queue.js';
 
 describe('SyncQueue', () => {
@@ -19,7 +19,7 @@ describe('SyncQueue', () => {
 
     it('has() returns true while a job is in progress', async () => {
         /** @type {(value?: unknown) => void} */
-        let resolve = () => { };
+        let resolve = () => {};
         const pending = new Promise((r) => {
             resolve = r;
         });
@@ -106,9 +106,27 @@ describe('SyncQueue', () => {
         const order = [];
 
         // Start a slow job on key 'a'
-        const a = queue.enqueue('a', () => new Promise((r) => setTimeout(() => { order.push('a'); r(); }, DELAY)));
+        const a = queue.enqueue(
+            'a',
+            () =>
+                new Promise((r) =>
+                    setTimeout(() => {
+                        order.push('a');
+                        r();
+                    }, DELAY),
+                ),
+        );
         // Start a fast job on key 'b' — should complete before 'a'
-        const b = queue.enqueue('b', () => new Promise((r) => setTimeout(() => { order.push('b'); r(); }, 1)));
+        const b = queue.enqueue(
+            'b',
+            () =>
+                new Promise((r) =>
+                    setTimeout(() => {
+                        order.push('b');
+                        r();
+                    }, 1),
+                ),
+        );
 
         await Promise.all([a, b]);
 

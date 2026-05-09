@@ -7,21 +7,17 @@
         "module": "ES2022",
         "moduleResolution": "bundler",
         "jsx": "react-jsx",
-        "jsxImportSource": "preact",
-        "paths": {
-            "@/*": [
-                "./src/*"
-            ]
-        }
+        "jsxImportSource": "preact"
     },
     "include": [
-        "src/**/*.js",
-        "src/**/*.jsx",
-        "src/**/*.d.ts",
-        "packages/**/*.js",
-        "popup.jsx"
+        "packages/core/src/**/*.js",
+        "packages/browser-ext/src/**/*.js",
+        "packages/browser-ext/src/**/*.jsx",
+        "packages/browser-ext/src/**/*.d.ts",
+        "packages/vscode-ext/src/**/*.js"
     ],
     "exclude": [
-        "packages/**/dist/**"
+        "**/node_modules/**",
+        "**/dist/**"
     ]
 }

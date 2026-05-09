@@ -32,11 +32,21 @@ import { normalizeIssueUrl, parseDuration, registerCommands } from '../src/comma
 // ---------------------------------------------------------------------------
 class InMemoryStorage extends StoragePort {
     #store = new Map();
-    async get(key) { return this.#store.get(key) ?? null; }
-    async set(key, value) { this.#store.set(key, value); }
-    async remove(key) { this.#store.delete(key); }
-    async getMultiple(keys) { return Object.fromEntries(keys.map((k) => [k, this.#store.get(k) ?? null])); }
-    async removeMultiple(keys) { for (const k of keys) this.#store.delete(k); }
+    async get(key) {
+        return this.#store.get(key) ?? null;
+    }
+    async set(key, value) {
+        this.#store.set(key, value);
+    }
+    async remove(key) {
+        this.#store.delete(key);
+    }
+    async getMultiple(keys) {
+        return Object.fromEntries(keys.map((k) => [k, this.#store.get(k) ?? null]));
+    }
+    async removeMultiple(keys) {
+        for (const k of keys) this.#store.delete(k);
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -47,8 +57,7 @@ function makeContext() {
 }
 
 function getHandler(commandId) {
-    const call = /** @type {any} */ (vscode.commands.registerCommand).mock.calls
-        .find(([id]) => id === commandId);
+    const call = /** @type {any} */ (vscode.commands.registerCommand).mock.calls.find(([id]) => id === commandId);
     if (!call) throw new Error(`Command '${commandId}' was not registered`);
     return call[1];
 }
@@ -58,13 +67,11 @@ function getHandler(commandId) {
 // ---------------------------------------------------------------------------
 describe('normalizeIssueUrl', () => {
     it('accepts a full HTTPS URL', () => {
-        expect(normalizeIssueUrl('https://github.com/owner/repo/issues/42'))
-            .toBe('/owner/repo/issues/42');
+        expect(normalizeIssueUrl('https://github.com/owner/repo/issues/42')).toBe('/owner/repo/issues/42');
     });
 
     it('accepts an HTTP URL', () => {
-        expect(normalizeIssueUrl('http://github.com/owner/repo/issues/1'))
-            .toBe('/owner/repo/issues/1');
+        expect(normalizeIssueUrl('http://github.com/owner/repo/issues/1')).toBe('/owner/repo/issues/1');
     });
 
     it('accepts path form without normalisation needed', () => {
@@ -137,10 +144,7 @@ describe('OctoClock commands', () => {
     // -----------------------------------------------------------------------
     describe('octoclock.startTimer', () => {
         it('is registered', () => {
-            expect(vscode.commands.registerCommand).toHaveBeenCalledWith(
-                'octoclock.startTimer',
-                expect.any(Function),
-            );
+            expect(vscode.commands.registerCommand).toHaveBeenCalledWith('octoclock.startTimer', expect.any(Function));
         });
 
         it('calls TimerService.startTimer with the normalised URL', async () => {
@@ -148,9 +152,7 @@ describe('OctoClock commands', () => {
             await getHandler('octoclock.startTimer')();
 
             expect(startTimerSpy).toHaveBeenCalledWith('/owner/repo/issues/1');
-            expect(win.showInformationMessage).toHaveBeenCalledWith(
-                expect.stringContaining('/owner/repo/issues/1'),
-            );
+            expect(win.showInformationMessage).toHaveBeenCalledWith(expect.stringContaining('/owner/repo/issues/1'));
         });
 
         it('also accepts path-form URLs', async () => {
@@ -188,9 +190,7 @@ describe('OctoClock commands', () => {
             win.showInputBox.mockResolvedValue('/owner/repo/issues/1');
             await getHandler('octoclock.startTimer')();
 
-            expect(win.showErrorMessage).toHaveBeenCalledWith(
-                expect.stringContaining('network failure'),
-            );
+            expect(win.showErrorMessage).toHaveBeenCalledWith(expect.stringContaining('network failure'));
         });
     });
 
@@ -199,10 +199,7 @@ describe('OctoClock commands', () => {
     // -----------------------------------------------------------------------
     describe('octoclock.stopTimer', () => {
         it('is registered', () => {
-            expect(vscode.commands.registerCommand).toHaveBeenCalledWith(
-                'octoclock.stopTimer',
-                expect.any(Function),
-            );
+            expect(vscode.commands.registerCommand).toHaveBeenCalledWith('octoclock.stopTimer', expect.any(Function));
         });
 
         it('calls TimerService.stopTimer with the active issue URL', async () => {
@@ -210,9 +207,7 @@ describe('OctoClock commands', () => {
             await getHandler('octoclock.stopTimer')();
 
             expect(stopTimerSpy).toHaveBeenCalledWith('/owner/repo/issues/2');
-            expect(win.showInformationMessage).toHaveBeenCalledWith(
-                expect.stringContaining('/owner/repo/issues/2'),
-            );
+            expect(win.showInformationMessage).toHaveBeenCalledWith(expect.stringContaining('/owner/repo/issues/2'));
         });
 
         it('shows an info message when no timer is running', async () => {
@@ -220,9 +215,7 @@ describe('OctoClock commands', () => {
             await getHandler('octoclock.stopTimer')();
 
             expect(stopTimerSpy).not.toHaveBeenCalled();
-            expect(win.showInformationMessage).toHaveBeenCalledWith(
-                expect.stringContaining('No timer'),
-            );
+            expect(win.showInformationMessage).toHaveBeenCalledWith(expect.stringContaining('No timer'));
         });
 
         it('shows an error when TimerService.stopTimer throws', async () => {
@@ -230,9 +223,7 @@ describe('OctoClock commands', () => {
             stopTimerSpy.mockRejectedValue(new Error('stop failed'));
             await getHandler('octoclock.stopTimer')();
 
-            expect(win.showErrorMessage).toHaveBeenCalledWith(
-                expect.stringContaining('stop failed'),
-            );
+            expect(win.showErrorMessage).toHaveBeenCalledWith(expect.stringContaining('stop failed'));
         });
     });
 
@@ -241,34 +232,22 @@ describe('OctoClock commands', () => {
     // -----------------------------------------------------------------------
     describe('octoclock.syncNow', () => {
         it('is registered', () => {
-            expect(vscode.commands.registerCommand).toHaveBeenCalledWith(
-                'octoclock.syncNow',
-                expect.any(Function),
-            );
+            expect(vscode.commands.registerCommand).toHaveBeenCalledWith('octoclock.syncNow', expect.any(Function));
         });
 
         it('calls TimerService.syncComment for the active issue', async () => {
             await storage.set(STORAGE_KEYS.ACTIVE_ISSUE, '/owner/repo/issues/4');
             await getHandler('octoclock.syncNow')();
 
-            expect(syncCommentSpy).toHaveBeenCalledWith(
-                '/owner/repo/issues/4',
-                'owner',
-                'repo',
-                4,
-            );
-            expect(win.showInformationMessage).toHaveBeenCalledWith(
-                expect.stringContaining('synced'),
-            );
+            expect(syncCommentSpy).toHaveBeenCalledWith('/owner/repo/issues/4', 'owner', 'repo', 4);
+            expect(win.showInformationMessage).toHaveBeenCalledWith(expect.stringContaining('synced'));
         });
 
         it('shows an info message when there is no active issue', async () => {
             await getHandler('octoclock.syncNow')();
 
             expect(syncCommentSpy).not.toHaveBeenCalled();
-            expect(win.showInformationMessage).toHaveBeenCalledWith(
-                expect.stringContaining('No active issue'),
-            );
+            expect(win.showInformationMessage).toHaveBeenCalledWith(expect.stringContaining('No active issue'));
         });
 
         it('shows an error when syncComment throws', async () => {
@@ -276,9 +255,7 @@ describe('OctoClock commands', () => {
             syncCommentSpy.mockRejectedValue(new Error('rate limited'));
             await getHandler('octoclock.syncNow')();
 
-            expect(win.showErrorMessage).toHaveBeenCalledWith(
-                expect.stringContaining('rate limited'),
-            );
+            expect(win.showErrorMessage).toHaveBeenCalledWith(expect.stringContaining('rate limited'));
         });
     });
 });
@@ -365,32 +342,22 @@ describe('OctoClock session commands', () => {
             const item = makeItem();
             await getHandler('octoclock.deleteSession')(item);
 
-            expect(deleteSessionSpy2).toHaveBeenCalledWith(
-                '/owner/repo/issues/7',
-                '2025-05-09',
-                3600,
-            );
-            expect(win2.showInformationMessage).toHaveBeenCalledWith(
-                expect.stringContaining('deleted'),
-            );
+            expect(deleteSessionSpy2).toHaveBeenCalledWith('/owner/repo/issues/7', '2025-05-09', 3600);
+            expect(win2.showInformationMessage).toHaveBeenCalledWith(expect.stringContaining('deleted'));
         });
 
         it('shows a warning when the session is not found (ok: false)', async () => {
             deleteSessionSpy2.mockResolvedValue({ ok: false, syncStatus: 'skipped', syncError: null });
             await getHandler('octoclock.deleteSession')(makeItem());
 
-            expect(win2.showWarningMessage).toHaveBeenCalledWith(
-                expect.stringContaining('not found'),
-            );
+            expect(win2.showWarningMessage).toHaveBeenCalledWith(expect.stringContaining('not found'));
         });
 
         it('shows an error when TimerService.deleteSession throws', async () => {
             deleteSessionSpy2.mockRejectedValue(new Error('disk full'));
             await getHandler('octoclock.deleteSession')(makeItem());
 
-            expect(win2.showErrorMessage).toHaveBeenCalledWith(
-                expect.stringContaining('disk full'),
-            );
+            expect(win2.showErrorMessage).toHaveBeenCalledWith(expect.stringContaining('disk full'));
         });
 
         it('returns early when item is undefined', async () => {
@@ -409,25 +376,15 @@ describe('OctoClock session commands', () => {
     // -----------------------------------------------------------------------
     describe('octoclock.editSession', () => {
         it('is registered', () => {
-            expect(vscode.commands.registerCommand).toHaveBeenCalledWith(
-                'octoclock.editSession',
-                expect.any(Function),
-            );
+            expect(vscode.commands.registerCommand).toHaveBeenCalledWith('octoclock.editSession', expect.any(Function));
         });
 
         it('calls TimerService.updateSessionTime with parsed newSeconds', async () => {
             win2.showInputBox.mockResolvedValue('02:00:00'); // 7200 seconds
             await getHandler('octoclock.editSession')(makeItem());
 
-            expect(updateSessionTimeSpy2).toHaveBeenCalledWith(
-                '/owner/repo/issues/7',
-                '2025-05-09',
-                3600,
-                7200,
-            );
-            expect(win2.showInformationMessage).toHaveBeenCalledWith(
-                expect.stringContaining('updated'),
-            );
+            expect(updateSessionTimeSpy2).toHaveBeenCalledWith('/owner/repo/issues/7', '2025-05-09', 3600, 7200);
+            expect(win2.showInformationMessage).toHaveBeenCalledWith(expect.stringContaining('updated'));
         });
 
         it('shows a warning when the session is not found (ok: false)', async () => {
@@ -435,9 +392,7 @@ describe('OctoClock session commands', () => {
             updateSessionTimeSpy2.mockResolvedValue({ ok: false, syncStatus: 'skipped', syncError: null });
             await getHandler('octoclock.editSession')(makeItem());
 
-            expect(win2.showWarningMessage).toHaveBeenCalledWith(
-                expect.stringContaining('not found'),
-            );
+            expect(win2.showWarningMessage).toHaveBeenCalledWith(expect.stringContaining('not found'));
         });
 
         it('shows an error for an invalid duration string', async () => {
@@ -445,9 +400,7 @@ describe('OctoClock session commands', () => {
             await getHandler('octoclock.editSession')(makeItem());
 
             expect(updateSessionTimeSpy2).not.toHaveBeenCalled();
-            expect(win2.showErrorMessage).toHaveBeenCalledWith(
-                expect.stringContaining('Invalid duration'),
-            );
+            expect(win2.showErrorMessage).toHaveBeenCalledWith(expect.stringContaining('Invalid duration'));
         });
 
         it('returns early when user cancels the input box (undefined)', async () => {
@@ -462,9 +415,7 @@ describe('OctoClock session commands', () => {
             updateSessionTimeSpy2.mockRejectedValue(new Error('write failed'));
             await getHandler('octoclock.editSession')(makeItem());
 
-            expect(win2.showErrorMessage).toHaveBeenCalledWith(
-                expect.stringContaining('write failed'),
-            );
+            expect(win2.showErrorMessage).toHaveBeenCalledWith(expect.stringContaining('write failed'));
         });
 
         it('returns early when item is undefined', async () => {
@@ -509,10 +460,7 @@ describe('OctoClock repo pin commands', () => {
     // -----------------------------------------------------------------------
     describe('octoclock.pinRepo', () => {
         it('is registered', () => {
-            expect(vscode.commands.registerCommand).toHaveBeenCalledWith(
-                'octoclock.pinRepo',
-                expect.any(Function),
-            );
+            expect(vscode.commands.registerCommand).toHaveBeenCalledWith('octoclock.pinRepo', expect.any(Function));
         });
 
         it('pins a repo and shows an info message', async () => {
@@ -520,9 +468,7 @@ describe('OctoClock repo pin commands', () => {
             await getHandler('octoclock.pinRepo')();
 
             expect(addPinnedRepoSpy).toHaveBeenCalledWith({ fullName: 'owner/my-repo' });
-            expect(win3.showInformationMessage).toHaveBeenCalledWith(
-                expect.stringContaining('owner/my-repo'),
-            );
+            expect(win3.showInformationMessage).toHaveBeenCalledWith(expect.stringContaining('owner/my-repo'));
         });
 
         it('returns early when user cancels the input box', async () => {
@@ -537,9 +483,7 @@ describe('OctoClock repo pin commands', () => {
             await getHandler('octoclock.pinRepo')();
 
             expect(addPinnedRepoSpy).not.toHaveBeenCalled();
-            expect(win3.showErrorMessage).toHaveBeenCalledWith(
-                expect.stringContaining('Invalid repository format'),
-            );
+            expect(win3.showErrorMessage).toHaveBeenCalledWith(expect.stringContaining('Invalid repository format'));
         });
 
         it('calls syncRepoFromGitHub when AUTO_SYNC is enabled', async () => {
@@ -563,9 +507,7 @@ describe('OctoClock repo pin commands', () => {
             win3.showInputBox.mockResolvedValue('owner/my-repo');
             await getHandler('octoclock.pinRepo')();
 
-            expect(win3.showErrorMessage).toHaveBeenCalledWith(
-                expect.stringContaining('write error'),
-            );
+            expect(win3.showErrorMessage).toHaveBeenCalledWith(expect.stringContaining('write error'));
         });
     });
 
@@ -574,19 +516,14 @@ describe('OctoClock repo pin commands', () => {
     // -----------------------------------------------------------------------
     describe('octoclock.unpinRepo', () => {
         it('is registered', () => {
-            expect(vscode.commands.registerCommand).toHaveBeenCalledWith(
-                'octoclock.unpinRepo',
-                expect.any(Function),
-            );
+            expect(vscode.commands.registerCommand).toHaveBeenCalledWith('octoclock.unpinRepo', expect.any(Function));
         });
 
         it('unpins a repo and shows an info message', async () => {
             await getHandler('octoclock.unpinRepo')({ fullName: 'owner/my-repo' });
 
             expect(removePinnedRepoSpy).toHaveBeenCalledWith('owner/my-repo');
-            expect(win3.showInformationMessage).toHaveBeenCalledWith(
-                expect.stringContaining('owner/my-repo'),
-            );
+            expect(win3.showInformationMessage).toHaveBeenCalledWith(expect.stringContaining('owner/my-repo'));
         });
 
         it('returns early when item is undefined', async () => {
@@ -603,9 +540,7 @@ describe('OctoClock repo pin commands', () => {
             removePinnedRepoSpy.mockRejectedValue(new Error('delete error'));
             await getHandler('octoclock.unpinRepo')({ fullName: 'owner/my-repo' });
 
-            expect(win3.showErrorMessage).toHaveBeenCalledWith(
-                expect.stringContaining('delete error'),
-            );
+            expect(win3.showErrorMessage).toHaveBeenCalledWith(expect.stringContaining('delete error'));
         });
     });
 });

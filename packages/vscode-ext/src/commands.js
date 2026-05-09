@@ -90,18 +90,12 @@ export function registerCommands(context) {
             try {
                 const result = await TimerService.startTimer(issueUrl);
                 if (result.isRunning) {
-                    vscode.window.showInformationMessage(
-                        `OctoClock: Timer started for ${issueUrl}`,
-                    );
+                    vscode.window.showInformationMessage(`OctoClock: Timer started for ${issueUrl}`);
                 } else {
-                    vscode.window.showWarningMessage(
-                        `OctoClock: Failed to start timer for ${issueUrl}`,
-                    );
+                    vscode.window.showWarningMessage(`OctoClock: Failed to start timer for ${issueUrl}`);
                 }
             } catch (error) {
-                vscode.window.showErrorMessage(
-                    `OctoClock: ${error instanceof Error ? error.message : String(error)}`,
-                );
+                vscode.window.showErrorMessage(`OctoClock: ${error instanceof Error ? error.message : String(error)}`);
             }
         }),
 
@@ -118,13 +112,9 @@ export function registerCommands(context) {
 
             try {
                 await TimerService.stopTimer(issueUrl);
-                vscode.window.showInformationMessage(
-                    `OctoClock: Timer stopped for ${issueUrl}`,
-                );
+                vscode.window.showInformationMessage(`OctoClock: Timer stopped for ${issueUrl}`);
             } catch (error) {
-                vscode.window.showErrorMessage(
-                    `OctoClock: ${error instanceof Error ? error.message : String(error)}`,
-                );
+                vscode.window.showErrorMessage(`OctoClock: ${error instanceof Error ? error.message : String(error)}`);
             }
         }),
 
@@ -161,17 +151,13 @@ export function registerCommands(context) {
                 placeHolder: 'owner/repo',
                 validateInput(v) {
                     const parts = v.trim().split('/');
-                    return parts.length === 2 && parts[0] && parts[1]
-                        ? null
-                        : 'Expected format: owner/repo';
+                    return parts.length === 2 && parts[0] && parts[1] ? null : 'Expected format: owner/repo';
                 },
             });
             if (!raw) return;
             const parts = raw.trim().split('/');
             if (parts.length !== 2 || !parts[0] || !parts[1]) {
-                vscode.window.showErrorMessage(
-                    'OctoClock: Invalid repository format — use owner/repo',
-                );
+                vscode.window.showErrorMessage('OctoClock: Invalid repository format — use owner/repo');
                 return;
             }
             const [owner, repoName] = parts;
@@ -186,9 +172,7 @@ export function registerCommands(context) {
                     );
                 }
             } catch (error) {
-                vscode.window.showErrorMessage(
-                    `OctoClock: ${error instanceof Error ? error.message : String(error)}`,
-                );
+                vscode.window.showErrorMessage(`OctoClock: ${error instanceof Error ? error.message : String(error)}`);
             }
         }),
 
@@ -203,9 +187,7 @@ export function registerCommands(context) {
                 await PinnedReposService.removePinnedRepo(item.fullName);
                 vscode.window.showInformationMessage(`OctoClock: Unpinned ${item.fullName}`);
             } catch (error) {
-                vscode.window.showErrorMessage(
-                    `OctoClock: ${error instanceof Error ? error.message : String(error)}`,
-                );
+                vscode.window.showErrorMessage(`OctoClock: ${error instanceof Error ? error.message : String(error)}`);
             }
         }),
 
@@ -225,9 +207,7 @@ export function registerCommands(context) {
                     vscode.window.showWarningMessage('OctoClock: Session not found');
                 }
             } catch (error) {
-                vscode.window.showErrorMessage(
-                    `OctoClock: ${error instanceof Error ? error.message : String(error)}`,
-                );
+                vscode.window.showErrorMessage(`OctoClock: ${error instanceof Error ? error.message : String(error)}`);
             }
         }),
 
@@ -250,27 +230,18 @@ export function registerCommands(context) {
             if (!raw) return;
             const newSeconds = parseDuration(raw);
             if (newSeconds === null) {
-                vscode.window.showErrorMessage(
-                    'OctoClock: Invalid duration — use HH:MM:SS format',
-                );
+                vscode.window.showErrorMessage('OctoClock: Invalid duration — use HH:MM:SS format');
                 return;
             }
             try {
-                const result = await TimerService.updateSessionTime(
-                    item.issueUrl,
-                    item.date,
-                    item.seconds,
-                    newSeconds,
-                );
+                const result = await TimerService.updateSessionTime(item.issueUrl, item.date, item.seconds, newSeconds);
                 if (result.ok) {
                     vscode.window.showInformationMessage('OctoClock: Session updated');
                 } else {
                     vscode.window.showWarningMessage('OctoClock: Session not found');
                 }
             } catch (error) {
-                vscode.window.showErrorMessage(
-                    `OctoClock: ${error instanceof Error ? error.message : String(error)}`,
-                );
+                vscode.window.showErrorMessage(`OctoClock: ${error instanceof Error ? error.message : String(error)}`);
             }
         }),
     );

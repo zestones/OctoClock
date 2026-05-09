@@ -5,9 +5,7 @@
             "name": "Run VS Code Extension",
             "type": "extensionHost",
             "request": "launch",
-            "args": [
-                "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode-ext"
-            ],
+            "args": ["--extensionDevelopmentPath=${workspaceFolder}/packages/vscode-ext"],
             "preLaunchTask": "build:vscode"
         }
     ]

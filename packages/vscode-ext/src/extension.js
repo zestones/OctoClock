@@ -5,8 +5,8 @@
 // Activation event: onStartupFinished (lazy — does not block editor startup).
 
 import * as vscode from 'vscode';
-import { storageEvents } from '../../core/src/services/storage-events.js';
 import { StorageService } from '../../core/src/services/storage.service.js';
+import { storageEvents } from '../../core/src/services/storage-events.js';
 import { syncFromGitHub } from '../../core/src/services/sync.service.js';
 import { TimerService } from '../../core/src/services/timer.service.js';
 import { STORAGE_KEYS } from '../../core/src/utils/constants.utils.js';
@@ -36,23 +36,20 @@ export function activate(context) {
         throw new Error('OctoClock: context.secrets is not available');
     }
 
-    StorageService.setAdapter(
-        new VSCodeStorageAdapter(context.globalState, context.secrets, storageEvents),
-    );
+    StorageService.setAdapter(new VSCodeStorageAdapter(context.globalState, context.secrets, storageEvents));
     TimerService.setMessagingPort(new VSCodeMessagingAdapter());
 
     // Non-blocking recovery: if AUTO_SYNC is enabled and a GitHub token is
     // present, pull tracker-comment data from GitHub and merge it into local
     // storage. Fire-and-forget so activation completes immediately and any
     // network errors are logged rather than surfaced to the user.
-    Promise.all([
-        StorageService.get(STORAGE_KEYS.AUTO_SYNC),
-        StorageService.get(STORAGE_KEYS.GITHUB_TOKEN),
-    ]).then(([autoSync, token]) => {
-        if (autoSync && token) {
-            syncFromGitHub().catch((e) => console.error('OctoClock: Auto-sync failed:', e));
-        }
-    }).catch((e) => console.error('OctoClock: Failed to check auto-sync settings:', e));
+    Promise.all([StorageService.get(STORAGE_KEYS.AUTO_SYNC), StorageService.get(STORAGE_KEYS.GITHUB_TOKEN)])
+        .then(([autoSync, token]) => {
+            if (autoSync && token) {
+                syncFromGitHub().catch((e) => console.error('OctoClock: Auto-sync failed:', e));
+            }
+        })
+        .catch((e) => console.error('OctoClock: Failed to check auto-sync settings:', e));
 
     registerCommands(context);
 
@@ -68,4 +65,4 @@ export function activate(context) {
     console.log('OctoClock: activated');
 }
 
-export function deactivate() { }
+export function deactivate() {}

@@ -16,8 +16,8 @@
 // (data is small; lazy per-level storage reads add complexity for no gain).
 
 import * as vscode from 'vscode';
-import { AggregationService } from '../../core/src/utils/aggregation.utils.js';
 import { StorageService } from '../../core/src/services/storage.service.js';
+import { AggregationService } from '../../core/src/utils/aggregation.utils.js';
 import { STORAGE_KEYS } from '../../core/src/utils/constants.utils.js';
 import { TimeService } from '../../core/src/utils/time.utils.js';
 
@@ -33,16 +33,11 @@ export class RepoNode extends vscode.TreeItem {
      */
     constructor(fullName, totalSeconds, issueNodes) {
         const state =
-            issueNodes.length > 0
-                ? vscode.TreeItemCollapsibleState.Collapsed
-                : vscode.TreeItemCollapsibleState.None;
+            issueNodes.length > 0 ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None;
         super(fullName, state);
         this.fullName = fullName;
         this.issueNodes = issueNodes;
-        this.tooltip =
-            totalSeconds > 0
-                ? `Total: ${TimeService.formatHuman(totalSeconds)}`
-                : 'No sessions yet';
+        this.tooltip = totalSeconds > 0 ? `Total: ${TimeService.formatHuman(totalSeconds)}` : 'No sessions yet';
         this.contextValue = 'octoclock.repo';
     }
 }
@@ -102,12 +97,8 @@ export class RepoTreeProvider {
      */
     constructor(events) {
         this.#unsubscribe = events.subscribe((event) => {
-            const keys =
-                event.type === 'removeMultiple' ? event.keys : [event.key];
-            if (
-                keys.includes(STORAGE_KEYS.TRACKED_TIMES) ||
-                keys.includes(STORAGE_KEYS.PINNED_REPOS)
-            ) {
+            const keys = event.type === 'removeMultiple' ? event.keys : [event.key];
+            if (keys.includes(STORAGE_KEYS.TRACKED_TIMES) || keys.includes(STORAGE_KEYS.PINNED_REPOS)) {
                 this.#emitter.fire(undefined);
             }
         });
@@ -161,15 +152,8 @@ export class RepoTreeProvider {
             const issueNodes = Object.entries(issueMap).map(([issueUrl, data]) => {
                 // issueUrl is the raw key from getRepoBreakdownDetailed — it IS
                 // the stored TrackedTimeEntry.issueUrl, never derived from labels.
-                const sessionNodes = data.sessions.map(
-                    (s) => new SessionNode(issueUrl, s.date, s.seconds),
-                );
-                return new IssueNode(
-                    issueUrl,
-                    data.title || issueUrl,
-                    data.totalSeconds,
-                    sessionNodes,
-                );
+                const sessionNodes = data.sessions.map((s) => new SessionNode(issueUrl, s.date, s.seconds));
+                return new IssueNode(issueUrl, data.title || issueUrl, data.totalSeconds, sessionNodes);
             });
 
             const totalSeconds = issueNodes.reduce((s, n) => s + n.totalSeconds, 0);

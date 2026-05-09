@@ -29,13 +29,13 @@ export class SyncQueue {
      */
     enqueue(key, job) {
         const previous = this.#queues.get(key) ?? Promise.resolve();
-        const next = previous.catch(() => { }).then(() => job());
+        const next = previous.catch(() => {}).then(() => job());
         this.#queues.set(key, next);
         next.finally(() => {
             if (this.#queues.get(key) === next) {
                 this.#queues.delete(key);
             }
-        }).catch(() => { }); // suppress unhandled rejection on the finally-chain branch
+        }).catch(() => {}); // suppress unhandled rejection on the finally-chain branch
         return next;
     }
 }
