@@ -4,6 +4,10 @@
 // Exported activate(context) is called by VS Code when the extension activates.
 // Activation event: onStartupFinished (lazy — does not block editor startup).
 
+import { storageEvents } from '../../core/src/services/storage-events.js';
+import { StorageService } from '../../core/src/services/storage.service.js';
+import { VSCodeStorageAdapter } from './adapters/vscode-storage.adapter.js';
+
 /**
  * Called by VS Code when the extension is activated.
  *
@@ -23,6 +27,10 @@ export function activate(context) {
     if (!context.secrets) {
         throw new Error('OctoClock: context.secrets is not available');
     }
+
+    StorageService.setAdapter(
+        new VSCodeStorageAdapter(context.globalState, context.secrets, storageEvents),
+    );
 
     console.log('OctoClock: activated');
 }

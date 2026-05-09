@@ -20,5 +20,8 @@
         "src/**/*.d.ts",
         "packages/**/*.js",
         "popup.jsx"
+    ],
+    "exclude": [
+        "packages/**/dist/**"
     ]
 }
