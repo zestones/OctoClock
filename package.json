@@ -3,12 +3,17 @@
   "private": true,
   "version": "1.0.3",
   "type": "module",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  },
   "scripts": {
     "watch": "nodemon --watch src --ext js,jsx,html,css,json --exec \"npm run build\"",
     "build:popup": "vite build --config vite.config.popup.js",
     "build:background": "vite build --config vite.config.background.js",
     "build:content": "vite build --config vite.config.content.js",
-    "build": "rm -rf dist && npm run build:popup && npm run build:background && npm run build:content",
+    "build": "rm -rf dist && pnpm run build:popup && pnpm run build:background && pnpm run build:content",
     "typecheck": "tsc -p jsconfig.json --noEmit",
     "lint": "biome lint ./src",
     "format": "biome format --write ./src",
