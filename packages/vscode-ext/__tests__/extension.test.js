@@ -1,13 +1,31 @@
 import { describe, expect, it, vi } from 'vitest';
 import { activate, deactivate } from '../src/extension.js';
 
-// commands.js imports 'vscode' — provide a minimal mock so activate() can run
-// in the test environment without the VS Code extension host.
+// commands.js and tree-view.js import 'vscode' — provide a minimal mock so
+// activate() can run in the test environment without the VS Code extension host.
 vi.mock('vscode', () => ({
     commands: {
         registerCommand: vi.fn(() => ({ dispose: vi.fn() })),
     },
     StatusBarAlignment: { Left: 1, Right: 2 },
+    TreeItemCollapsibleState: { None: 0, Collapsed: 1, Expanded: 2 },
+    TreeItem: class TreeItem {
+        constructor(label, collapsibleState) {
+            this.label = label;
+            this.collapsibleState = collapsibleState;
+        }
+    },
+    EventEmitter: class EventEmitter {
+        constructor() {
+            this._listeners = [];
+            this.event = (listener) => {
+                this._listeners.push(listener);
+                return { dispose: () => { } };
+            };
+        }
+        fire(data) { for (const l of this._listeners) l(data); }
+        dispose() { }
+    },
     window: {
         showInputBox: vi.fn(),
         showErrorMessage: vi.fn(),
@@ -20,6 +38,7 @@ vi.mock('vscode', () => ({
             tooltip: '',
             command: undefined,
         })),
+        createTreeView: vi.fn(() => ({ dispose: vi.fn() })),
     },
 }));
 
