@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'preact/hooks';
+import { GitHubService } from '../../packages/core/src/services/github.service.js';
+import { IssueStorageService } from '../../packages/core/src/services/issue-storage.service.js';
+import { AggregationService } from '../../packages/core/src/utils/aggregation.utils.js';
 import { useElapsedTimer } from '../hooks/useElapsedTimer.js';
 import { IconStop } from '../icons.jsx';
-import { GitHubService } from '../services/github.service.js';
-import { IssueStorageService } from '../services/issue-storage.service.js';
-import { AggregationService } from '../utils/aggregation.utils.js';
 
 export function ActiveTimer() {
     const { activeIssue, startTime, elapsedTime, stop } = useElapsedTimer({ includeTotalTime: true });

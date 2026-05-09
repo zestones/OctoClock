@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { StorageService } from '../services/storage.service.js';
-import { storageEvents } from '../services/storage-events.js';
+import { StorageService } from '../../packages/core/src/services/storage.service.js';
+import { storageEvents } from '../../packages/core/src/services/storage-events.js';
 
 /**
  * @param {string} key

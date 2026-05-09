@@ -1,13 +1,13 @@
 // background/index.js
 
 import '../browser-bootstrap.js';
+import { CacheService } from '../../packages/core/src/services/cache.service.js';
+import { GitHubService } from '../../packages/core/src/services/github.service.js';
+import { GitHubStorageService } from '../../packages/core/src/services/github-storage.service.js';
+import { PinnedReposService } from '../../packages/core/src/services/pinned-repos.service.js';
+import { StorageService } from '../../packages/core/src/services/storage.service.js';
 import { SyncQueue } from '../../packages/core/src/sync-queue.js';
-import { CacheService } from '../services/cache.service.js';
-import { GitHubService } from '../services/github.service.js';
-import { GitHubStorageService } from '../services/github-storage.service.js';
-import { PinnedReposService } from '../services/pinned-repos.service.js';
-import { StorageService } from '../services/storage.service.js';
-import { CACHE_REFRESH_INTERVAL, SCHEMA_VERSION, STORAGE_KEYS } from '../utils/constants.utils.js';
+import { CACHE_REFRESH_INTERVAL, SCHEMA_VERSION, STORAGE_KEYS } from '../../packages/core/src/utils/constants.utils.js';
 
 const trackerSyncQueue = new SyncQueue();
 const TRACKER_SYNC_LOG_PREFIX = '[TrackerSync][background]';

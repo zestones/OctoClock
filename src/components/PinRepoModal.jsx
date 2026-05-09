@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
+import { GitHubService } from '../../packages/core/src/services/github.service.js';
+import { DEBOUNCE_SEARCH_MS } from '../../packages/core/src/utils/constants.utils.js';
 import { useDebounce } from '../hooks/useDebounce.js';
 import { IconCheck, IconPin, IconX } from '../icons.jsx';
-import { GitHubService } from '../services/github.service.js';
-import { DEBOUNCE_SEARCH_MS } from '../utils/constants.utils.js';
 import { SearchInput } from './SearchInput.jsx';
 
 export function PinRepoModal({ onClose, onPin, pinnedRepos }) {
@@ -91,11 +91,10 @@ export function PinRepoModal({ onClose, onPin, pinnedRepos }) {
                                         }
                                     }}
                                     disabled={isPinned(repo.fullName)}
-                                    className={`shrink-0 flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-md cursor-pointer transition-colors ${
-                                        isPinned(repo.fullName)
+                                    className={`shrink-0 flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-md cursor-pointer transition-colors ${isPinned(repo.fullName)
                                             ? 'bg-raised text-muted cursor-default'
                                             : 'bg-accent-subtle text-accent-text hover:bg-accent-ring'
-                                    }`}
+                                        }`}
                                 >
                                     {isPinned(repo.fullName) ? (
                                         <>

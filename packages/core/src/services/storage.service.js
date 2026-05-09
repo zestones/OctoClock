@@ -1,11 +1,11 @@
 export class StorageService {
-    /** @type {import('../../packages/core/src/ports/storage.port.js').StoragePort | null} */
+    /** @type {import('../ports/storage.port.js').StoragePort | null} */
     static #adapter = null;
 
     /**
      * Register the platform adapter. Must be called once at bootstrap before any
      * storage operation is invoked.
-     * @param {import('../../packages/core/src/ports/storage.port.js').StoragePort} adapter
+     * @param {import('../ports/storage.port.js').StoragePort} adapter
      */
     static setAdapter(adapter) {
         StorageService.#adapter = adapter;

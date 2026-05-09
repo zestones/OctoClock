@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { StoragePort } from '../../packages/core/src/ports/storage.port.js';
-import { StorageService } from '../../src/services/storage.service.js';
+import { StorageService } from '../../packages/core/src/services/storage.service.js';
 
 // ---------------------------------------------------------------------------
 // In-memory adapter (also validates StoragePort contract)

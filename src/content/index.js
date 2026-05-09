@@ -1,13 +1,13 @@
 // content/index.js
 
 import '../browser-bootstrap.js';
-import { storageEvents } from '../services/storage-events.js';
+import { storageEvents } from '../../packages/core/src/services/storage-events.js';
 import {
     CONTAINER_CHECK_INTERVAL_MS,
     CONTAINER_CHECK_MAX_ATTEMPTS,
     DEBOUNCE_INJECT_MS,
     STORAGE_KEYS,
-} from '../utils/constants.utils.js';
+} from '../../packages/core/src/utils/constants.utils.js';
 import { isIssuePage } from './helpers.js';
 import { injectTimerButton, resetInjectedFlag } from './injectTimerButton.js';
 

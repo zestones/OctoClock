@@ -1,6 +1,6 @@
+import { TimerService } from '../../../packages/core/src/services/timer.service.js';
 import { useActiveTimer } from '../../hooks/useActiveTimer.js';
 import { IconClock, IconExternalLink, IconPlay, IconStop } from '../../icons.jsx';
-import { TimerService } from '../../services/timer.service.js';
 
 export function TrackedList({ entries, showTimerControls = false }) {
     const { isActive: isTimerActive } = useActiveTimer();
@@ -22,11 +22,10 @@ export function TrackedList({ entries, showTimerControls = false }) {
                 return (
                     <div
                         key={entry.issueUrl || i}
-                        className={`relative py-1.5 px-2.5 my-0.5 rounded-lg border transition-all group ${
-                            active
+                        className={`relative py-1.5 px-2.5 my-0.5 rounded-lg border transition-all group ${active
                                 ? 'bg-success-subtle/60 border-success-border border-l-[3px] border-l-success-dot shadow-sm'
                                 : 'bg-surface border-border-subtle hover:border-border-default hover:shadow-sm'
-                        }`}
+                            }`}
                     >
                         {/* Top row: number + title + open link */}
                         <div className="flex items-start gap-1.5 mb-0.5">
@@ -69,11 +68,10 @@ export function TrackedList({ entries, showTimerControls = false }) {
                                 <button
                                     type="button"
                                     onClick={() => handleTimerClick(entry)}
-                                    className={`flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-lg cursor-pointer transition-all ${
-                                        active
+                                    className={`flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-lg cursor-pointer transition-all ${active
                                             ? 'bg-danger-subtle text-danger-text hover:bg-danger-hover'
                                             : 'bg-success-subtle text-success-text hover:bg-success-hover opacity-40 group-hover:opacity-100'
-                                    }`}
+                                        }`}
                                 >
                                     {active ? (
                                         <>
