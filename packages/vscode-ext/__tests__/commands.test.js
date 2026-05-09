@@ -19,7 +19,6 @@ vi.mock('../../core/src/services/sync.service.js', () => ({
 
 import * as vscode from 'vscode';
 import { StoragePort } from '../../core/src/ports/storage.port.js';
-import { GitHubService } from '../../core/src/services/github.service.js';
 import { PinnedReposService } from '../../core/src/services/pinned-repos.service.js';
 import { StorageService } from '../../core/src/services/storage.service.js';
 import { syncRepoFromGitHub } from '../../core/src/services/sync.service.js';

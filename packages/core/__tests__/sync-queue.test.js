@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { SyncQueue } from '../src/sync-queue.js';
 
 describe('SyncQueue', () => {
@@ -19,7 +19,7 @@ describe('SyncQueue', () => {
 
     it('has() returns true while a job is in progress', async () => {
         /** @type {(value?: unknown) => void} */
-        let resolve = () => {};
+        let resolve = () => { };
         const pending = new Promise((r) => {
             resolve = r;
         });
