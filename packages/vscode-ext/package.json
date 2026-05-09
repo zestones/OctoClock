@@ -1,0 +1,10 @@
+{
+    "name": "@octoclock/vscode-ext",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
+    "description": "VS Code extension entry point, VS Code adapters, and tree view providers.",
+    "dependencies": {
+        "@octoclock/core": "workspace:*"
+    }
+}
