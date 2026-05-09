@@ -7,11 +7,19 @@ vi.mock('vscode', () => ({
     commands: {
         registerCommand: vi.fn(() => ({ dispose: vi.fn() })),
     },
+    StatusBarAlignment: { Left: 1, Right: 2 },
     window: {
         showInputBox: vi.fn(),
         showErrorMessage: vi.fn(),
         showInformationMessage: vi.fn(),
         showWarningMessage: vi.fn(),
+        createStatusBarItem: vi.fn(() => ({
+            show: vi.fn(),
+            dispose: vi.fn(),
+            text: '',
+            tooltip: '',
+            command: undefined,
+        })),
     },
 }));
 

@@ -4,12 +4,14 @@
 // Exported activate(context) is called by VS Code when the extension activates.
 // Activation event: onStartupFinished (lazy — does not block editor startup).
 
+import * as vscode from 'vscode';
 import { storageEvents } from '../../core/src/services/storage-events.js';
 import { StorageService } from '../../core/src/services/storage.service.js';
 import { TimerService } from '../../core/src/services/timer.service.js';
 import { VSCodeMessagingAdapter } from './adapters/vscode-messaging.adapter.js';
 import { VSCodeStorageAdapter } from './adapters/vscode-storage.adapter.js';
 import { registerCommands } from './commands.js';
+import { createStatusBarController } from './status-bar.js';
 
 /**
  * Called by VS Code when the extension is activated.
@@ -36,6 +38,9 @@ export function activate(context) {
     );
     TimerService.setMessagingPort(new VSCodeMessagingAdapter());
     registerCommands(context);
+
+    const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
+    context.subscriptions.push(createStatusBarController(statusBarItem, storageEvents));
 
     console.log('OctoClock: activated');
 }
