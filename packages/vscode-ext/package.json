@@ -1,6 +1,7 @@
 {
     "name": "octoclock",
     "displayName": "GitHub Time Tracker",
+    "publisher": "zestones",
     "description": "Track time spent on GitHub issues",
     "version": "1.0.3",
     "private": true,
