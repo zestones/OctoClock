@@ -1,10 +1,7 @@
 // content/index.js
 
-import { ChromeMessagingAdapter } from '../../packages/browser-ext/src/adapters/chrome-messaging.adapter.js';
-import { ChromeStorageAdapter } from '../../packages/browser-ext/src/adapters/chrome-storage.adapter.js';
-import { StorageService } from '../services/storage.service.js';
+import '../browser-bootstrap.js';
 import { storageEvents } from '../services/storage-events.js';
-import { TimerService } from '../services/timer.service.js';
 import {
     CONTAINER_CHECK_INTERVAL_MS,
     CONTAINER_CHECK_MAX_ATTEMPTS,
@@ -13,10 +10,6 @@ import {
 } from '../utils/constants.utils.js';
 import { isIssuePage } from './helpers.js';
 import { injectTimerButton, resetInjectedFlag } from './injectTimerButton.js';
-
-// TODO(#14): move to a dedicated browser bootstrap module
-StorageService.setAdapter(new ChromeStorageAdapter(storageEvents));
-TimerService.setMessagingPort(new ChromeMessagingAdapter());
 
 function debounce(fn, delay) {
     let timeoutId;
