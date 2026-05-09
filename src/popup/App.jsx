@@ -193,8 +193,9 @@ export function App() {
                                     type="button"
                                     key={id}
                                     onClick={() => setPage(id)}
-                                    className={`relative z-10 flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-xl cursor-pointer transition-colors duration-200 ${active ? 'text-white' : 'text-muted hover:text-primary'
-                                        }`}
+                                    className={`relative z-10 flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-xl cursor-pointer transition-colors duration-200 ${
+                                        active ? 'text-white' : 'text-muted hover:text-primary'
+                                    }`}
                                 >
                                     <Icon size={16} strokeWidth={active ? 2.5 : 1.75} />
                                     <span className={`text-[9px] ${active ? 'font-bold' : 'font-medium'}`}>

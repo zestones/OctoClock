@@ -1,9 +1,22 @@
 {
-    "name": "@octoclock/vscode-ext",
+    "name": "octoclock",
+    "displayName": "GitHub Time Tracker",
+    "description": "Track time spent on GitHub issues",
+    "version": "1.0.3",
     "private": true,
-    "version": "0.0.0",
-    "type": "module",
-    "description": "VS Code extension entry point, VS Code adapters, and tree view providers.",
+    "engines": {
+        "vscode": "^1.85.0"
+    },
+    "extensionKind": [
+        "workspace"
+    ],
+    "activationEvents": [
+        "onStartupFinished"
+    ],
+    "main": "./dist/extension.js",
+    "contributes": {
+        "commands": []
+    },
     "dependencies": {
         "@octoclock/core": "workspace:*"
     }

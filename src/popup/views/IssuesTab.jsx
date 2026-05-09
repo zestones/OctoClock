@@ -114,8 +114,9 @@ export function IssuesTab({ filter, onFilterChange }) {
                             type="button"
                             key={f.id}
                             onClick={() => onFilterChange(f.id)}
-                            className={`relative z-10 flex-1 text-[11px] px-2 py-1.5 rounded-md cursor-pointer transition-colors font-medium text-center ${filter === f.id ? 'text-accent-text' : 'text-muted hover:text-secondary'
-                                }`}
+                            className={`relative z-10 flex-1 text-[11px] px-2 py-1.5 rounded-md cursor-pointer transition-colors font-medium text-center ${
+                                filter === f.id ? 'text-accent-text' : 'text-muted hover:text-secondary'
+                            }`}
                         >
                             {f.label}
                         </button>
@@ -180,10 +181,11 @@ export function IssuesTab({ filter, onFilterChange }) {
                                 <div key={repo.fullName} className="mb-2">
                                     {/* Repo card header */}
                                     <div
-                                        className={`flex items-center justify-between py-2.5 px-3 cursor-pointer rounded-xl border transition-all ${isExpanded
+                                        className={`flex items-center justify-between py-2.5 px-3 cursor-pointer rounded-xl border transition-all ${
+                                            isExpanded
                                                 ? 'bg-accent-subtle/40 border-accent-ring/30 shadow-sm'
                                                 : 'bg-surface border-border-subtle hover:border-border-default hover:shadow-sm'
-                                            }`}
+                                        }`}
                                         onClick={() =>
                                             setExpandedRepos((prev) => ({
                                                 ...prev,
@@ -271,8 +273,8 @@ export function IssuesTab({ filter, onFilterChange }) {
                                                         {filter === 'closed'
                                                             ? 'No closed issues'
                                                             : filter === 'open'
-                                                                ? 'No open issues'
-                                                                : 'No matching issues'}
+                                                              ? 'No open issues'
+                                                              : 'No matching issues'}
                                                     </div>
                                                 ) : (
                                                     issues.map((issue) => (

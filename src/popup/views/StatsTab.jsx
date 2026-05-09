@@ -142,10 +142,11 @@ export function StatsTab({ tracked, user }) {
                         <button
                             type="button"
                             key={card.id}
-                            className={`relative rounded-xl p-3 text-left cursor-pointer transition-all w-full border overflow-hidden ${active
+                            className={`relative rounded-xl p-3 text-left cursor-pointer transition-all w-full border overflow-hidden ${
+                                active
                                     ? 'bg-accent-subtle/50 border-accent-ring/40 shadow-sm'
                                     : 'bg-surface border-border-subtle hover:border-border-default hover:shadow-sm'
-                                }`}
+                            }`}
                             onClick={() => setRangeMode(card.id)}
                         >
                             <div className="flex items-center justify-between mb-1">
@@ -186,8 +187,9 @@ export function StatsTab({ tracked, user }) {
                                 type="button"
                                 key={mode.id}
                                 onClick={() => setUserMode(mode.id)}
-                                className={`relative z-10 flex items-center gap-1 text-[11px] cursor-pointer font-medium px-2.5 py-1.5 transition-colors ${userMode === mode.id ? 'text-accent' : 'text-tertiary hover:text-secondary'
-                                    }`}
+                                className={`relative z-10 flex items-center gap-1 text-[11px] cursor-pointer font-medium px-2.5 py-1.5 transition-colors ${
+                                    userMode === mode.id ? 'text-accent' : 'text-tertiary hover:text-secondary'
+                                }`}
                             >
                                 <ModeIcon size={11} /> {mode.label}
                             </button>
@@ -201,10 +203,11 @@ export function StatsTab({ tracked, user }) {
                 <button
                     type="button"
                     onClick={() => setRangeMode(rangeMode === 'custom' ? 'all' : 'custom')}
-                    className={`flex items-center gap-1.5 text-[11px] cursor-pointer transition-all font-medium px-2.5 py-1.5 rounded-lg border ${rangeMode === 'custom'
+                    className={`flex items-center gap-1.5 text-[11px] cursor-pointer transition-all font-medium px-2.5 py-1.5 rounded-lg border ${
+                        rangeMode === 'custom'
                             ? 'bg-accent-subtle text-accent border-accent-ring'
                             : 'bg-surface text-tertiary border-border-default hover:bg-raised hover:text-secondary'
-                        }`}
+                    }`}
                 >
                     {rangeMode === 'custom' ? (
                         <>
