@@ -9,6 +9,7 @@ import { StorageService } from '../../core/src/services/storage.service.js';
 import { TimerService } from '../../core/src/services/timer.service.js';
 import { VSCodeMessagingAdapter } from './adapters/vscode-messaging.adapter.js';
 import { VSCodeStorageAdapter } from './adapters/vscode-storage.adapter.js';
+import { registerCommands } from './commands.js';
 
 /**
  * Called by VS Code when the extension is activated.
@@ -34,6 +35,7 @@ export function activate(context) {
         new VSCodeStorageAdapter(context.globalState, context.secrets, storageEvents),
     );
     TimerService.setMessagingPort(new VSCodeMessagingAdapter());
+    registerCommands(context);
 
     console.log('OctoClock: activated');
 }
