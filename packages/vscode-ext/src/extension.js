@@ -6,6 +6,8 @@
 
 import { storageEvents } from '../../core/src/services/storage-events.js';
 import { StorageService } from '../../core/src/services/storage.service.js';
+import { TimerService } from '../../core/src/services/timer.service.js';
+import { VSCodeMessagingAdapter } from './adapters/vscode-messaging.adapter.js';
 import { VSCodeStorageAdapter } from './adapters/vscode-storage.adapter.js';
 
 /**
@@ -31,6 +33,7 @@ export function activate(context) {
     StorageService.setAdapter(
         new VSCodeStorageAdapter(context.globalState, context.secrets, storageEvents),
     );
+    TimerService.setMessagingPort(new VSCodeMessagingAdapter());
 
     console.log('OctoClock: activated');
 }
