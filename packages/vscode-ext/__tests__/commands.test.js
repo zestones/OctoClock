@@ -13,10 +13,16 @@ vi.mock('vscode', () => ({
     },
 }));
 
+vi.mock('../../core/src/services/sync.service.js', () => ({
+    syncRepoFromGitHub: vi.fn().mockResolvedValue({ importedCount: 1 }),
+}));
+
 import * as vscode from 'vscode';
 import { StoragePort } from '../../core/src/ports/storage.port.js';
 import { GitHubService } from '../../core/src/services/github.service.js';
+import { PinnedReposService } from '../../core/src/services/pinned-repos.service.js';
 import { StorageService } from '../../core/src/services/storage.service.js';
+import { syncRepoFromGitHub } from '../../core/src/services/sync.service.js';
 import { TimerService } from '../../core/src/services/timer.service.js';
 import { STORAGE_KEYS } from '../../core/src/utils/constants.utils.js';
 import { normalizeIssueUrl, parseDuration, registerCommands } from '../src/commands.js';
@@ -464,6 +470,142 @@ describe('OctoClock session commands', () => {
         it('returns early when item is undefined', async () => {
             await getHandler('octoclock.editSession')(undefined);
             expect(win2.showInputBox).not.toHaveBeenCalled();
+        });
+    });
+});
+
+// ---------------------------------------------------------------------------
+// octoclock.pinRepo / octoclock.unpinRepo
+// ---------------------------------------------------------------------------
+describe('OctoClock repo pin commands', () => {
+    let storage;
+    /** @type {any} */
+    let addPinnedRepoSpy;
+    /** @type {any} */
+    let removePinnedRepoSpy;
+    /** @type {any} */
+    const win3 = vscode.window;
+
+    beforeEach(() => {
+        storage = new InMemoryStorage();
+        StorageService.setAdapter(storage);
+        vi.clearAllMocks();
+
+        addPinnedRepoSpy = vi.spyOn(PinnedReposService, 'addPinnedRepo');
+        addPinnedRepoSpy.mockResolvedValue(undefined);
+        removePinnedRepoSpy = vi.spyOn(PinnedReposService, 'removePinnedRepo');
+        removePinnedRepoSpy.mockResolvedValue(undefined);
+
+        registerCommands(makeContext());
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
+        StorageService.setAdapter(null);
+    });
+
+    // -----------------------------------------------------------------------
+    // octoclock.pinRepo
+    // -----------------------------------------------------------------------
+    describe('octoclock.pinRepo', () => {
+        it('is registered', () => {
+            expect(vscode.commands.registerCommand).toHaveBeenCalledWith(
+                'octoclock.pinRepo',
+                expect.any(Function),
+            );
+        });
+
+        it('pins a repo and shows an info message', async () => {
+            win3.showInputBox.mockResolvedValue('owner/my-repo');
+            await getHandler('octoclock.pinRepo')();
+
+            expect(addPinnedRepoSpy).toHaveBeenCalledWith({ fullName: 'owner/my-repo' });
+            expect(win3.showInformationMessage).toHaveBeenCalledWith(
+                expect.stringContaining('owner/my-repo'),
+            );
+        });
+
+        it('returns early when user cancels the input box', async () => {
+            win3.showInputBox.mockResolvedValue(undefined);
+            await getHandler('octoclock.pinRepo')();
+
+            expect(addPinnedRepoSpy).not.toHaveBeenCalled();
+        });
+
+        it('shows an error for an invalid owner/repo format', async () => {
+            win3.showInputBox.mockResolvedValue('not-a-repo');
+            await getHandler('octoclock.pinRepo')();
+
+            expect(addPinnedRepoSpy).not.toHaveBeenCalled();
+            expect(win3.showErrorMessage).toHaveBeenCalledWith(
+                expect.stringContaining('Invalid repository format'),
+            );
+        });
+
+        it('calls syncRepoFromGitHub when AUTO_SYNC is enabled', async () => {
+            await storage.set(STORAGE_KEYS.AUTO_SYNC, true);
+            win3.showInputBox.mockResolvedValue('owner/my-repo');
+            await getHandler('octoclock.pinRepo')();
+
+            expect(syncRepoFromGitHub).toHaveBeenCalledWith('owner', 'my-repo');
+        });
+
+        it('does not call syncRepoFromGitHub when AUTO_SYNC is disabled', async () => {
+            await storage.set(STORAGE_KEYS.AUTO_SYNC, false);
+            win3.showInputBox.mockResolvedValue('owner/my-repo');
+            await getHandler('octoclock.pinRepo')();
+
+            expect(syncRepoFromGitHub).not.toHaveBeenCalled();
+        });
+
+        it('shows an error when addPinnedRepo throws', async () => {
+            addPinnedRepoSpy.mockRejectedValue(new Error('write error'));
+            win3.showInputBox.mockResolvedValue('owner/my-repo');
+            await getHandler('octoclock.pinRepo')();
+
+            expect(win3.showErrorMessage).toHaveBeenCalledWith(
+                expect.stringContaining('write error'),
+            );
+        });
+    });
+
+    // -----------------------------------------------------------------------
+    // octoclock.unpinRepo
+    // -----------------------------------------------------------------------
+    describe('octoclock.unpinRepo', () => {
+        it('is registered', () => {
+            expect(vscode.commands.registerCommand).toHaveBeenCalledWith(
+                'octoclock.unpinRepo',
+                expect.any(Function),
+            );
+        });
+
+        it('unpins a repo and shows an info message', async () => {
+            await getHandler('octoclock.unpinRepo')({ fullName: 'owner/my-repo' });
+
+            expect(removePinnedRepoSpy).toHaveBeenCalledWith('owner/my-repo');
+            expect(win3.showInformationMessage).toHaveBeenCalledWith(
+                expect.stringContaining('owner/my-repo'),
+            );
+        });
+
+        it('returns early when item is undefined', async () => {
+            await getHandler('octoclock.unpinRepo')(undefined);
+            expect(removePinnedRepoSpy).not.toHaveBeenCalled();
+        });
+
+        it('returns early when item has no fullName', async () => {
+            await getHandler('octoclock.unpinRepo')({});
+            expect(removePinnedRepoSpy).not.toHaveBeenCalled();
+        });
+
+        it('shows an error when removePinnedRepo throws', async () => {
+            removePinnedRepoSpy.mockRejectedValue(new Error('delete error'));
+            await getHandler('octoclock.unpinRepo')({ fullName: 'owner/my-repo' });
+
+            expect(win3.showErrorMessage).toHaveBeenCalledWith(
+                expect.stringContaining('delete error'),
+            );
         });
     });
 });
