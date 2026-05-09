@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'preact/hooks';
+import { TimeService } from '../../../packages/core/src/utils/time.utils.js';
 import { IconChevronRight, IconUser } from '../../icons.jsx';
-import { TimeService } from '../../utils/time.utils.js';
 
 export function ContributorsView({ repoDetails }) {
     const [expandedUser, setExpandedUser] = useState(null);
@@ -123,11 +123,10 @@ export function ContributorsView({ repoDetails }) {
                             <div key={contrib.user}>
                                 <button
                                     type="button"
-                                    className={`w-full text-left rounded-xl p-2.5 cursor-pointer transition-all border ${
-                                        isOpen
+                                    className={`w-full text-left rounded-xl p-2.5 cursor-pointer transition-all border ${isOpen
                                             ? 'bg-surface border-border-default shadow-sm'
                                             : 'bg-base border-transparent hover:bg-surface hover:border-border-subtle'
-                                    }`}
+                                        }`}
                                     onClick={() => setExpandedUser(isOpen ? null : contrib.user)}
                                 >
                                     {/* Name + time row */}

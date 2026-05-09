@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
+import { TimerService } from '../../../packages/core/src/services/timer.service.js';
+import { TimeService } from '../../../packages/core/src/utils/time.utils.js';
 import { EditTimeModal } from '../../components/EditTimeModal.jsx';
 import { Modal } from '../../components/Modal.jsx';
 import { SearchInput } from '../../components/SearchInput.jsx';
@@ -11,8 +13,6 @@ import {
     IconTrash,
     IconUser,
 } from '../../icons.jsx';
-import { TimerService } from '../../services/timer.service.js';
-import { TimeService } from '../../utils/time.utils.js';
 import { ContributorsView } from './ContributorsView.jsx';
 
 export function RepoDetailView({ repo, repoDetails, userMode, onBack }) {
@@ -129,9 +129,8 @@ export function RepoDetailView({ repo, repoDetails, userMode, onBack }) {
                                 type="button"
                                 key={t.id}
                                 onClick={() => setDetailTab(t.id)}
-                                className={`relative z-10 flex-1 text-[11px] px-2 py-1.5 rounded-md cursor-pointer transition-colors font-medium text-center ${
-                                    detailTab === t.id ? 'text-accent-text' : 'text-muted hover:text-secondary'
-                                }`}
+                                className={`relative z-10 flex-1 text-[11px] px-2 py-1.5 rounded-md cursor-pointer transition-colors font-medium text-center ${detailTab === t.id ? 'text-accent-text' : 'text-muted hover:text-secondary'
+                                    }`}
                             >
                                 {t.label}
                             </button>
@@ -177,11 +176,10 @@ export function RepoDetailView({ repo, repoDetails, userMode, onBack }) {
                                         {/* Issue row */}
                                         <button
                                             type="button"
-                                            className={`w-full text-left rounded-xl px-3 py-2 cursor-pointer transition-all border ${
-                                                isOpen
+                                            className={`w-full text-left rounded-xl px-3 py-2 cursor-pointer transition-all border ${isOpen
                                                     ? 'bg-surface border-border-default shadow-sm'
                                                     : 'bg-base border-transparent hover:bg-surface hover:border-border-subtle'
-                                            }`}
+                                                }`}
                                             onClick={() => setExpandedIssue(isOpen ? null : issue.url)}
                                         >
                                             <div className="flex items-center gap-2">

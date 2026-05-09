@@ -1,4 +1,8 @@
 import { useEffect, useState } from 'preact/hooks';
+import { IssueStorageService } from '../../packages/core/src/services/issue-storage.service.js';
+import { StorageService } from '../../packages/core/src/services/storage.service.js';
+import { syncFromGitHub } from '../../packages/core/src/services/sync.service.js';
+import { STORAGE_KEYS } from '../../packages/core/src/utils/constants.utils.js';
 import { ActiveTimer } from '../components/ActiveTimer.jsx';
 import { ErrorBoundary } from '../components/ErrorBoundary.jsx';
 import { Modal } from '../components/Modal.jsx';
@@ -8,10 +12,6 @@ import { useStorageListener } from '../hooks/useStorageListener.js';
 import { useTheme } from '../hooks/useTheme.js';
 import { useUIState } from '../hooks/useUIState.js';
 import { IconCalendar, IconChart, IconIssues, IconSettings } from '../icons.jsx';
-import { IssueStorageService } from '../services/issue-storage.service.js';
-import { StorageService } from '../services/storage.service.js';
-import { syncFromGitHub } from '../services/sync.service.js';
-import { STORAGE_KEYS } from '../utils/constants.utils.js';
 import { CalendarView } from './views/CalendarView.jsx';
 import { IssuesTab } from './views/IssuesTab.jsx';
 import { StatsTab } from './views/StatsTab.jsx';
@@ -193,9 +193,8 @@ export function App() {
                                     type="button"
                                     key={id}
                                     onClick={() => setPage(id)}
-                                    className={`relative z-10 flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-xl cursor-pointer transition-colors duration-200 ${
-                                        active ? 'text-white' : 'text-muted hover:text-primary'
-                                    }`}
+                                    className={`relative z-10 flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-xl cursor-pointer transition-colors duration-200 ${active ? 'text-white' : 'text-muted hover:text-primary'
+                                        }`}
                                 >
                                     <Icon size={16} strokeWidth={active ? 2.5 : 1.75} />
                                     <span className={`text-[9px] ${active ? 'font-bold' : 'font-medium'}`}>

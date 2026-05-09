@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { MessagingPort } from '../../packages/core/src/ports/messaging.port.js';
-import { TimerService } from '../../src/services/timer.service.js';
+import { TimerService } from '../../packages/core/src/services/timer.service.js';
 
 // ---------------------------------------------------------------------------
 // Minimal stub implementations of MessagingPort

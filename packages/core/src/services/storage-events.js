@@ -1,4 +1,4 @@
-import { StorageEventsPort } from '../../packages/core/src/ports/storage-events.port.js';
+import { StorageEventsPort } from '../ports/storage-events.port.js';
 
 /**
  * Process-scoped singleton StorageEventsPort.

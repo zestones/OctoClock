@@ -34,7 +34,7 @@ afterAll(() => {
 
 describe('browser-bootstrap', () => {
     it('registers the Chrome storage adapter — StorageService.get routes to chrome.storage.local.get', async () => {
-        const { StorageService } = await import('../src/services/storage.service.js');
+        const { StorageService } = await import('../packages/core/src/services/storage.service.js');
         await StorageService.get('any-key');
         expect(fakeGet).toHaveBeenCalledWith('any-key');
     });
@@ -45,7 +45,7 @@ describe('browser-bootstrap', () => {
     });
 
     it('without bootstrap the adapter guard throws — proves registration is mandatory', async () => {
-        const { StorageService } = await import('../src/services/storage.service.js');
+        const { StorageService } = await import('../packages/core/src/services/storage.service.js');
 
         // Reset to simulate a missing bootstrap
         StorageService.setAdapter(null);
@@ -57,7 +57,7 @@ describe('browser-bootstrap', () => {
         const { ChromeStorageAdapter } = await import(
             '../packages/browser-ext/src/adapters/chrome-storage.adapter.js'
         );
-        const { storageEvents } = await import('../src/services/storage-events.js');
+        const { storageEvents } = await import('../packages/core/src/services/storage-events.js');
         StorageService.setAdapter(new ChromeStorageAdapter(storageEvents));
     });
 });

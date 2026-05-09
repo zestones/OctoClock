@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'preact/hooks';
+import { GitHubService } from '../../packages/core/src/services/github.service.js';
+import { GitHubStorageService } from '../../packages/core/src/services/github-storage.service.js';
+import { StorageService } from '../../packages/core/src/services/storage.service.js';
+import { syncFromGitHub } from '../../packages/core/src/services/sync.service.js';
+import { STORAGE_KEYS } from '../../packages/core/src/utils/constants.utils.js';
 import { IconDownload, IconMonitor, IconMoon, IconRefresh, IconSun, IconTrash } from '../icons.jsx';
-import { GitHubService } from '../services/github.service.js';
-import { GitHubStorageService } from '../services/github-storage.service.js';
-import { StorageService } from '../services/storage.service.js';
-import { syncFromGitHub } from '../services/sync.service.js';
-import { STORAGE_KEYS } from '../utils/constants.utils.js';
 
 function downloadFile(content, filename, mimeType) {
     const blob = new Blob([content], { type: mimeType });
@@ -67,7 +67,7 @@ export function Settings({ token, maskedToken, user, onTokenChange, onClearData,
     const handleSync = async () => {
         setSyncStatus('syncing');
         try {
-            const { PinnedReposService } = await import('../services/pinned-repos.service.js');
+            const { PinnedReposService } = await import('../../packages/core/src/services/pinned-repos.service.js');
             const repos = await PinnedReposService.getPinnedRepos();
             if (repos.length === 0) {
                 setSyncStatus('no-repos');
@@ -219,9 +219,8 @@ export function Settings({ token, maskedToken, user, onTokenChange, onClearData,
                                 type="button"
                                 key={id}
                                 onClick={() => onThemeChange(id)}
-                                className={`relative z-10 flex-1 flex items-center justify-center gap-1.5 text-[12px] font-medium py-2 rounded-lg cursor-pointer transition-colors ${
-                                    theme === id ? 'text-accent-text' : 'text-tertiary hover:text-secondary'
-                                }`}
+                                className={`relative z-10 flex-1 flex items-center justify-center gap-1.5 text-[12px] font-medium py-2 rounded-lg cursor-pointer transition-colors ${theme === id ? 'text-accent-text' : 'text-tertiary hover:text-secondary'
+                                    }`}
                             >
                                 <Icon size={13} />
                                 {label}
@@ -295,14 +294,12 @@ export function Settings({ token, maskedToken, user, onTokenChange, onClearData,
                                 <button
                                     type="button"
                                     onClick={toggleAutoSync}
-                                    className={`relative shrink-0 w-9 h-5 rounded-full transition-colors cursor-pointer ${
-                                        autoSync ? 'bg-accent' : 'bg-raised border border-border-subtle'
-                                    }`}
+                                    className={`relative shrink-0 w-9 h-5 rounded-full transition-colors cursor-pointer ${autoSync ? 'bg-accent' : 'bg-raised border border-border-subtle'
+                                        }`}
                                 >
                                     <span
-                                        className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${
-                                            autoSync ? 'translate-x-4' : ''
-                                        }`}
+                                        className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${autoSync ? 'translate-x-4' : ''
+                                            }`}
                                     />
                                 </button>
                             </div>

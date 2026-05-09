@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'preact/hooks';
-import { StorageService } from '../services/storage.service.js';
-import { storageEvents } from '../services/storage-events.js';
-import { TimerService } from '../services/timer.service.js';
-import { STORAGE_KEYS } from '../utils/constants.utils.js';
+import { StorageService } from '../../packages/core/src/services/storage.service.js';
+import { storageEvents } from '../../packages/core/src/services/storage-events.js';
+import { TimerService } from '../../packages/core/src/services/timer.service.js';
+import { STORAGE_KEYS } from '../../packages/core/src/utils/constants.utils.js';
 
 /**
  * @param {import('../../packages/core/src/ports/storage-events.port.js').StorageEventsPort} [eventsPort]

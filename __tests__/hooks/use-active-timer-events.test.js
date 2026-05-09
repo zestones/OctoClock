@@ -3,9 +3,9 @@ import { act, renderHook, waitFor } from '@testing-library/preact';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { StorageEventsPort } from '../../packages/core/src/ports/storage-events.port.js';
 import { StoragePort } from '../../packages/core/src/ports/storage.port.js';
-import { StorageService } from '../../src/services/storage.service.js';
+import { StorageService } from '../../packages/core/src/services/storage.service.js';
 import { useActiveTimer } from '../../src/hooks/useActiveTimer.js';
-import { STORAGE_KEYS } from '../../src/utils/constants.utils.js';
+import { STORAGE_KEYS } from '../../packages/core/src/utils/constants.utils.js';
 
 // ---------------------------------------------------------------------------
 // In-memory adapter

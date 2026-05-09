@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'preact/hooks';
-import { CacheService } from '../services/cache.service.js';
-import { GitHubService } from '../services/github.service.js';
-import { PinnedReposService } from '../services/pinned-repos.service.js';
-import { StorageService } from '../services/storage.service.js';
-import { syncRepoFromGitHub } from '../services/sync.service.js';
-import { STORAGE_KEYS } from '../utils/constants.utils.js';
+import { CacheService } from '../../packages/core/src/services/cache.service.js';
+import { GitHubService } from '../../packages/core/src/services/github.service.js';
+import { PinnedReposService } from '../../packages/core/src/services/pinned-repos.service.js';
+import { StorageService } from '../../packages/core/src/services/storage.service.js';
+import { syncRepoFromGitHub } from '../../packages/core/src/services/sync.service.js';
+import { STORAGE_KEYS } from '../../packages/core/src/utils/constants.utils.js';
 
 export function useIssuesData() {
     const [pinnedRepos, setPinnedRepos] = useState([]);

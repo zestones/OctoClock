@@ -20,10 +20,10 @@ function getErrorMessage(error) {
  */
 
 export class TimerService {
-    /** @type {import('../../packages/core/src/ports/messaging.port.js').MessagingPort | null} */
+    /** @type {import('../ports/messaging.port.js').MessagingPort | null} */
     static #messagingPort = null;
 
-    /** @param {import('../../packages/core/src/ports/messaging.port.js').MessagingPort} port */
+    /** @param {import('../ports/messaging.port.js').MessagingPort} port */
     static setMessagingPort(port) {
         TimerService.#messagingPort = port;
     }
