@@ -1,8 +1,7 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { activate, deactivate } from '../src/extension.js';
 
-// commands.js and tree-view.js import 'vscode' — provide a minimal mock so
-// activate() can run in the test environment without the VS Code extension host.
+// Must be hoisted before any import that touches 'vscode'.
 vi.mock('vscode', () => ({
     commands: {
         registerCommand: vi.fn(() => ({ dispose: vi.fn() })),
@@ -42,6 +41,15 @@ vi.mock('vscode', () => ({
     },
 }));
 
+vi.mock('../../core/src/services/sync.service.js', () => ({
+    syncFromGitHub: vi.fn().mockResolvedValue({ importedCount: 3 }),
+    syncRepoFromGitHub: vi.fn().mockResolvedValue({ importedCount: 1 }),
+}));
+
+import * as vscode from 'vscode';
+import { syncFromGitHub } from '../../core/src/services/sync.service.js';
+import { STORAGE_KEYS } from '../../core/src/utils/constants.utils.js';
+
 const makeContext = (overrides = {}) =>
     /** @type {import('vscode').ExtensionContext} */(
         /** @type {any} */ ({
@@ -70,5 +78,101 @@ describe('deactivate', () => {
     it('is exported and does not throw', () => {
         expect(typeof deactivate).toBe('function');
         expect(() => deactivate()).not.toThrow();
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Auto-sync recovery on activation
+// ---------------------------------------------------------------------------
+describe('activate — auto-sync recovery', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
+    /** Drains the microtask queue so fire-and-forget promises settle. */
+    const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+    it('calls syncFromGitHub when AUTO_SYNC is true and a token is stored', async () => {
+        const ctx = makeContext({
+            globalState: {
+                get: (key) => (key === STORAGE_KEYS.AUTO_SYNC ? true : undefined),
+                update: async () => { },
+            },
+            secrets: {
+                get: async (key) =>
+                    key === STORAGE_KEYS.GITHUB_TOKEN ? JSON.stringify('my-token') : undefined,
+                store: async () => { },
+                delete: async () => { },
+            },
+        });
+
+        activate(ctx);
+        await flush();
+
+        expect(syncFromGitHub).toHaveBeenCalledOnce();
+    });
+
+    it('does not call syncFromGitHub when AUTO_SYNC is false', async () => {
+        const ctx = makeContext({
+            globalState: {
+                get: (key) => (key === STORAGE_KEYS.AUTO_SYNC ? false : undefined),
+                update: async () => { },
+            },
+            secrets: {
+                get: async (key) =>
+                    key === STORAGE_KEYS.GITHUB_TOKEN ? JSON.stringify('my-token') : undefined,
+                store: async () => { },
+                delete: async () => { },
+            },
+        });
+
+        activate(ctx);
+        await flush();
+
+        expect(syncFromGitHub).not.toHaveBeenCalled();
+    });
+
+    it('does not call syncFromGitHub when the token is absent', async () => {
+        const ctx = makeContext({
+            globalState: {
+                get: (key) => (key === STORAGE_KEYS.AUTO_SYNC ? true : undefined),
+                update: async () => { },
+            },
+            secrets: {
+                get: async () => undefined,
+                store: async () => { },
+                delete: async () => { },
+            },
+        });
+
+        activate(ctx);
+        await flush();
+
+        expect(syncFromGitHub).not.toHaveBeenCalled();
+    });
+
+    it('does not throw when syncFromGitHub rejects', async () => {
+        /** @type {any} */
+        const spy = syncFromGitHub;
+        spy.mockRejectedValue(new Error('network timeout'));
+
+        const ctx = makeContext({
+            globalState: {
+                get: (key) => (key === STORAGE_KEYS.AUTO_SYNC ? true : undefined),
+                update: async () => { },
+            },
+            secrets: {
+                get: async (key) =>
+                    key === STORAGE_KEYS.GITHUB_TOKEN ? JSON.stringify('tok') : undefined,
+                store: async () => { },
+                delete: async () => { },
+            },
+        });
+
+        // Error must be swallowed — activation must not reject.
+        await expect(async () => {
+            activate(ctx);
+            await flush();
+        }).not.toThrow();
     });
 });

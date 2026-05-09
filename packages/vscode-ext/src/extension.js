@@ -7,7 +7,9 @@
 import * as vscode from 'vscode';
 import { storageEvents } from '../../core/src/services/storage-events.js';
 import { StorageService } from '../../core/src/services/storage.service.js';
+import { syncFromGitHub } from '../../core/src/services/sync.service.js';
 import { TimerService } from '../../core/src/services/timer.service.js';
+import { STORAGE_KEYS } from '../../core/src/utils/constants.utils.js';
 import { VSCodeMessagingAdapter } from './adapters/vscode-messaging.adapter.js';
 import { VSCodeStorageAdapter } from './adapters/vscode-storage.adapter.js';
 import { registerCommands } from './commands.js';
@@ -38,6 +40,20 @@ export function activate(context) {
         new VSCodeStorageAdapter(context.globalState, context.secrets, storageEvents),
     );
     TimerService.setMessagingPort(new VSCodeMessagingAdapter());
+
+    // Non-blocking recovery: if AUTO_SYNC is enabled and a GitHub token is
+    // present, pull tracker-comment data from GitHub and merge it into local
+    // storage. Fire-and-forget so activation completes immediately and any
+    // network errors are logged rather than surfaced to the user.
+    Promise.all([
+        StorageService.get(STORAGE_KEYS.AUTO_SYNC),
+        StorageService.get(STORAGE_KEYS.GITHUB_TOKEN),
+    ]).then(([autoSync, token]) => {
+        if (autoSync && token) {
+            syncFromGitHub().catch((e) => console.error('OctoClock: Auto-sync failed:', e));
+        }
+    }).catch((e) => console.error('OctoClock: Failed to check auto-sync settings:', e));
+
     registerCommands(context);
 
     const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);

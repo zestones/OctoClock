@@ -7,7 +7,9 @@
 
 import * as vscode from 'vscode';
 import { GitHubService } from '../../core/src/services/github.service.js';
+import { PinnedReposService } from '../../core/src/services/pinned-repos.service.js';
 import { StorageService } from '../../core/src/services/storage.service.js';
+import { syncRepoFromGitHub } from '../../core/src/services/sync.service.js';
 import { TimerService } from '../../core/src/services/timer.service.js';
 import { STORAGE_KEYS } from '../../core/src/utils/constants.utils.js';
 import { TimeService } from '../../core/src/utils/time.utils.js';
@@ -144,6 +146,65 @@ export function registerCommands(context) {
             } catch (error) {
                 vscode.window.showErrorMessage(
                     `OctoClock: Sync failed — ${error instanceof Error ? error.message : String(error)}`,
+                );
+            }
+        }),
+
+        // ----------------------------------------------------------------
+        // octoclock.pinRepo
+        // Prompt for an owner/repo string, pin it via PinnedReposService,
+        // then fire-and-forget syncRepoFromGitHub when AUTO_SYNC is on.
+        // ----------------------------------------------------------------
+        vscode.commands.registerCommand('octoclock.pinRepo', async () => {
+            const raw = await vscode.window.showInputBox({
+                prompt: 'Enter the GitHub repository to pin',
+                placeHolder: 'owner/repo',
+                validateInput(v) {
+                    const parts = v.trim().split('/');
+                    return parts.length === 2 && parts[0] && parts[1]
+                        ? null
+                        : 'Expected format: owner/repo';
+                },
+            });
+            if (!raw) return;
+            const parts = raw.trim().split('/');
+            if (parts.length !== 2 || !parts[0] || !parts[1]) {
+                vscode.window.showErrorMessage(
+                    'OctoClock: Invalid repository format — use owner/repo',
+                );
+                return;
+            }
+            const [owner, repoName] = parts;
+            const fullName = `${owner}/${repoName}`;
+            try {
+                await PinnedReposService.addPinnedRepo({ fullName });
+                vscode.window.showInformationMessage(`OctoClock: Pinned ${fullName}`);
+                const autoSync = await StorageService.get(STORAGE_KEYS.AUTO_SYNC);
+                if (autoSync) {
+                    syncRepoFromGitHub(owner, repoName).catch((e) =>
+                        console.error(`OctoClock: Auto-sync failed for ${fullName}:`, e),
+                    );
+                }
+            } catch (error) {
+                vscode.window.showErrorMessage(
+                    `OctoClock: ${error instanceof Error ? error.message : String(error)}`,
+                );
+            }
+        }),
+
+        // ----------------------------------------------------------------
+        // octoclock.unpinRepo
+        // Remove a pinned repository via the tree-view context menu.
+        // The item argument is the RepoNode that was right-clicked.
+        // ----------------------------------------------------------------
+        vscode.commands.registerCommand('octoclock.unpinRepo', async (item) => {
+            if (!item?.fullName) return;
+            try {
+                await PinnedReposService.removePinnedRepo(item.fullName);
+                vscode.window.showInformationMessage(`OctoClock: Unpinned ${item.fullName}`);
+            } catch (error) {
+                vscode.window.showErrorMessage(
+                    `OctoClock: ${error instanceof Error ? error.message : String(error)}`,
                 );
             }
         }),

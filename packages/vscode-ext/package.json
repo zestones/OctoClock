@@ -49,10 +49,32 @@
                 "command": "octoclock.editSession",
                 "title": "Edit session duration",
                 "category": "OctoClock"
+            },
+            {
+                "command": "octoclock.pinRepo",
+                "title": "Pin repository",
+                "category": "OctoClock"
+            },
+            {
+                "command": "octoclock.unpinRepo",
+                "title": "Unpin repository",
+                "category": "OctoClock"
             }
         ],
         "menus": {
+            "view/title": [
+                {
+                    "command": "octoclock.pinRepo",
+                    "when": "view == octoclock.repoTree",
+                    "group": "navigation"
+                }
+            ],
             "view/item/context": [
+                {
+                    "command": "octoclock.unpinRepo",
+                    "when": "viewItem == octoclock.repo",
+                    "group": "octoclock@1"
+                },
                 {
                     "command": "octoclock.deleteSession",
                     "when": "viewItem == octoclock.session",
