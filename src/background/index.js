@@ -1,6 +1,7 @@
 // background/index.js
 
 import { ChromeStorageAdapter } from '../../packages/browser-ext/src/adapters/chrome-storage.adapter.js';
+import { SyncQueue } from '../../packages/core/src/sync-queue.js';
 import { CacheService } from '../services/cache.service.js';
 import { GitHubService } from '../services/github.service.js';
 import { GitHubStorageService } from '../services/github-storage.service.js';
@@ -13,7 +14,7 @@ StorageService.setAdapter(new ChromeStorageAdapter(storageEvents));
 
 import { CACHE_REFRESH_INTERVAL, SCHEMA_VERSION, STORAGE_KEYS } from '../utils/constants.utils.js';
 
-const trackerSyncQueues = new Map();
+const trackerSyncQueue = new SyncQueue();
 const TRACKER_SYNC_LOG_PREFIX = '[TrackerSync][background]';
 
 function getErrorMessage(error) {
@@ -87,33 +88,17 @@ async function syncTrackerComment({ issueUrl, owner, repo, issueNumber }) {
 }
 
 function queueTrackerCommentSync(payload) {
-    const previous = trackerSyncQueues.get(payload.issueUrl) ?? Promise.resolve();
-    const hadPendingJob = trackerSyncQueues.has(payload.issueUrl);
+    const hadPendingJob = trackerSyncQueue.has(payload.issueUrl);
 
     console.info(
         TRACKER_SYNC_LOG_PREFIX,
         hadPendingJob ? 'Queueing tracker sync behind pending job' : 'Queueing tracker sync',
-        {
-            issueUrl: payload.issueUrl,
-        },
+        { issueUrl: payload.issueUrl },
     );
 
-    const next = previous
-        .catch((error) => {
-            console.warn(TRACKER_SYNC_LOG_PREFIX, 'Previous tracker sync failed; continuing queue', {
-                issueUrl: payload.issueUrl,
-                error: getErrorMessage(error),
-            });
-        })
-        .then(() => syncTrackerComment(payload));
-
-    trackerSyncQueues.set(payload.issueUrl, next);
+    const next = trackerSyncQueue.enqueue(payload.issueUrl, () => syncTrackerComment(payload));
 
     next.finally(() => {
-        if (trackerSyncQueues.get(payload.issueUrl) === next) {
-            trackerSyncQueues.delete(payload.issueUrl);
-        }
-
         console.info(TRACKER_SYNC_LOG_PREFIX, 'Tracker sync queue drained for issue', {
             issueUrl: payload.issueUrl,
         });

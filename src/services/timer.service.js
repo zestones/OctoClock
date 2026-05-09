@@ -12,20 +12,6 @@ function getErrorMessage(error) {
     return String(error);
 }
 
-function normalizeSyncErrorMessage(error) {
-    const message = getErrorMessage(error);
-
-    if (message === 'The message port closed before a response was received.') {
-        return 'Background worker did not answer. Reload the extension and try again.';
-    }
-
-    if (message === 'Could not establish connection. Receiving end does not exist.') {
-        return 'Background worker is not loaded. Reload the extension and try again.';
-    }
-
-    return message;
-}
-
 /**
  * @typedef {Object} SessionMutationResult
  * @property {boolean} ok
@@ -34,6 +20,22 @@ function normalizeSyncErrorMessage(error) {
  */
 
 export class TimerService {
+    /** @type {import('../../packages/core/src/ports/messaging.port.js').MessagingPort | null} */
+    static #messagingPort = null;
+
+    /** @param {import('../../packages/core/src/ports/messaging.port.js').MessagingPort} port */
+    static setMessagingPort(port) {
+        TimerService.#messagingPort = port;
+    }
+
+    static #assertMessagingPort() {
+        if (!TimerService.#messagingPort) {
+            throw new Error(
+                'TimerService: no MessagingPort set. Call TimerService.setMessagingPort() during bootstrap.',
+            );
+        }
+    }
+
     /** @param {string} issueUrl @returns {Promise<number>} Total seconds */
     static async getTotalTimeForIssue(issueUrl) {
         /** @type {import('../utils/schema.utils.js').TrackedTimeEntry[]} */
@@ -44,53 +46,24 @@ export class TimerService {
     }
 
     /**
-     * Queue tracker-comment sync through the background worker so it can outlive
-     * the popup lifecycle and serialize updates for the same issue.
+     * Queue tracker-comment sync through the messaging port.
+     * In the browser the port forwards to the background worker, which serializes
+     * writes per issue via SyncQueue. In VS Code the port calls GitHub directly.
      */
     static async syncComment(issueUrl, owner, repo, issueNumber) {
-        return new Promise((resolve, reject) => {
-            console.info(TRACKER_SYNC_LOG_PREFIX, 'Requesting background tracker sync', {
-                issueUrl,
-                owner,
-                repo,
-                issueNumber,
-            });
-            chrome.runtime.sendMessage(
-                {
-                    action: 'syncTrackerComment',
-                    issueUrl,
-                    owner,
-                    repo,
-                    issueNumber,
-                },
-                (response) => {
-                    if (chrome.runtime.lastError) {
-                        const message = normalizeSyncErrorMessage(chrome.runtime.lastError);
-                        console.error(TRACKER_SYNC_LOG_PREFIX, 'Background message failed', {
-                            issueUrl,
-                            error: message,
-                        });
-                        reject(new Error(message));
-                        return;
-                    }
-                    if (!response?.ok) {
-                        const message = response?.error || 'Tracker comment sync failed';
-                        console.error(TRACKER_SYNC_LOG_PREFIX, 'Background sync failed', {
-                            issueUrl,
-                            error: message,
-                            response,
-                        });
-                        reject(new Error(message));
-                        return;
-                    }
-                    console.info(TRACKER_SYNC_LOG_PREFIX, 'Background sync completed', {
-                        issueUrl,
-                        commentId: response.commentId,
-                    });
-                    resolve(response);
-                },
-            );
+        TimerService.#assertMessagingPort();
+        console.info(TRACKER_SYNC_LOG_PREFIX, 'Requesting tracker sync', {
+            issueUrl,
+            owner,
+            repo,
+            issueNumber,
         });
+        const response = await TimerService.#messagingPort.syncComment(issueUrl, owner, repo, issueNumber);
+        console.info(TRACKER_SYNC_LOG_PREFIX, 'Tracker sync completed', {
+            issueUrl,
+            commentId: response.commentId,
+        });
+        return response;
     }
 
     /** @param {string} issueUrl @param {string|null} [issueTitle] @returns {Promise<import('../utils/schema.utils.js').TimerResult>} */
@@ -124,7 +97,8 @@ export class TimerService {
             }
 
             const totalTime = await TimerService.getTotalTimeForIssue(issueUrl);
-            chrome.runtime.sendMessage({ action: 'timerStarted', issueUrl });
+            TimerService.#assertMessagingPort();
+            TimerService.#messagingPort.notifyTimerStarted(issueUrl);
             return { issueUrl, totalTime, isRunning: true };
         } catch (error) {
             console.error('Failed to start timer:', error);
@@ -179,7 +153,8 @@ export class TimerService {
                 });
             }
 
-            chrome.runtime.sendMessage({ action: 'timerStopped', issueUrl });
+            TimerService.#assertMessagingPort();
+            TimerService.#messagingPort.notifyTimerStopped(issueUrl);
             return { issueUrl, totalTime, isRunning: false };
         } catch (error) {
             console.error('Failed to stop timer:', error);
