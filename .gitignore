@@ -3,3 +3,6 @@ node_modules
 /dist
 dist
 /.idea
+
+# VS Code e2e test binary cache
+.vscode-test/
