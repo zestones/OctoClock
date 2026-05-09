@@ -67,11 +67,15 @@ export class IssueNode extends vscode.TreeItem {
 
 export class SessionNode extends vscode.TreeItem {
     /**
+     * @param {string} issueUrl - canonical issue path from the parent IssueNode
      * @param {string} date - "YYYY-MM-DD"
      * @param {number} seconds
      */
-    constructor(date, seconds) {
+    constructor(issueUrl, date, seconds) {
         super(`${date} — ${TimeService.formatHuman(seconds)}`, vscode.TreeItemCollapsibleState.None);
+        this.issueUrl = issueUrl;
+        this.date = date;
+        this.seconds = seconds;
         this.contextValue = 'octoclock.session';
     }
 }
@@ -158,7 +162,7 @@ export class RepoTreeProvider {
                 // issueUrl is the raw key from getRepoBreakdownDetailed — it IS
                 // the stored TrackedTimeEntry.issueUrl, never derived from labels.
                 const sessionNodes = data.sessions.map(
-                    (s) => new SessionNode(s.date, s.seconds),
+                    (s) => new SessionNode(issueUrl, s.date, s.seconds),
                 );
                 return new IssueNode(
                     issueUrl,

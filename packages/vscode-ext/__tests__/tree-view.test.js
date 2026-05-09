@@ -158,19 +158,26 @@ describe('IssueNode', () => {
 
 describe('SessionNode', () => {
     it('label includes date and formatted duration', () => {
-        const node = new SessionNode('2025-05-09', 3660);
+        const node = new SessionNode('/owner/repo/issues/1', '2025-05-09', 3660);
         expect(node.label).toContain('2025-05-09');
         expect(node.label).toContain('1h');
     });
 
     it('collapsibleState is None', () => {
-        const node = new SessionNode('2025-05-09', 60);
+        const node = new SessionNode('/owner/repo/issues/1', '2025-05-09', 60);
         expect(node.collapsibleState).toBe(0); // None
     });
 
     it('contextValue is octoclock.session', () => {
-        const node = new SessionNode('2025-05-09', 60);
+        const node = new SessionNode('/owner/repo/issues/1', '2025-05-09', 60);
         expect(node.contextValue).toBe('octoclock.session');
+    });
+
+    it('stores issueUrl, date, and seconds as properties', () => {
+        const node = new SessionNode('/owner/repo/issues/42', '2025-05-09', 3600);
+        expect(node.issueUrl).toBe('/owner/repo/issues/42');
+        expect(node.date).toBe('2025-05-09');
+        expect(node.seconds).toBe(3600);
     });
 });
 
@@ -318,11 +325,22 @@ describe('RepoTreeProvider', () => {
         expect(session.label).toMatch(/1h/);
     });
 
+    it('SessionNode exposes issueUrl, date and seconds for command handlers', async () => {
+        await storage.set(STORAGE_KEYS.TRACKED_TIMES, [ENTRY_A]);
+        const [repo] = await provider.getChildren(undefined);
+        const [issue] = await provider.getChildren(repo);
+        const [session] = /** @type {any[]} */ (await provider.getChildren(issue));
+
+        expect(session.issueUrl).toBe(ENTRY_A.issueUrl);
+        expect(session.date).toBe(ENTRY_A.date);
+        expect(session.seconds).toBe(ENTRY_A.seconds);
+    });
+
     // -----------------------------------------------------------------------
     // getChildren — SessionNode (leaf)
     // -----------------------------------------------------------------------
     it('returns [] for a SessionNode (it is a leaf)', async () => {
-        const session = new SessionNode('2025-05-09', 60);
+        const session = new SessionNode('/owner/repo/issues/1', '2025-05-09', 60);
         const result = await provider.getChildren(session);
         expect(result).toEqual([]);
     });
