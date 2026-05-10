@@ -16,6 +16,7 @@ import { registerCommands } from './commands.js';
 import { createStatusBarController } from './status-bar.js';
 import { RepoTreeProvider } from './tree-view.js';
 import { ActiveTimerProvider } from './webview/sidebar/active-timer/provider.js';
+import { MyIssuesProvider } from './webview/sidebar/my-issues/provider.js';
 
 /**
  * Called by VS Code when the extension is activated.
@@ -63,6 +64,16 @@ export function activate(context) {
             webviewOptions: { retainContextWhenHidden: true },
         }),
         activeTimerProvider,
+    );
+
+    const myIssuesProvider = new MyIssuesProvider(context, storageEvents);
+    context.subscriptions.push(
+        vscode.window.registerWebviewViewProvider(
+            MyIssuesProvider.viewType,
+            myIssuesProvider,
+            { webviewOptions: { retainContextWhenHidden: true } },
+        ),
+        myIssuesProvider,
     );
 
     const treeProvider = new RepoTreeProvider(storageEvents);
