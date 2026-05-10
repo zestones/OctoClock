@@ -43,6 +43,23 @@ vi.mock('vscode', () => ({
         createTreeView: vi.fn(() => ({ dispose: vi.fn() })),
         registerWebviewViewProvider: vi.fn(() => ({ dispose: vi.fn() })),
     },
+    workspace: {
+        workspaceFolders: [],
+        onDidChangeWorkspaceFolders: vi.fn(() => ({ dispose: vi.fn() })),
+        fs: { readFile: vi.fn().mockRejectedValue(new Error('not found')) },
+    },
+    Uri: { joinPath: vi.fn((base, ...segs) => ({ ...base, path: `${base?.path ?? ''}/${segs.join('/')}` })) },
+    ThemeIcon: class ThemeIcon {
+        constructor(id, color) {
+            this.id = id;
+            this.color = color;
+        }
+    },
+    ThemeColor: class ThemeColor {
+        constructor(id) {
+            this.id = id;
+        }
+    },
 }));
 
 vi.mock('../../core/src/services/sync.service.js', () => ({
