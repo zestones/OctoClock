@@ -5,6 +5,7 @@ import { activate, deactivate } from '../src/extension.js';
 vi.mock('vscode', () => ({
     commands: {
         registerCommand: vi.fn(() => ({ dispose: vi.fn() })),
+        executeCommand: vi.fn(),
     },
     StatusBarAlignment: { Left: 1, Right: 2 },
     TreeItemCollapsibleState: { None: 0, Collapsed: 1, Expanded: 2 },
@@ -40,6 +41,7 @@ vi.mock('vscode', () => ({
             command: undefined,
         })),
         createTreeView: vi.fn(() => ({ dispose: vi.fn() })),
+        registerWebviewViewProvider: vi.fn(() => ({ dispose: vi.fn() })),
     },
 }));
 
