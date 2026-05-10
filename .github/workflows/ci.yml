@@ -36,13 +36,16 @@ jobs:
         with:
           ref: ${{ github.head_ref || github.ref_name }}
           token: ${{ secrets.PAT_TOKEN }}
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-      - run: npm ci
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
       - name: Format & fix (biome)
-        run: npx @biomejs/biome check --write ./src
+        run: pnpm run format
       - name: Commit & push formatting changes
         id: auto-commit
         uses: stefanzweifel/git-auto-commit-action@v5
@@ -60,12 +63,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-      - run: npm ci
-      - run: npx @biomejs/biome check ./src
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run lint
 
   # -------------------------------------------------------
   # Typecheck — tsc via JSDoc
@@ -77,9 +83,32 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-      - run: npm ci
-      - run: npm run typecheck
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run typecheck
+
+  # -------------------------------------------------------
+  # Test — vitest unit tests
+  # -------------------------------------------------------
+  test:
+    name: "Test (vitest)"
+    needs: auto-format
+    if: needs.auto-format.outputs.changes_detected == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run test
