@@ -54,7 +54,7 @@ export default defineConfig({
                 'sidebar/active-timer/app': resolve(webviewDir, 'sidebar/active-timer/view/app.jsx'),
                 'sidebar/my-issues/app': resolve(webviewDir, 'sidebar/my-issues/view/app.jsx'),
                 'sidebar/team-stats/app': resolve(webviewDir, 'sidebar/team-stats/view/app.jsx'),
-                'dashboard/app': resolve(webviewDir, 'dashboard/app.js'),
+                'dashboard/app': resolve(webviewDir, 'dashboard/view/app.jsx'),
             },
             output: {
                 format: 'es',
