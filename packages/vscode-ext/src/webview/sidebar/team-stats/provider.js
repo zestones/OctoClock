@@ -21,6 +21,8 @@
 
 import * as vscode from 'vscode';
 import { CacheService } from '../../../../../core/src/services/cache.service.js';
+import { GitHubService } from '../../../../../core/src/services/github.service.js';
+import { GitHubStorageService } from '../../../../../core/src/services/github-storage.service.js';
 import { StorageService } from '../../../../../core/src/services/storage.service.js';
 import { AggregationService } from '../../../../../core/src/utils/aggregation.utils.js';
 import { STORAGE_KEYS } from '../../../../../core/src/utils/constants.utils.js';
@@ -106,8 +108,34 @@ export class TeamStatsProvider {
                 StorageService.get(STORAGE_KEYS.EVERYONE_DATA),
                 CacheService.getCachedUser().catch(() => null),
             ]);
-            const username = cachedUser?.login ?? 'me';
-            const payload = TeamStatsProvider._aggregate(trackedTimes ?? [], everyoneData ?? [], username);
+
+            // Populate the user cache on first use — the VS Code extension
+            // (unlike the browser popup) doesn't call setCachedUser anywhere
+            // else, so the team-stats avatar would never be shown without
+            // this fetch. Fire-and-forget when a token is configured.
+            let user = cachedUser;
+            if (!user?.login) {
+                const token = await GitHubStorageService.getGitHubToken();
+                if (token) {
+                    try {
+                        const fresh = await GitHubService.getUser();
+                        user = { login: fresh.login, avatar_url: fresh.avatar_url, name: fresh.name };
+                        await CacheService.setCachedUser(user);
+                    } catch (e) {
+                        console.error('OctoClock: TeamStats user fetch failed:', e);
+                    }
+                }
+            }
+
+            const currentUser = user?.login
+                ? { login: user.login, avatarUrl: user.avatar_url ?? null }
+                : null;
+            const payload = TeamStatsProvider._aggregate(
+                trackedTimes ?? [],
+                everyoneData ?? [],
+                currentUser?.login ?? 'me',
+            );
+            payload.currentUser = currentUser;
             this._view.webview.postMessage({ type: 'stats', payload });
             this._lastSentAt = Date.now();
         } catch {
@@ -116,7 +144,7 @@ export class TeamStatsProvider {
     }
 
     static _emptyPayload() {
-        return { myTimeToday: 0, teamTimeWeek: 0, issuesTouchedToday: 0, issueBars: [], teamRows: [] };
+        return { myTimeToday: 0, teamTimeWeek: 0, issuesTouchedToday: 0, issueBars: [], teamRows: [], currentUser: null };
     }
 
     /**
@@ -156,14 +184,17 @@ export class TeamStatsProvider {
         const teamTimeWeek = AggregationService.getTotalSeconds(weekEntries);
 
         // Top N issues by total time across the union.
-        /** @type {Record<string, { issueUrl: string, title: string, seconds: number }>} */
+        /** @type {Record<string, { issueUrl: string, title: string, issueNumber: string, seconds: number }>} */
         const issueAgg = {};
         for (const e of everyone) {
             const k = e.issueUrl;
             if (!issueAgg[k]) {
+                const parsed = AggregationService.parseEntryTitle(e.title || '');
+                const numFromUrl = (k.match(/\/issues\/(\d+)$/) || [])[1] || '';
                 issueAgg[k] = {
                     issueUrl: k,
-                    title: AggregationService.extractCleanTitle(e.title),
+                    title: parsed.issueTitle || AggregationService.extractCleanTitle(e.title),
+                    issueNumber: parsed.issueNumber?.replace(/^#/, '') || numFromUrl,
                     seconds: 0,
                 };
             }

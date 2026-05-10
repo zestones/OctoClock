@@ -40,7 +40,7 @@ export function getHtml(webview, extensionUri) {
       --ts-desc:     var(--vscode-descriptionForeground, #868686);
       --ts-muted:    #525252;
       --ts-border:   var(--vscode-panel-border, rgba(255,255,255,.08));
-      --ts-accent:   var(--vscode-charts-blue, #007acc);
+      --ts-accent:   #007acc;
       --ts-accent-2: #6fb3e8;
       --ts-mono:     var(--vscode-editor-font-family, 'Cascadia Code','SF Mono',Consolas,monospace);
     }
@@ -76,23 +76,33 @@ export function getHtml(webview, extensionUri) {
 
     /* ── Bar rows (mockup .bar-row / .bar-lbl / .bar-track / .bar-fill / .bar-val) ── */
     .bar-row { display: flex; align-items: center; gap: 7px; padding: 3px 8px; }
-    .bar-lbl {
-      width: 70px;
+    .bar-num {
+      font-family: var(--ts-mono);
       font-size: 11px;
-      color: var(--ts-desc);
+      color: var(--ts-accent-2);
+      flex-shrink: 0;
+      min-width: 30px;
+    }
+    .bar-lbl {
+      flex-shrink: 1;
+      min-width: 0;
+      max-width: 90px;
+      font-size: 11px;
+      color: var(--ts-fg);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      flex-shrink: 0;
     }
     .bar-track {
+      display: block;
       flex: 1;
-      height: 3px;
+      min-width: 24px;
+      height: 4px;
       background: rgba(255,255,255,.07);
       border-radius: 2px;
       overflow: hidden;
     }
-    .bar-fill { height: 100%; border-radius: 2px; background: var(--ts-accent); }
+    .bar-fill { display: block; height: 100%; border-radius: 2px; background: var(--ts-accent); min-width: 2px; }
     .bar-val {
       width: 44px;
       font-size: 11px;
@@ -123,7 +133,9 @@ export function getHtml(webview, extensionUri) {
       color: #fff;
       text-transform: uppercase;
       flex-shrink: 0;
+      overflow: hidden;
     }
+    .av img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .team-name {
       flex: 1;
       font-size: 12px;
