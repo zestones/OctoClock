@@ -68,11 +68,9 @@ export function activate(context) {
 
     const myIssuesProvider = new MyIssuesProvider(context, storageEvents);
     context.subscriptions.push(
-        vscode.window.registerWebviewViewProvider(
-            MyIssuesProvider.viewType,
-            myIssuesProvider,
-            { webviewOptions: { retainContextWhenHidden: true } },
-        ),
+        vscode.window.registerWebviewViewProvider(MyIssuesProvider.viewType, myIssuesProvider, {
+            webviewOptions: { retainContextWhenHidden: true },
+        }),
         myIssuesProvider,
     );
 

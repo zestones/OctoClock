@@ -120,9 +120,7 @@ export class MyIssuesProvider {
         // Re-push issues when workspace folders change.
         // Issues are global (not workspace-scoped) so this is a mechanism wiring
         // for future workspace-scoped filtering.
-        this._context.subscriptions.push(
-            vscode.workspace.onDidChangeWorkspaceFolders(() => this._sendIssues()),
-        );
+        this._context.subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(() => this._sendIssues()));
 
         // Restore timer state from storage (webview may open after timer started).
         StorageService.getMultiple([STORAGE_KEYS.ACTIVE_ISSUE, STORAGE_KEYS.START_TIME])
