@@ -53,6 +53,7 @@ vi.mock('vscode', () => ({
     },
     extensions: {
         getExtension: vi.fn(() => undefined),
+        onDidChange: vi.fn(() => ({ dispose: vi.fn() })),
     },
     languages: {
         registerCodeLensProvider: vi.fn(() => ({ dispose: vi.fn() })),

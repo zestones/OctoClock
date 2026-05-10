@@ -3,10 +3,11 @@
 import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('vscode', () => ({
-    extensions: { getExtension: vi.fn(() => undefined) },
+    extensions: { getExtension: vi.fn(() => undefined), onDidChange: vi.fn(() => ({ dispose: vi.fn() })) },
 }));
 
-import { findMatchingIssue } from '../../src/integrations/branch-watcher.js';
+import * as vscode from 'vscode';
+import { BranchWatcher, findMatchingIssue } from '../../src/integrations/branch-watcher.js';
 
 const issues = [
     { url: '/owner1/repo1/issues/42', title: 'a' },
@@ -48,5 +49,19 @@ describe('findMatchingIssue', () => {
     it('returns null for empty issue lists', () => {
         expect(findMatchingIssue('feature/42', [])).toBeNull();
         expect(findMatchingIssue('feature/42', null)).toBeNull();
+    });
+});
+
+describe('BranchWatcher', () => {
+    it('does not read vscode.git exports until the git extension is active', () => {
+        const exportsGetter = vi.fn(() => {
+            throw new Error("Extension 'vscode.git' is not known or not activated.");
+        });
+        const gitExtension = { isActive: false };
+        Object.defineProperty(gitExtension, 'exports', { get: exportsGetter });
+        vi.mocked(vscode.extensions.getExtension).mockReturnValueOnce(gitExtension);
+
+        expect(() => new BranchWatcher({ subscriptions: [] })).not.toThrow();
+        expect(exportsGetter).not.toHaveBeenCalled();
     });
 });

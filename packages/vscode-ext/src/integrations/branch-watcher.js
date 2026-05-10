@@ -68,20 +68,26 @@ export class BranchWatcher {
         /** @type {{ dispose(): unknown } | null} */
         this._stateSubscription = null;
 
-        // The git extension may not be ready immediately — try now and on
-        // extension activation events.
+        // The git extension may not be ready immediately — try now and
+        // whenever the set of active extensions changes (e.g. vscode.git
+        // finishes its own lazy activation). We must NOT call ext.activate()
+        // ourselves: VS Code throws if an extension tries to activate another.
         this._tryWire();
-        const ext = vscode.extensions.getExtension('vscode.git');
-        if (ext && !ext.isActive) {
-            ext.activate()
-                .then(() => this._tryWire())
-                .catch(() => {});
-        }
+        const extChangeSub = vscode.extensions.onDidChange?.(() => this._tryWire());
+        if (extChangeSub) this._context.subscriptions.push(extChangeSub);
     }
 
     _tryWire() {
         if (this._stateSubscription) return;
-        const api = vscode.extensions.getExtension('vscode.git')?.exports?.getAPI?.(1);
+        const gitExtension = vscode.extensions.getExtension('vscode.git');
+        if (!gitExtension?.isActive) return;
+
+        let api;
+        try {
+            api = gitExtension.exports?.getAPI?.(1);
+        } catch {
+            return;
+        }
         if (!api) return;
         const repo = api.repositories[0];
         if (!repo) {
@@ -92,9 +98,9 @@ export class BranchWatcher {
         }
         // Initial check for when activation happens after a branch is already
         // checked out.
-        this._onHeadChanged(repo).catch(() => {});
+        this._onHeadChanged(repo).catch(() => { });
         this._stateSubscription = repo.state.onDidChange(() => {
-            this._onHeadChanged(repo).catch(() => {});
+            this._onHeadChanged(repo).catch(() => { });
         });
         this._context.subscriptions.push(this._stateSubscription);
     }

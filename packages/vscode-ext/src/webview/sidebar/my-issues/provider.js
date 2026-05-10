@@ -40,152 +40,170 @@ const ISSUE_URL_RE = /^\/[^/]+\/[^/]+\/issues\/\d+$/;
  * @returns {{ id: number, title: string, status: string, repo: string, url: string }}
  */
 function mapEntry(entry) {
-    const parts = entry.url.split('/');
-    // /owner/repo/issues/42 → ['', 'owner', 'repo', 'issues', '42']
-    const id = parts.length >= 5 ? parseInt(parts[4], 10) : 0;
-    const repo = parts.length >= 3 ? `${parts[1]}/${parts[2]}` : '';
+  const parts = entry.url.split('/');
+  // /owner/repo/issues/42 → ['', 'owner', 'repo', 'issues', '42']
+  const id = parts.length >= 5 ? parseInt(parts[4], 10) : 0;
+  const repo = parts.length >= 3 ? `${parts[1]}/${parts[2]}` : '';
 
-    const titleParts = entry.title.split(' | ');
-    const human = titleParts.length >= 3 ? titleParts.slice(1, -1).join(' | ') : entry.title;
+  const titleParts = entry.title.split(' | ');
+  const human = titleParts.length >= 3 ? titleParts.slice(1, -1).join(' | ') : entry.title;
 
-    return { id, title: human || entry.title, status: 'open', repo, url: entry.url };
+  return { id, title: human || entry.title, status: 'open', repo, url: entry.url };
 }
 
 export class MyIssuesProvider {
-    static viewType = 'octoclock.myIssues';
+  static viewType = 'octoclock.myIssues';
 
-    /** @type {vscode.WebviewView | undefined} */
-    _view = undefined;
+  /** @type {vscode.WebviewView | undefined} */
+  _view = undefined;
 
-    /** @type {string | null} */
-    _activeIssue = null;
+  /** @type {string | null} */
+  _activeIssue = null;
 
-    /** @type {string | null} */
-    _startTime = null;
+  /** @type {string | null} */
+  _startTime = null;
 
-    /**
-     * @param {vscode.ExtensionContext} context
-     * @param {import('../../../../../core/src/ports/storage-events.port.js').StorageEventsPort} events
-     */
-    constructor(context, events) {
-        this._context = context;
+  /**
+   * @param {vscode.ExtensionContext} context
+   * @param {import('../../../../../core/src/ports/storage-events.port.js').StorageEventsPort} events
+   */
+  constructor(context, events) {
+    this._context = context;
+    /** @type {{ dispose(): unknown } | null} */
+    this._branchSubscription = null;
 
-        const unsubscribe = events.subscribe((event) => {
-            if (event.type === 'set') {
-                if (event.key === STORAGE_KEYS.ACTIVE_ISSUE) this._activeIssue = event.value ?? null;
-                if (event.key === STORAGE_KEYS.START_TIME) this._startTime = event.value ?? null;
-                if (event.key === STORAGE_KEYS.ISSUES) this._sendIssues();
-            } else if (event.type === 'remove') {
-                if (event.key === STORAGE_KEYS.ACTIVE_ISSUE) this._activeIssue = null;
-                if (event.key === STORAGE_KEYS.START_TIME) this._startTime = null;
-            } else if (event.type === 'removeMultiple') {
-                if (event.keys.includes(STORAGE_KEYS.ACTIVE_ISSUE)) this._activeIssue = null;
-                if (event.keys.includes(STORAGE_KEYS.START_TIME)) this._startTime = null;
-            }
-            this._sendTimerState();
-        });
+    const unsubscribe = events.subscribe((event) => {
+      if (event.type === 'set') {
+        if (event.key === STORAGE_KEYS.ACTIVE_ISSUE) this._activeIssue = event.value ?? null;
+        if (event.key === STORAGE_KEYS.START_TIME) this._startTime = event.value ?? null;
+        if (event.key === STORAGE_KEYS.ISSUES) this._sendIssues();
+      } else if (event.type === 'remove') {
+        if (event.key === STORAGE_KEYS.ACTIVE_ISSUE) this._activeIssue = null;
+        if (event.key === STORAGE_KEYS.START_TIME) this._startTime = null;
+      } else if (event.type === 'removeMultiple') {
+        if (event.keys.includes(STORAGE_KEYS.ACTIVE_ISSUE)) this._activeIssue = null;
+        if (event.keys.includes(STORAGE_KEYS.START_TIME)) this._startTime = null;
+      }
+      this._sendTimerState();
+    });
 
-        this.dispose = () => unsubscribe();
-    }
+    const extChangeSub = vscode.extensions.onDidChange?.(() => this._wireBranchSuggestion());
+    if (extChangeSub) this._context.subscriptions.push(extChangeSub);
 
-    /** @param {vscode.WebviewView} webviewView */
-    resolveWebviewView(webviewView) {
-        this._view = webviewView;
+    this.dispose = () => unsubscribe();
+  }
 
-        webviewView.webview.options = {
-            enableScripts: true,
-            localResourceRoots: [vscode.Uri.joinPath(this._context.extensionUri, 'dist')],
-        };
+  /** @param {vscode.WebviewView} webviewView */
+  resolveWebviewView(webviewView) {
+    this._view = webviewView;
 
-        webviewView.webview.html = getHtml(webviewView.webview, this._context.extensionUri);
+    webviewView.webview.options = {
+      enableScripts: true,
+      localResourceRoots: [vscode.Uri.joinPath(this._context.extensionUri, 'dist')],
+    };
 
-        webviewView.webview.onDidReceiveMessage((message) => {
-            if (message.type === 'ready') {
-                this._sendIssues();
-                this._sendTimerState();
-            } else if (message.type === 'startTimer') {
-                if (typeof message.url === 'string' && ISSUE_URL_RE.test(message.url)) {
-                    vscode.commands.executeCommand('octoclock.startTimer', message.url);
-                }
-            } else if (message.type === 'stopTimer') {
-                vscode.commands.executeCommand('octoclock.stopTimer');
-            } else if (message.type === 'openUrl') {
-                if (typeof message.url === 'string' && ISSUE_URL_RE.test(message.url)) {
-                    vscode.env.openExternal(vscode.Uri.parse(`https://github.com${message.url}`));
-                }
-            }
-        });
+    webviewView.webview.html = getHtml(webviewView.webview, this._context.extensionUri);
 
-        // Re-push issues when workspace folders change.
-        // Issues are global (not workspace-scoped) so this is a mechanism wiring
-        // for future workspace-scoped filtering.
-        this._context.subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(() => this._sendIssues()));
-
-        // Restore timer state from storage (webview may open after timer started).
-        StorageService.getMultiple([STORAGE_KEYS.ACTIVE_ISSUE, STORAGE_KEYS.START_TIME])
-            .then((values) => {
-                this._activeIssue = values[STORAGE_KEYS.ACTIVE_ISSUE] ?? null;
-                this._startTime = values[STORAGE_KEYS.START_TIME] ?? null;
-                this._sendTimerState();
-            })
-            .catch(() => {
-                // StorageService not ready — timer state will arrive via events.
-            });
-
-        // Load and send initial issue list.
+    webviewView.webview.onDidReceiveMessage((message) => {
+      if (message.type === 'ready') {
         this._sendIssues();
+        this._sendTimerState();
+      } else if (message.type === 'startTimer') {
+        if (typeof message.url === 'string' && ISSUE_URL_RE.test(message.url)) {
+          vscode.commands.executeCommand('octoclock.startTimer', message.url);
+        }
+      } else if (message.type === 'stopTimer') {
+        vscode.commands.executeCommand('octoclock.stopTimer');
+      } else if (message.type === 'openUrl') {
+        if (typeof message.url === 'string' && ISSUE_URL_RE.test(message.url)) {
+          vscode.env.openExternal(vscode.Uri.parse(`https://github.com${message.url}`));
+        }
+      }
+    });
 
-        // Arm branch suggestion row if git API is available.
-        this._wireBranchSuggestion();
+    // Re-push issues when workspace folders change.
+    // Issues are global (not workspace-scoped) so this is a mechanism wiring
+    // for future workspace-scoped filtering.
+    this._context.subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(() => this._sendIssues()));
+
+    // Restore timer state from storage (webview may open after timer started).
+    StorageService.getMultiple([STORAGE_KEYS.ACTIVE_ISSUE, STORAGE_KEYS.START_TIME])
+      .then((values) => {
+        this._activeIssue = values[STORAGE_KEYS.ACTIVE_ISSUE] ?? null;
+        this._startTime = values[STORAGE_KEYS.START_TIME] ?? null;
+        this._sendTimerState();
+      })
+      .catch(() => {
+        // StorageService not ready — timer state will arrive via events.
+      });
+
+    // Load and send initial issue list.
+    this._sendIssues();
+
+    // Arm branch suggestion row if git API is available.
+    this._wireBranchSuggestion();
+  }
+
+  /** Load issues from storage and post them to the webview. */
+  _sendIssues() {
+    if (!this._view) return;
+    IssueStorageService.getAll()
+      .then((entries) => {
+        this._view?.webview.postMessage({
+          type: 'issues',
+          items: entries.map(mapEntry),
+        });
+      })
+      .catch(() => {
+        // StorageService not ready — webview remains in loading state.
+      });
+  }
+
+  /** Post current timer state to the webview. */
+  _sendTimerState() {
+    if (!this._view) return;
+    const running = !!(this._activeIssue && this._startTime);
+    const parts = this._activeIssue ? this._activeIssue.split('/') : [];
+    const activeIssueId = running && parts.length >= 5 ? parseInt(parts[4], 10) : null;
+    this._view.webview.postMessage({ type: 'timerState', running, activeIssueId });
+  }
+
+  /**
+   * Arm the branch suggestion row using the vscode.git extension API.
+   * Silently no-ops when the git extension is not available.
+   */
+  _wireBranchSuggestion() {
+    if (this._branchSubscription) return;
+
+    const gitExtension = vscode.extensions.getExtension('vscode.git');
+    if (!gitExtension?.isActive) return;
+
+    let git;
+    try {
+      git = gitExtension.exports?.getAPI?.(1);
+    } catch {
+      return;
     }
+    if (!git) return;
+    const repo = git.repositories[0];
+    if (!repo) return;
 
-    /** Load issues from storage and post them to the webview. */
-    _sendIssues() {
-        if (!this._view) return;
-        IssueStorageService.getAll()
-            .then((entries) => {
-                this._view?.webview.postMessage({
-                    type: 'issues',
-                    items: entries.map(mapEntry),
-                });
-            })
-            .catch(() => {
-                // StorageService not ready — webview remains in loading state.
-            });
-    }
+    const send = () => {
+      const branch = repo.state.HEAD?.name ?? null;
+      if (!branch) return;
+      const match = branch.match(/\b(\d{2,6})\b/);
+      if (match) {
+        this._view?.webview.postMessage({
+          type: 'branchSuggestion',
+          issueId: parseInt(match[1], 10),
+          branch,
+        });
+      }
+    };
 
-    /** Post current timer state to the webview. */
-    _sendTimerState() {
-        if (!this._view) return;
-        const running = !!(this._activeIssue && this._startTime);
-        const parts = this._activeIssue ? this._activeIssue.split('/') : [];
-        const activeIssueId = running && parts.length >= 5 ? parseInt(parts[4], 10) : null;
-        this._view.webview.postMessage({ type: 'timerState', running, activeIssueId });
-    }
-
-    /**
-     * Arm the branch suggestion row using the vscode.git extension API.
-     * Silently no-ops when the git extension is not available.
-     */
-    _wireBranchSuggestion() {
-        const git = vscode.extensions.getExtension('vscode.git')?.exports?.getAPI(1);
-        if (!git) return;
-
-        const send = () => {
-            const branch = git.repositories[0]?.state.HEAD?.name ?? null;
-            if (!branch) return;
-            const match = branch.match(/\b(\d{2,6})\b/);
-            if (match) {
-                this._view?.webview.postMessage({
-                    type: 'branchSuggestion',
-                    issueId: parseInt(match[1], 10),
-                    branch,
-                });
-            }
-        };
-
-        // Immediate check for when the panel opens after branch is already set.
-        send();
-        git.repositories[0]?.state.onDidChange(send);
-    }
+    // Immediate check for when the panel opens after branch is already set.
+    send();
+    this._branchSubscription = repo.state.onDidChange(send);
+    this._context.subscriptions.push(this._branchSubscription);
+  }
 }
