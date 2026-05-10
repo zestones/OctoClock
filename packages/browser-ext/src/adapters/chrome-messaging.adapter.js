@@ -33,12 +33,13 @@ export class ChromeMessagingAdapter extends MessagingPort {
      * @param {string} owner
      * @param {string} repo
      * @param {number} issueNumber
+     * @param {string|null} [running]
      * @returns {Promise<import('../../../core/src/ports/messaging.port.js').SyncCommentResult>}
      */
-    syncComment(issueUrl, owner, repo, issueNumber) {
+    syncComment(issueUrl, owner, repo, issueNumber, running = null) {
         return new Promise((resolve, reject) => {
             chrome.runtime.sendMessage(
-                { action: 'syncTrackerComment', issueUrl, owner, repo, issueNumber },
+                { action: 'syncTrackerComment', issueUrl, owner, repo, issueNumber, running },
                 (response) => {
                     if (chrome.runtime.lastError) {
                         reject(new Error(normalizeSyncErrorMessage(chrome.runtime.lastError)));

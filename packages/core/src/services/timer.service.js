@@ -49,16 +49,23 @@ export class TimerService {
      * Queue tracker-comment sync through the messaging port.
      * In the browser the port forwards to the background worker, which serializes
      * writes per issue via SyncQueue. In VS Code the port calls GitHub directly.
+     *
+     * @param {string} issueUrl
+     * @param {string} owner
+     * @param {string} repo
+     * @param {number} issueNumber
+     * @param {string|null} [running] - ISO timestamp of the in-progress session, or null to clear.
      */
-    static async syncComment(issueUrl, owner, repo, issueNumber) {
+    static async syncComment(issueUrl, owner, repo, issueNumber, running = null) {
         TimerService.#assertMessagingPort();
         console.info(TRACKER_SYNC_LOG_PREFIX, 'Requesting tracker sync', {
             issueUrl,
             owner,
             repo,
             issueNumber,
+            running: running ?? null,
         });
-        const response = await TimerService.#messagingPort.syncComment(issueUrl, owner, repo, issueNumber);
+        const response = await TimerService.#messagingPort.syncComment(issueUrl, owner, repo, issueNumber, running);
         console.info(TRACKER_SYNC_LOG_PREFIX, 'Tracker sync completed', {
             issueUrl,
             commentId: response.commentId,
@@ -87,9 +94,10 @@ export class TimerService {
             // Merge remote entries into local before starting
             await TimerService.backfillRemoteEntries(issueUrl, owner, repo, issueNumber, fullIssueTitle);
 
+            const startedAt = new Date().toISOString();
             await Promise.all([
                 StorageService.set(STORAGE_KEYS.ACTIVE_ISSUE, issueUrl),
-                StorageService.set(STORAGE_KEYS.START_TIME, new Date().toISOString()),
+                StorageService.set(STORAGE_KEYS.START_TIME, startedAt),
             ]);
 
             if (!issue) {
@@ -99,6 +107,17 @@ export class TimerService {
             const totalTime = await TimerService.getTotalTimeForIssue(issueUrl);
             TimerService.#assertMessagingPort();
             TimerService.#messagingPort.notifyTimerStarted(issueUrl);
+
+            // Cross-context heartbeat: push the running marker to GitHub so the
+            // VS Code extension (or another browser context) picks up the active
+            // timer on its next sync. Fire-and-forget — never block start.
+            const githubToken = await GitHubStorageService.getGitHubToken();
+            if (githubToken) {
+                void TimerService.syncComment(issueUrl, owner, repo, issueNumber, startedAt).catch((error) => {
+                    console.error('Background sync on start failed:', error);
+                });
+            }
+
             return { issueUrl, totalTime, isRunning: true };
         } catch (error) {
             console.error('Failed to start timer:', error);
@@ -286,6 +305,11 @@ export class TimerService {
     /**
      * Fetches remote entries from the GitHub comment for this issue
      * and merges any missing ones into local storage.
+     *
+     * If `title` is omitted, the title is derived from existing local entries
+     * for that issue (falling back to a generic "(owner) repo | #n" string).
+     * This lets callers that don't have the issue title handy (e.g. the
+     * tracker-comment sync handlers) still safely pull-merge before pushing.
      */
     static async backfillRemoteEntries(issueUrl, owner, repo, issueNumber, title) {
         try {
@@ -302,7 +326,8 @@ export class TimerService {
             commentIds[commentKey] = comment.id;
             await StorageService.set(STORAGE_KEYS.COMMENT_IDS, commentIds);
 
-            const remoteEntries = GitHubService.parseTrackerPayload(comment.body) || [];
+            const parsed = GitHubService.parseTrackerPayload(comment.body);
+            const remoteEntries = parsed?.entries ?? [];
             if (remoteEntries.length === 0) return;
 
             const trackedTimes = (await StorageService.get(STORAGE_KEYS.TRACKED_TIMES)) ?? [];
@@ -310,13 +335,21 @@ export class TimerService {
                 trackedTimes.filter((e) => e.issueUrl === issueUrl).map((e) => `${e.date}:${e.seconds}`),
             );
 
+            // Derive a title if the caller didn't supply one. Fall back to
+            // any existing local entry's title, or a generic descriptor.
+            let resolvedTitle = title;
+            if (!resolvedTitle) {
+                const existing = trackedTimes.find((e) => e.issueUrl === issueUrl);
+                resolvedTitle = existing?.title || `(${owner}) ${repo} | #${issueNumber}`;
+            }
+
             let added = false;
             for (const entry of remoteEntries) {
                 const key = `${entry.date}:${entry.seconds}`;
                 if (!localKeys.has(key)) {
                     trackedTimes.push({
                         issueUrl,
-                        title,
+                        title: resolvedTitle,
                         seconds: entry.seconds,
                         date: entry.date,
                     });

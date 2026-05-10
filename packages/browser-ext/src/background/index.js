@@ -6,6 +6,8 @@ import { GitHubService } from '../../../core/src/services/github.service.js';
 import { GitHubStorageService } from '../../../core/src/services/github-storage.service.js';
 import { PinnedReposService } from '../../../core/src/services/pinned-repos.service.js';
 import { StorageService } from '../../../core/src/services/storage.service.js';
+import { syncFromGitHub } from '../../../core/src/services/sync.service.js';
+import { TimerService } from '../../../core/src/services/timer.service.js';
 import { SyncQueue } from '../../../core/src/sync-queue.js';
 import { CACHE_REFRESH_INTERVAL, SCHEMA_VERSION, STORAGE_KEYS } from '../../../core/src/utils/constants.utils.js';
 
@@ -46,13 +48,25 @@ async function refreshCachedIssues() {
     }
 }
 
-async function syncTrackerComment({ issueUrl, owner, repo, issueNumber }) {
+async function syncTrackerComment({ issueUrl, owner, repo, issueNumber, running = null }) {
     console.info(TRACKER_SYNC_LOG_PREFIX, 'Starting tracker sync job', {
         issueUrl,
         owner,
         repo,
         issueNumber,
+        running: running ?? null,
     });
+
+    // Pull-merge before push: fold any remote-only entries (e.g. written by
+    // VS Code on the same issue) into local storage so the upcoming overwrite
+    // of the GitHub comment carries the union of both sides instead of wiping
+    // entries written elsewhere. Best-effort — failures fall through to a
+    // local-only push.
+    try {
+        await TimerService.backfillRemoteEntries(issueUrl, owner, repo, issueNumber);
+    } catch (e) {
+        console.error(TRACKER_SYNC_LOG_PREFIX, 'pre-push backfill failed (continuing):', e);
+    }
 
     const trackedTimes = (await StorageService.get(STORAGE_KEYS.TRACKED_TIMES)) ?? [];
     const issueEntries = trackedTimes
@@ -68,6 +82,7 @@ async function syncTrackerComment({ issueUrl, owner, repo, issueNumber }) {
         issueNumber,
         entries: issueEntries,
         cachedCommentId: commentIds[commentKey],
+        running,
     });
 
     commentIds[commentKey] = result.commentId;
@@ -113,16 +128,46 @@ chrome.runtime.onInstalled.addListener(async () => {
         await StorageService.set(STORAGE_KEYS.SCHEMA_VERSION, SCHEMA_VERSION);
     }
 
+    // Default AUTO_SYNC to true on first install so cross-client sync
+    // (browser ↔ VS Code) works out of the box.
+    const autoSync = await StorageService.get(STORAGE_KEYS.AUTO_SYNC);
+    if (autoSync == null) {
+        await StorageService.set(STORAGE_KEYS.AUTO_SYNC, true);
+    }
+
     chrome.alarms.get('refreshCache', (existing) => {
         if (!existing) {
             chrome.alarms.create('refreshCache', { periodInMinutes: CACHE_REFRESH_INTERVAL });
         }
     });
+
+    // Cross-context active-timer sync — pulls remote tracker comments every minute
+    // so timers started in VS Code (or another browser context) propagate here.
+    chrome.alarms.get('crossContextSync', (existing) => {
+        if (!existing) {
+            chrome.alarms.create('crossContextSync', { periodInMinutes: 1 });
+        }
+    });
 });
+
+async function runCrossContextSync() {
+    try {
+        const [autoSync, token] = await Promise.all([
+            StorageService.get(STORAGE_KEYS.AUTO_SYNC),
+            GitHubStorageService.getGitHubToken(),
+        ]);
+        if (!autoSync || !token) return;
+        await syncFromGitHub();
+    } catch (e) {
+        console.error('OctoClock: cross-context sync failed:', e);
+    }
+}
 
 chrome.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === 'refreshCache') {
         refreshCachedIssues();
+    } else if (alarm.name === 'crossContextSync') {
+        runCrossContextSync();
     }
 });
 

@@ -81,6 +81,8 @@ async function getWorkspaceRepoSlugs() {
 }
 
 export class MyIssuesProvider {
+  static viewType = 'octoclock.myIssues';
+
   /** @type {vscode.WebviewView | undefined} */
   _view = undefined;
 
@@ -192,13 +194,20 @@ export class MyIssuesProvider {
     if (!this._view) return;
     IssueStorageService.getAll()
       .then((entries) => {
-        this._view?.webview.postMessage({
-          type: 'issues',
-          items: entries.map(mapEntry),
-        });
+        const items = [];
+        for (const entry of entries ?? []) {
+          try {
+            if (entry && typeof entry.url === 'string') items.push(mapEntry(entry));
+          } catch (err) {
+            console.warn('[OctoClock] Skipping malformed issue entry:', entry, err);
+          }
+        }
+        this._view?.webview.postMessage({ type: 'issues', items });
       })
-      .catch(() => {
-        // StorageService not ready — webview remains in loading state.
+      .catch((err) => {
+        console.error('[OctoClock] Failed to load issues for sidebar:', err);
+        // Still flip the webview out of the loading state so users see an empty UI.
+        this._view?.webview.postMessage({ type: 'issues', items: [] });
       });
   }
 

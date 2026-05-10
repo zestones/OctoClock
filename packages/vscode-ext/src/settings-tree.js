@@ -169,11 +169,11 @@ export class SettingsProvider {
             ),
             makeNode(
                 'Sync Now',
-                'pull tracker comments',
+                'pull issues + tracker comments',
                 'sync',
                 'octoclock.syncNow',
                 'oc-setting-action',
-                "Manually trigger a sync of the active issue's tracker comment",
+                'Pull issues from GitHub for all pinned repos, then sync the active tracker comment',
             ),
         ];
     }

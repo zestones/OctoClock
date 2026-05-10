@@ -17,6 +17,7 @@ import { BranchWatcher } from './integrations/branch-watcher.js';
 import { IssueCodeLensProvider } from './integrations/codelens-provider.js';
 import { IdleWatcher } from './integrations/idle-watcher.js';
 import { WorkspaceRepoDetector } from './integrations/repo-detector.js';
+import { SyncWatcher } from './integrations/sync-watcher.js';
 import { SettingsProvider } from './settings-tree.js';
 import { createStatusBarController } from './status-bar.js';
 import { TrackedTimeProvider } from './tracked-time-tree.js';
@@ -53,7 +54,13 @@ export function activate(context) {
     // storage. Fire-and-forget so activation completes immediately and any
     // network errors are logged rather than surfaced to the user.
     Promise.all([StorageService.get(STORAGE_KEYS.AUTO_SYNC), StorageService.get(STORAGE_KEYS.GITHUB_TOKEN)])
-        .then(([autoSync, token]) => {
+        .then(async ([autoSync, token]) => {
+            // Default AUTO_SYNC to true on first run so cross-client sync
+            // (browser ↔ VS Code) works out of the box.
+            if (autoSync == null) {
+                await StorageService.set(STORAGE_KEYS.AUTO_SYNC, true);
+                autoSync = true;
+            }
             if (autoSync && token) {
                 syncFromGitHub().catch((e) => console.error('OctoClock: Auto-sync failed:', e));
             }
@@ -116,6 +123,10 @@ export function activate(context) {
 
     // #62 Idle reminder watcher.
     new IdleWatcher(context, storageEvents);
+
+    // Cross-context active-timer sync — periodic + on window focus.
+    // Picks up timers started/stopped in the browser extension or content script.
+    new SyncWatcher(context);
 
     // #63 CodeLens for #N references (opt-in).
     const codeLensProvider = new IssueCodeLensProvider(storageEvents);

@@ -41,37 +41,33 @@ async function mergeRecoveredTimes(recovered) {
         commentIds[commentKey] = item.commentId;
 
         const localEntries = trackedTimes.filter((t) => t.issueUrl === item.issueUrl);
-        const localTotal = localEntries.reduce((sum, e) => sum + (e.seconds || 0), 0);
-        const remoteTotal = item.entries.reduce((sum, e) => sum + (e.seconds || 0), 0);
+        const localKeys = new Set(localEntries.map((e) => `${e.date}:${e.seconds}`));
 
-        if (localEntries.length === 0 || remoteTotal > localTotal) {
-            const filtered = trackedTimes.filter((t) => t.issueUrl !== item.issueUrl);
-            trackedTimes.length = 0;
-            trackedTimes.push(...filtered);
+        const { owner, repo, issueNumber } = GitHubService.parseIssueUrl(item.issueUrl);
+        const apiTitle = issueTitleMap[item.issueUrl];
+        const title = apiTitle
+            ? `(${owner}) ${repo} | ${apiTitle} | #${issueNumber}`
+            : `(${owner}) ${repo} | #${issueNumber}`;
 
-            const { owner, repo, issueNumber } = GitHubService.parseIssueUrl(item.issueUrl);
-            const apiTitle = issueTitleMap[item.issueUrl];
-            const title = apiTitle
-                ? `(${owner}) ${repo} | ${apiTitle} | #${issueNumber}`
-                : `(${owner}) ${repo} | #${issueNumber}`;
-            for (const entry of item.entries) {
-                trackedTimes.push({
-                    issueUrl: item.issueUrl,
-                    title,
-                    seconds: entry.seconds,
-                    date: entry.date,
-                });
-                importedCount++;
-            }
+        // Union merge: append remote entries that are not already present
+        // locally (keyed on date+seconds). Never delete or replace local
+        // entries — that path caused cross-client data loss when a stop on
+        // one surface had not yet been pushed before the other surface synced.
+        for (const entry of item.entries) {
+            const key = `${entry.date}:${entry.seconds}`;
+            if (localKeys.has(key)) continue;
+            trackedTimes.push({
+                issueUrl: item.issueUrl,
+                title,
+                seconds: entry.seconds,
+                date: entry.date,
+            });
+            localKeys.add(key);
+            importedCount++;
         }
 
         const issueExists = await IssueStorageService.exists(item.issueUrl);
         if (!issueExists) {
-            const { owner, repo, issueNumber } = GitHubService.parseIssueUrl(item.issueUrl);
-            const apiTitle = issueTitleMap[item.issueUrl];
-            const title = apiTitle
-                ? `(${owner}) ${repo} | ${apiTitle} | #${issueNumber}`
-                : `(${owner}) ${repo} | #${issueNumber}`;
             await IssueStorageService.add({ url: item.issueUrl, title });
         }
     }
@@ -132,8 +128,68 @@ export async function syncIssueStatuses() {
 }
 
 /**
+ * Reconciles the local active-timer state (ACTIVE_ISSUE / START_TIME) with the
+ * `running` heartbeat marker carried by the user's tracker comments.
+ *
+ * Rules:
+ *  - If a remote comment has `running` set, treat it as the authoritative active timer.
+ *    Adopt it locally if it differs from current local state.
+ *  - If no remote comment has `running`, clear local active-timer state.
+ *  - Protect against a brief race after a local startTimer call: if local state
+ *    is very recent (< 60s) and remote shows no marker, do NOT clear — the
+ *    background push probably hasn't completed yet.
+ *
+ * @param {Array<{ issueUrl: string, running: string|null }>} recovered
+ */
+async function reconcileActiveTimerFromRemote(recovered) {
+    // Pick the latest running marker across all recovered tracker comments.
+    /** @type {{ issueUrl: string, running: string } | null} */
+    let remoteActive = null;
+    for (const item of recovered) {
+        if (item.running) {
+            if (!remoteActive || item.running > remoteActive.running) {
+                remoteActive = { issueUrl: item.issueUrl, running: item.running };
+            }
+        }
+    }
+
+    const [localIssue, localStart] = await Promise.all([
+        StorageService.get(STORAGE_KEYS.ACTIVE_ISSUE),
+        StorageService.get(STORAGE_KEYS.START_TIME),
+    ]);
+
+    if (remoteActive) {
+        if (localIssue !== remoteActive.issueUrl || localStart !== remoteActive.running) {
+            await Promise.all([
+                StorageService.set(STORAGE_KEYS.ACTIVE_ISSUE, remoteActive.issueUrl),
+                StorageService.set(STORAGE_KEYS.START_TIME, remoteActive.running),
+            ]);
+            console.info(
+                'OctoClock: adopted remote active timer',
+                remoteActive.issueUrl,
+                'startedAt',
+                remoteActive.running,
+            );
+        }
+        return;
+    }
+
+    // Remote has no running marker — clear local IF local state is older than
+    // 60s (otherwise the local push is probably still in flight).
+    if (localIssue && localStart) {
+        const ageMs = Date.now() - new Date(localStart).getTime();
+        if (Number.isFinite(ageMs) && ageMs > 60_000) {
+            await StorageService.removeMultiple([STORAGE_KEYS.ACTIVE_ISSUE, STORAGE_KEYS.START_TIME]);
+            console.info('OctoClock: cleared local active timer (no remote heartbeat)');
+        }
+    }
+}
+
+/**
  * Recovers tracked times from GitHub comments for all pinned repos.
  * Merges remote data into local storage (imports if no local data or remote has more).
+ * Reconciles the cross-context active-timer state from remote `running` markers.
+ *
  * Returns { importedCount } or null if nothing to recover.
  */
 export async function syncFromGitHub() {
@@ -142,6 +198,14 @@ export async function syncFromGitHub() {
 
     const recovered = await GitHubService.recoverAllTimes(pinnedRepos);
     const merge = recovered.length === 0 ? null : await mergeRecoveredTimes(recovered);
+
+    // Reconcile cross-context active timer state. Even when no entries were
+    // imported, a `running` marker may have appeared/disappeared remotely.
+    try {
+        await reconcileActiveTimerFromRemote(recovered);
+    } catch (e) {
+        console.error('OctoClock: active-timer reconciliation failed:', e);
+    }
 
     // Best-effort status refresh; never blocks recovery.
     syncIssueStatuses().catch((e) => console.error('OctoClock: issue-status sync failed:', e));

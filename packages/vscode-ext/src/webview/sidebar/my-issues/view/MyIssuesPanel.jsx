@@ -23,6 +23,7 @@ const vscode = acquireVsCodeApi();
 
 export function MyIssuesPanel() {
     const [issues, setIssues] = useState(/** @type {any[]} */([]));
+    const [issuesLoaded, setIssuesLoaded] = useState(false);
     const [query, setQuery] = useState('');
     const [statusTab, setStatusTab] = useState('open');
     const [timerRunning, setTimerRunning] = useState(false);
@@ -33,7 +34,10 @@ export function MyIssuesPanel() {
         /** @type {{ issueId: number, branch: string, url: string, title: string }|null} */(null),
     );
 
-    useVscodeMessage('issues', (msg) => setIssues(msg.items));
+    useVscodeMessage('issues', (msg) => {
+        setIssues(msg.items || []);
+        setIssuesLoaded(true);
+    });
     useVscodeMessage('workspaceRepos', (msg) => setWorkspaceRepos(msg.items || []));
 
     useVscodeMessage('timerState', (msg) => {
@@ -88,6 +92,7 @@ export function MyIssuesPanel() {
             />
             <IssueList
                 issues={issues}
+                issuesLoaded={issuesLoaded}
                 query={query}
                 statusTab={statusTab}
                 timerRunning={timerRunning}

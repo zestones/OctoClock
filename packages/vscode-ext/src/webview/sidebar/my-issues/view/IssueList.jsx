@@ -7,6 +7,8 @@
 //
 // CSS classes defined in html.js.
 
+import { Fragment, h } from 'preact';
+
 /**
  * Escape special HTML characters to prevent XSS.
  * @param {string} s
@@ -40,6 +42,7 @@ function highlight(text, query) {
 /**
  * @param {{
  *   issues: Array<{ id: number, title: string, status: string, repo: string, url: string }>,
+ *   issuesLoaded?: boolean,
  *   query: string,
  *   statusTab: string,
  *   timerRunning: boolean,
@@ -53,6 +56,7 @@ function highlight(text, query) {
  */
 export function IssueList({
     issues,
+    issuesLoaded = true,
     query,
     statusTab,
     timerRunning,
@@ -73,8 +77,34 @@ export function IssueList({
     });
 
     if (filtered.length === 0) {
-        const msg = issues.length === 0 ? 'Loading\u2026' : 'No matching issues';
-        return <div class="no-results">{msg}</div>;
+        if (!issuesLoaded) {
+            return <div class="no-results">{'Loading\u2026'}</div>;
+        }
+        if (issues.length === 0) {
+            return (
+                <div class="no-results">
+                    No tracked issues yet.
+                    <br />
+                    Start a timer on a GitHub issue to populate this list.
+                </div>
+            );
+        }
+        // Issues exist but all filtered out.
+        const filteredByWorkspace = workspaceOnly && issues.some((i) => !wsSet.has(i.repo));
+        return (
+            <div class="no-results">
+                No matching issues
+                {filteredByWorkspace && (
+                    <Fragment>
+                        <br />
+                        <span class="no-results-hint">
+                            Workspace filter is hiding {issues.filter((i) => !wsSet.has(i.repo)).length} issue(s) from
+                            other repos. Toggle &ldquo;Workspace only&rdquo; above to show them.
+                        </span>
+                    </Fragment>
+                )}
+            </div>
+        );
     }
 
     // Group by repo so cross-project lists stay readable. Within each group,

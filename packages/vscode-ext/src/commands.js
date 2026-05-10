@@ -126,23 +126,34 @@ export function registerCommands(context) {
 
         // ----------------------------------------------------------------
         // octoclock.syncNow
-        // Trigger a queued tracker-comment sync for the active issue.
+        // Pull issues from GitHub for all pinned repos, then sync the
+        // tracker comment for the currently active issue (if any).
         // ----------------------------------------------------------------
         vscode.commands.registerCommand('octoclock.syncNow', async () => {
             const issueUrl = await StorageService.get(STORAGE_KEYS.ACTIVE_ISSUE);
-            if (!issueUrl) {
-                vscode.window.showInformationMessage('OctoClock: No active issue to sync');
-                return;
-            }
+            const errors = [];
 
             try {
-                const { owner, repo, issueNumber } = GitHubService.parseIssueUrl(issueUrl);
-                await TimerService.syncComment(issueUrl, owner, repo, issueNumber);
-                vscode.window.showInformationMessage('OctoClock: Tracker comment synced');
+                await syncFromGitHub();
             } catch (error) {
-                vscode.window.showErrorMessage(
-                    `OctoClock: Sync failed — ${error instanceof Error ? error.message : String(error)}`,
-                );
+                errors.push(`pull issues: ${error instanceof Error ? error.message : String(error)}`);
+            }
+
+            if (issueUrl) {
+                try {
+                    const { owner, repo, issueNumber } = GitHubService.parseIssueUrl(issueUrl);
+                    await TimerService.syncComment(issueUrl, owner, repo, issueNumber);
+                } catch (error) {
+                    errors.push(`tracker comment: ${error instanceof Error ? error.message : String(error)}`);
+                }
+            }
+
+            if (errors.length > 0) {
+                vscode.window.showErrorMessage(`OctoClock: Sync failed — ${errors.join('; ')}`);
+            } else if (issueUrl) {
+                vscode.window.showInformationMessage('OctoClock: Issues pulled and tracker comment synced');
+            } else {
+                vscode.window.showInformationMessage('OctoClock: Issues pulled from GitHub');
             }
         }),
 

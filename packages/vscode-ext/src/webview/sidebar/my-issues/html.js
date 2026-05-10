@@ -66,6 +66,9 @@ export function getHtml(webview, extensionUri) {
     .ws-chip:hover { background: rgba(255,255,255,.08); color: var(--oc-fg); }
     .ws-chip.on { background: rgba(0,122,204,.15); border-color: rgba(0,122,204,.35); color: var(--oc-accent-fg, #6fb3e8); }
     .ws-chip .codicon { font-size: 11px; }
+
+    /* Empty-state hint (secondary line under "No matching issues") */
+    .no-results-hint { display: inline-block; margin-top: 4px; font-size: 11px; color: var(--oc-muted); line-height: 1.4; }
   </style>
   <title>My Issues</title>
 </head>

@@ -20,6 +20,7 @@
 //   webview → host  { type: 'openDashboard' }
 
 import * as vscode from 'vscode';
+import { CacheService } from '../../../../../core/src/services/cache.service.js';
 import { StorageService } from '../../../../../core/src/services/storage.service.js';
 import { AggregationService } from '../../../../../core/src/utils/aggregation.utils.js';
 import { STORAGE_KEYS } from '../../../../../core/src/utils/constants.utils.js';
@@ -100,11 +101,13 @@ export class TeamStatsProvider {
     async _sendStats() {
         if (!this._view) return;
         try {
-            const [trackedTimes, everyoneData] = await Promise.all([
+            const [trackedTimes, everyoneData, cachedUser] = await Promise.all([
                 StorageService.get(STORAGE_KEYS.TRACKED_TIMES),
                 StorageService.get(STORAGE_KEYS.EVERYONE_DATA),
+                CacheService.getCachedUser().catch(() => null),
             ]);
-            const payload = TeamStatsProvider._aggregate(trackedTimes ?? [], everyoneData ?? []);
+            const username = cachedUser?.login ?? 'me';
+            const payload = TeamStatsProvider._aggregate(trackedTimes ?? [], everyoneData ?? [], username);
             this._view.webview.postMessage({ type: 'stats', payload });
             this._lastSentAt = Date.now();
         } catch {
@@ -120,23 +123,42 @@ export class TeamStatsProvider {
      * Pure aggregation — exported as a static method so it is unit-testable
      * without spinning up a webview.
      *
+     * Local `trackedTimes` are folded into the "everyone" view tagged as the
+     * current user so that Top Issues and Team Today reflect the user's own
+     * activity even when team sync hasn't populated EVERYONE_DATA yet.
+     *
      * @param {import('../../../../../core/src/utils/schema.utils.js').TrackedTimeEntry[]} trackedTimes
      * @param {import('../../../../../core/src/utils/schema.utils.js').EveryoneDataEntry[]} everyoneData
+     * @param {string} [currentUsername]
      */
-    static _aggregate(trackedTimes, everyoneData) {
+    static _aggregate(trackedTimes, everyoneData, currentUsername = 'me') {
         // Your time today + issues touched today (from local TRACKED_TIMES).
         const todayEntries = AggregationService.getTodayEntries(trackedTimes);
         const myTimeToday = AggregationService.getTotalSeconds(todayEntries);
         const issuesTouchedToday = new Set(todayEntries.map((e) => e.issueUrl)).size;
 
+        // Union view: local entries (tagged as the current user) + team entries,
+        // de-duplicated on user+issueUrl+date+seconds so the same session
+        // recovered from GitHub isn't counted twice.
+        const localAsEveryone = trackedTimes.map((e) => ({ ...e, user: currentUsername }));
+        const seen = new Set();
+        /** @type {import('../../../../../core/src/utils/schema.utils.js').EveryoneDataEntry[]} */
+        const everyone = [];
+        for (const e of [...localAsEveryone, ...everyoneData]) {
+            const k = `${e.user}|${e.issueUrl}|${e.date}|${e.seconds}`;
+            if (seen.has(k)) continue;
+            seen.add(k);
+            everyone.push(e);
+        }
+
         // Team time this week (everyone's entries within the current week).
-        const weekEntries = AggregationService.getWeekEntries(everyoneData);
+        const weekEntries = AggregationService.getWeekEntries(everyone);
         const teamTimeWeek = AggregationService.getTotalSeconds(weekEntries);
 
-        // Top N issues by total time across the team.
+        // Top N issues by total time across the union.
         /** @type {Record<string, { issueUrl: string, title: string, seconds: number }>} */
         const issueAgg = {};
-        for (const e of everyoneData) {
+        for (const e of everyone) {
             const k = e.issueUrl;
             if (!issueAgg[k]) {
                 issueAgg[k] = {
@@ -154,7 +176,7 @@ export class TeamStatsProvider {
         // Per-user today rows: avatar initials, name, last issue, today seconds, last activity date.
         /** @type {Record<string, { user: string, todaySeconds: number, lastDate: string, lastIssueUrl: string, lastIssueTitle: string }>} */
         const teamAgg = {};
-        for (const e of everyoneData) {
+        for (const e of everyone) {
             const u = e.user;
             if (!u) continue;
             if (!teamAgg[u]) {
@@ -167,7 +189,7 @@ export class TeamStatsProvider {
             }
         }
         const todayStr = new Date().toISOString().slice(0, 10);
-        for (const e of everyoneData) {
+        for (const e of everyone) {
             if (e.date === todayStr && e.user) {
                 teamAgg[e.user].todaySeconds += e.seconds || 0;
             }

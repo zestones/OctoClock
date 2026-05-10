@@ -15,6 +15,7 @@ vi.mock('vscode', () => ({
 
 vi.mock('../../core/src/services/sync.service.js', () => ({
     syncRepoFromGitHub: vi.fn().mockResolvedValue({ importedCount: 1 }),
+    syncFromGitHub: vi.fn().mockResolvedValue({ importedCount: 0 }),
 }));
 
 import * as vscode from 'vscode';
@@ -253,7 +254,7 @@ describe('OctoClock commands', () => {
             await getHandler('octoclock.syncNow')();
 
             expect(syncCommentSpy).not.toHaveBeenCalled();
-            expect(win.showInformationMessage).toHaveBeenCalledWith(expect.stringContaining('No active issue'));
+            expect(win.showInformationMessage).toHaveBeenCalledWith(expect.stringContaining('pulled'));
         });
 
         it('shows an error when syncComment throws', async () => {

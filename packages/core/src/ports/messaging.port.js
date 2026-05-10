@@ -15,9 +15,10 @@ export class MessagingPort {
      * @param {string} _owner
      * @param {string} _repo
      * @param {number} _issueNumber
+     * @param {string|null} [_running] - ISO timestamp of the in-progress session, or null/undefined when no session is active.
      * @returns {Promise<SyncCommentResult>}
      */
-    syncComment(_issueUrl, _owner, _repo, _issueNumber) {
+    syncComment(_issueUrl, _owner, _repo, _issueNumber, _running) {
         throw new Error('MessagingPort.syncComment not implemented');
     }
 

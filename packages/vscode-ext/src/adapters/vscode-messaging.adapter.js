@@ -16,6 +16,7 @@
 import { MessagingPort } from '../../../core/src/ports/messaging.port.js';
 import { GitHubService } from '../../../core/src/services/github.service.js';
 import { StorageService } from '../../../core/src/services/storage.service.js';
+import { TimerService } from '../../../core/src/services/timer.service.js';
 import { SyncQueue } from '../../../core/src/sync-queue.js';
 import { STORAGE_KEYS } from '../../../core/src/utils/constants.utils.js';
 
@@ -38,13 +39,24 @@ export class VSCodeMessagingAdapter extends MessagingPort {
      * @param {{ issueUrl: string, owner: string, repo: string, issueNumber: number }} payload
      * @returns {Promise<import('../../../core/src/ports/messaging.port.js').SyncCommentResult>}
      */
-    async #syncTrackerComment({ issueUrl, owner, repo, issueNumber }) {
+    async #syncTrackerComment({ issueUrl, owner, repo, issueNumber, running = null }) {
         console.info(LOG_PREFIX, 'Starting tracker sync job', {
             issueUrl,
             owner,
             repo,
             issueNumber,
+            running: running ?? null,
         });
+
+        // Pull-merge before push: fold any remote-only entries (e.g. written
+        // by the browser extension on the same issue) into local storage so
+        // the upcoming overwrite of the GitHub comment carries the union of
+        // both sides instead of wiping entries written elsewhere. Best-effort.
+        try {
+            await TimerService.backfillRemoteEntries(issueUrl, owner, repo, issueNumber);
+        } catch (e) {
+            console.error(LOG_PREFIX, 'pre-push backfill failed (continuing):', e);
+        }
 
         const trackedTimes = (await StorageService.get(STORAGE_KEYS.TRACKED_TIMES)) ?? [];
         const issueEntries = trackedTimes
@@ -61,6 +73,7 @@ export class VSCodeMessagingAdapter extends MessagingPort {
             issueNumber,
             entries: issueEntries,
             cachedCommentId: commentIds[commentKey],
+            running,
         });
 
         commentIds[commentKey] = result.commentId;
@@ -78,29 +91,28 @@ export class VSCodeMessagingAdapter extends MessagingPort {
     /**
      * Queue a tracker-comment sync for the given issue.
      *
-     * Jobs for the same issueUrl run serially — a stop, edit, and delete sequence
-     * cannot produce out-of-order writes even when triggered in rapid succession.
-     *
      * @param {string} issueUrl
      * @param {string} owner
      * @param {string} repo
      * @param {number} issueNumber
+     * @param {string|null} [running]
      * @returns {Promise<import('../../../core/src/ports/messaging.port.js').SyncCommentResult>}
      */
-    syncComment(issueUrl, owner, repo, issueNumber) {
+    syncComment(issueUrl, owner, repo, issueNumber, running = null) {
         const hadPendingJob = this.#queue.has(issueUrl);
 
         console.info(LOG_PREFIX, hadPendingJob ? 'Queueing tracker sync behind pending job' : 'Queueing tracker sync', {
             issueUrl,
+            running: running ?? null,
         });
 
         const next = this.#queue.enqueue(issueUrl, () =>
-            this.#syncTrackerComment({ issueUrl, owner, repo, issueNumber }),
+            this.#syncTrackerComment({ issueUrl, owner, repo, issueNumber, running }),
         );
 
         next.finally(() => {
             console.info(LOG_PREFIX, 'Tracker sync queue drained for issue', { issueUrl });
-        }).catch(() => {}); // suppress unhandled rejection on the finally-chain
+        }).catch(() => { }); // suppress unhandled rejection on the finally-chain
 
         return next;
     }
@@ -109,11 +121,11 @@ export class VSCodeMessagingAdapter extends MessagingPort {
      * No-op — VS Code has no browser tabs to notify.
      * @param {string} _issueUrl
      */
-    notifyTimerStarted(_issueUrl) {}
+    notifyTimerStarted(_issueUrl) { }
 
     /**
      * No-op — VS Code has no browser tabs to notify.
      * @param {string} _issueUrl
      */
-    notifyTimerStopped(_issueUrl) {}
+    notifyTimerStopped(_issueUrl) { }
 }

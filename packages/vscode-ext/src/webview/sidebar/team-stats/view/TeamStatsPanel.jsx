@@ -68,11 +68,7 @@ export function TeamStatsPanel() {
     }, []);
 
     if (!stats) {
-        return (
-            <div class="ts-section">
-                <div class="ts-empty">Loading team stats…</div>
-            </div>
-        );
+        return <div class="ts-empty">Loading team stats…</div>;
     }
 
     const { myTimeToday, teamTimeWeek, issuesTouchedToday, issueBars, teamRows } = stats;
@@ -80,88 +76,72 @@ export function TeamStatsPanel() {
 
     return (
         <div>
-            <div class="ts-section">
-                <div class="kpi-grid">
-                    <div class="kpi">
-                        <div class="kpi-label">Your time today</div>
-                        <div class="kpi-value">{fmtHM(myTimeToday)}</div>
-                        <div class="kpi-sub">
-                            {issuesTouchedToday || 0} issue{issuesTouchedToday === 1 ? '' : 's'}
-                        </div>
+            {/* ── Stat cards ───────────────────────────────────────── */}
+            <div class="stat-cards">
+                <div class="stat-card accent">
+                    <div class="sc-lbl">Your time today</div>
+                    <div class="sc-val">{fmtHM(myTimeToday)}</div>
+                    <div class="sc-sub">
+                        {issuesTouchedToday || 0} issue{issuesTouchedToday === 1 ? '' : 's'}
                     </div>
-                    <div class="kpi">
-                        <div class="kpi-label">Team this week</div>
-                        <div class="kpi-value">{fmtHM(teamTimeWeek)}</div>
-                        <div class="kpi-sub">
-                            {(teamRows || []).length} member{teamRows && teamRows.length === 1 ? '' : 's'}
-                        </div>
+                </div>
+                <div class="stat-card">
+                    <div class="sc-lbl">Team this week</div>
+                    <div class="sc-val">{fmtHM(teamTimeWeek)}</div>
+                    <div class="sc-sub">
+                        {(teamRows || []).length} member{teamRows && teamRows.length === 1 ? '' : 's'}
                     </div>
                 </div>
             </div>
 
-            <div class="ts-section">
-                <div class="ts-heading">Top issues</div>
-                {!issueBars || issueBars.length === 0 ? (
-                    <div class="ts-empty">
-                        No tracked time yet.
-                        <br />
-                        <span class="ts-hint">Start a timer on any issue to populate this view.</span>
+            {/* ── Top issues ───────────────────────────────────────── */}
+            <div class="team-hdr">Top issues</div>
+            {!issueBars || issueBars.length === 0 ? (
+                <div class="ts-empty">
+                    No tracked time yet.
+                    <span class="ts-hint">Start a timer on any issue to populate this view.</span>
+                </div>
+            ) : (
+                issueBars.map((b) => (
+                    <div key={b.issueUrl} class="bar-row" title={b.title}>
+                        <span class="bar-lbl">{b.title}</span>
+                        <span class="bar-track">
+                            <span class="bar-fill" style={`width:${Math.round((b.seconds / maxBar) * 100)}%`} />
+                        </span>
+                        <span class="bar-val">{fmtHM(b.seconds)}</span>
                     </div>
-                ) : (
-                    <div class="bars">
-                        {issueBars.map((b) => (
-                            <div key={b.issueUrl}>
-                                <div class="bar-row">
-                                    <span class="bar-lbl" title={b.title}>
-                                        {b.title}
-                                    </span>
-                                    <span class="bar-time">{fmtHM(b.seconds)}</span>
-                                </div>
-                                <div class="bar-track">
-                                    <div class="bar-fill" style={`width:${Math.round((b.seconds / maxBar) * 100)}%`} />
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
+                ))
+            )}
 
-            <div class="ts-section">
-                <div class="ts-heading">Team today</div>
-                {!teamRows || teamRows.length === 0 ? (
-                    <div class="ts-empty">
-                        No team activity yet.
-                        <br />
-                        <span class="ts-hint">Enable Auto Sync in Settings to see teammates.</span>
+            {/* ── Team today ───────────────────────────────────────── */}
+            <div class="team-hdr">Team today</div>
+            {!teamRows || teamRows.length === 0 ? (
+                <div class="ts-empty">
+                    No team activity yet.
+                    <span class="ts-hint">Enable Auto Sync in Settings to see teammates.</span>
+                </div>
+            ) : (
+                teamRows.map((r) => (
+                    <div key={r.user} class="team-row">
+                        <span class="av" style={`background:${avatarColor(r.user)}`}>
+                            {initials(r.user)}
+                        </span>
+                        <span class="team-name" title={r.lastIssueTitle || ''}>{r.user}</span>
+                        <span class="when">{recencyLabel(r.lastDate)}</span>
+                        <span class="team-time">{fmtHM(r.todaySeconds)}</span>
                     </div>
-                ) : (
-                    teamRows.map((r) => (
-                        <div key={r.user} class="team-row">
-                            <span class="avatar" style={`background:${avatarColor(r.user)}`}>
-                                {initials(r.user)}
-                            </span>
-                            <div>
-                                <div class="team-name">{r.user}</div>
-                                <div class="team-meta">
-                                    {r.lastIssueTitle || '—'} · {recencyLabel(r.lastDate)}
-                                </div>
-                            </div>
-                            <span class="team-time">{fmtHM(r.todaySeconds)}</span>
-                        </div>
-                    ))
-                )}
-            </div>
+                ))
+            )}
 
-            <div class="ts-footer">
-                <button
-                    type="button"
-                    class="btn-dashboard"
-                    onClick={() => vscode.postMessage({ type: 'openDashboard' })}
-                >
-                    <i class="codicon codicon-dashboard" />
-                    &nbsp;Full Dashboard&nbsp;&rarr;
-                </button>
-            </div>
+            {/* ── Full Dashboard button ────────────────────────────── */}
+            <button
+                type="button"
+                class="dashboard-btn"
+                onClick={() => vscode.postMessage({ type: 'openDashboard' })}
+            >
+                <i class="codicon codicon-dashboard" />
+                Full Dashboard&nbsp;→
+            </button>
         </div>
     );
 }

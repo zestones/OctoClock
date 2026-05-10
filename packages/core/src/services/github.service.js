@@ -81,7 +81,15 @@ export class GitHubService {
         return user.login;
     }
 
-    static buildTrackerCommentBody(entries, username) {
+    /**
+     * Build the tracker comment body.
+     *
+     * @param {Array<{date:string, seconds:number}>} entries
+     * @param {string} username
+     * @param {string|null} [running] - ISO timestamp when an active session started, or null/undefined when no session is in progress.
+     * @returns {string}
+     */
+    static buildTrackerCommentBody(entries, username, running = null) {
         const sorted = entries
             .map((e) => ({ date: e.date, seconds: Math.floor(e.seconds) }))
             .sort((a, b) => a.date.localeCompare(b.date) || 0);
@@ -92,6 +100,10 @@ export class GitHubService {
         let body = `${marker}\n`;
         body += `⏱️ **Total tracked time: ${TimeService.formatHuman(totalSeconds)}**\n\n`;
 
+        if (running) {
+            body += `🟢 **Currently tracking** — session started at ${running}\n\n`;
+        }
+
         if (sorted.length > 0) {
             body += `| # | Date | Duration |\n|---|------|----------|\n`;
             sorted.forEach((e, i) => {
@@ -100,19 +112,30 @@ export class GitHubService {
             body += '\n';
         }
 
-        const payload = btoa(JSON.stringify({ v: 1, entries: sorted }));
+        const payload = btoa(JSON.stringify({ v: 2, entries: sorted, running: running ?? null }));
         body += `${TRACKER_PAYLOAD_PREFIX}${payload} -->`;
 
         return body;
     }
 
+    /**
+     * Parse a tracker comment body. Returns an object with `entries` and an optional
+     * `running` ISO timestamp when the author of the comment has an active session.
+     *
+     * Backward-compatible with v1 payloads (no `running` field). Returns `null`
+     * when no payload marker is found.
+     *
+     * @param {string} commentBody
+     * @returns {{ entries: Array<{date:string, seconds:number}>, running: string|null } | null}
+     */
     static parseTrackerPayload(commentBody) {
         const match = commentBody.match(/<!-- timetracker-payload:(.*?) -->/);
         if (!match) return null;
         try {
             const json = JSON.parse(atob(match[1]));
-            if (json.v === 1 && Array.isArray(json.entries)) {
-                return json.entries;
+            if ((json.v === 1 || json.v === 2) && Array.isArray(json.entries)) {
+                const running = typeof json.running === 'string' && json.running.length > 0 ? json.running : null;
+                return { entries: json.entries, running };
             }
         } catch (e) {
             console.error('Failed to parse tracker payload:', e);
@@ -134,9 +157,9 @@ export class GitHubService {
         return null;
     }
 
-    static async createOrUpdateTrackerComment({ owner, repo, issueNumber, entries, cachedCommentId }) {
+    static async createOrUpdateTrackerComment({ owner, repo, issueNumber, entries, cachedCommentId, running = null }) {
         const username = await GitHubService.getCurrentUsername();
-        const body = GitHubService.buildTrackerCommentBody(entries, username);
+        const body = GitHubService.buildTrackerCommentBody(entries, username, running);
 
         console.info(TRACKER_SYNC_LOG_PREFIX, 'Preparing tracker comment sync', {
             owner,
@@ -228,13 +251,14 @@ export class GitHubService {
             );
             for (const comment of comments) {
                 if (comment.body && matchesTrackerMarker(comment.body, username)) {
-                    const entries = GitHubService.parseTrackerPayload(comment.body);
-                    if (entries) {
+                    const parsed = GitHubService.parseTrackerPayload(comment.body);
+                    if (parsed) {
                         const issueMatch = comment.issue_url.match(/\/issues\/(\d+)$/);
                         if (issueMatch) {
                             results.push({
                                 issueUrl: `/${owner}/${repo}/issues/${issueMatch[1]}`,
-                                entries,
+                                entries: parsed.entries,
+                                running: parsed.running,
                                 commentId: comment.id,
                             });
                         }
@@ -270,14 +294,15 @@ export class GitHubService {
             );
             for (const comment of comments) {
                 if (comment.body && matchesTrackerMarker(comment.body)) {
-                    const entries = GitHubService.parseTrackerPayload(comment.body);
-                    if (entries) {
+                    const parsed = GitHubService.parseTrackerPayload(comment.body);
+                    if (parsed) {
                         const issueMatch = comment.issue_url.match(/\/issues\/(\d+)$/);
                         if (issueMatch) {
                             results.push({
                                 issueUrl: `/${owner}/${repo}/issues/${issueMatch[1]}`,
                                 user: comment.user.login,
-                                entries,
+                                entries: parsed.entries,
+                                running: parsed.running,
                                 commentId: comment.id,
                             });
                         }
