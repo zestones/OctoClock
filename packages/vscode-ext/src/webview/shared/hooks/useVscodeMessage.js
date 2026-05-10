@@ -8,7 +8,7 @@
 //
 // The handler is stable across renders — no need to memoize at the call site.
 
-import { useEffect } from 'preact/hooks';
+import { useEffect, useRef } from 'preact/hooks';
 
 /**
  * @template T
@@ -16,14 +16,16 @@ import { useEffect } from 'preact/hooks';
  * @param {(message: T) => void} handler - Called for every matching message.
  */
 export function useVscodeMessage(type, handler) {
+    const handlerRef = useRef(handler);
+    handlerRef.current = handler;
+
     useEffect(() => {
         const listener = (/** @type {MessageEvent} */ event) => {
             if (event.data?.type === type) {
-                handler(event.data);
+                handlerRef.current(event.data);
             }
         };
         window.addEventListener('message', listener);
         return () => window.removeEventListener('message', listener);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [type]);
 }

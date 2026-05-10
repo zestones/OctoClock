@@ -95,6 +95,7 @@ export function activate(context) {
         vscode.commands.registerCommand('octoclock.toggleWorkspaceFilter', () =>
             trackedTimeProvider.toggleWorkspaceFilter(),
         ),
+        vscode.commands.registerCommand('octoclock.refreshTrackedTime', () => trackedTimeProvider.refresh()),
     );
     // Initialise the `setContext` flag so the title-bar icon reflects the
     // persisted toggle state from the moment the view loads.
@@ -144,4 +145,4 @@ export function activate(context) {
     console.log('OctoClock: activated');
 }
 
-export function deactivate() {}
+export function deactivate() { }

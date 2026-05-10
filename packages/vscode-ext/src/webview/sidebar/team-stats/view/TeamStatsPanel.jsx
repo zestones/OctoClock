@@ -7,7 +7,7 @@
 // Receives a single `stats` message from the host carrying everything
 // pre-aggregated; the webview is presentation-only.
 
-import { useState } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import { useVscodeMessage } from '../../../shared/hooks/useVscodeMessage.js';
 
 // eslint-disable-next-line no-undef
@@ -45,9 +45,13 @@ function recencyLabel(dateStr) {
 }
 
 export function TeamStatsPanel() {
-    const [stats, setStats] = useState(/** @type {any} */ (null));
+    const [stats, setStats] = useState(/** @type {any} */(null));
 
     useVscodeMessage('stats', (msg) => setStats(msg.payload));
+
+    useEffect(() => {
+        vscode.postMessage({ type: 'ready' });
+    }, []);
 
     if (!stats) {
         return (

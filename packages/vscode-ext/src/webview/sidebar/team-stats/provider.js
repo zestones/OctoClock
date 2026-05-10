@@ -16,6 +16,7 @@
 // postMessage protocol:
 //   host → webview  { type: 'stats', payload: { myTimeToday, teamTimeWeek,
 //                     issuesTouchedToday, issueBars, teamRows } }
+//   webview → host  { type: 'ready' }
 //   webview → host  { type: 'openDashboard' }
 
 import * as vscode from 'vscode';
@@ -71,7 +72,9 @@ export class TeamStatsProvider {
         webviewView.webview.html = getHtml(webviewView.webview, this._context.extensionUri);
 
         webviewView.webview.onDidReceiveMessage((message) => {
-            if (message.type === 'openDashboard') {
+            if (message.type === 'ready') {
+                this._sendStats();
+            } else if (message.type === 'openDashboard') {
                 vscode.commands.executeCommand('octoclock.openDashboard');
             }
         });
@@ -105,9 +108,12 @@ export class TeamStatsProvider {
             this._view.webview.postMessage({ type: 'stats', payload });
             this._lastSentAt = Date.now();
         } catch {
-            // Storage not ready or read failed — webview keeps showing the
-            // previous (or "Loading…") state, no user-facing error needed.
+            this._view.webview.postMessage({ type: 'stats', payload: TeamStatsProvider._emptyPayload() });
         }
+    }
+
+    static _emptyPayload() {
+        return { myTimeToday: 0, teamTimeWeek: 0, issuesTouchedToday: 0, issueBars: [], teamRows: [] };
     }
 
     /**

@@ -3,7 +3,6 @@
 // Search input + Open/Closed/All tab buttons.
 // CSS classes defined in html.js.
 
-import { h } from 'preact';
 import { useRef } from 'preact/hooks';
 
 const TABS = /** @type {const} */ (['open', 'closed', 'all']);
@@ -17,7 +16,7 @@ const TABS = /** @type {const} */ (['open', 'closed', 'all']);
  * }} props
  */
 export function FilterBar({ query, onQuery, tab, onTab }) {
-    const debounce = useRef(/** @type {ReturnType<typeof setTimeout>|null} */ (null));
+    const debounce = useRef(/** @type {ReturnType<typeof setTimeout>|null} */(null));
 
     const handleInput = (/** @type {Event} */ e) => {
         const value = /** @type {HTMLInputElement} */ (e.target).value;
@@ -30,7 +29,7 @@ export function FilterBar({ query, onQuery, tab, onTab }) {
             <input
                 class="filter-input"
                 type="text"
-                placeholder="Filter by title or #id\u2026"
+                placeholder="Filter by title or #id..."
                 autocomplete="off"
                 aria-label="Filter issues by title or number"
                 value={query}

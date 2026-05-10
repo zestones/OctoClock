@@ -130,6 +130,21 @@ export class TrackedSessionNode extends vscode.TreeItem {
     }
 }
 
+export class WorkspaceFilterNode extends vscode.TreeItem {
+    /** @param {boolean} enabled */
+    constructor(enabled) {
+        super('Workspace filter', vscode.TreeItemCollapsibleState.None);
+        this.description = enabled ? 'on' : 'off';
+        this.tooltip = enabled ? 'Showing repositories from this workspace only' : 'Showing all pinned repositories';
+        this.iconPath = new vscode.ThemeIcon(enabled ? 'filter-filled' : 'filter');
+        this.contextValue = 'oc-workspace-filter';
+        this.command = {
+            command: 'octoclock.toggleWorkspaceFilter',
+            title: 'Toggle workspace filter',
+        };
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Tree data provider
 // ---------------------------------------------------------------------------
@@ -205,7 +220,7 @@ export class TrackedTimeProvider {
      * @param {TrackedRepoNode | TrackedIssueNode | TrackedSessionNode | undefined} element
      */
     async getChildren(element) {
-        if (!element) return this.#buildRepoNodes();
+        if (!element) return [new WorkspaceFilterNode(this.workspaceFilterEnabled), ...(await this.#buildRepoNodes())];
         if (element instanceof TrackedRepoNode) return element.issueNodes;
         if (element instanceof TrackedIssueNode) return element.sessionNodes;
         return [];

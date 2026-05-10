@@ -137,12 +137,20 @@
             {
                 "command": "octoclock.pinRepo",
                 "title": "Pin repository",
-                "category": "OctoClock"
+                "category": "OctoClock",
+                "icon": "$(pin)"
             },
             {
                 "command": "octoclock.unpinRepo",
                 "title": "Unpin repository",
-                "category": "OctoClock"
+                "category": "OctoClock",
+                "icon": "$(pinned-dirty)"
+            },
+            {
+                "command": "octoclock.refreshTrackedTime",
+                "title": "Refresh tracked time",
+                "category": "OctoClock",
+                "icon": "$(refresh)"
             },
             {
                 "command": "octoclock.toggleWorkspaceFilter",
@@ -196,9 +204,19 @@
                     "group": "navigation"
                 },
                 {
+                    "command": "octoclock.pinRepo",
+                    "when": "view == octoclock.trackedTime",
+                    "group": "navigation@1"
+                },
+                {
+                    "command": "octoclock.refreshTrackedTime",
+                    "when": "view == octoclock.trackedTime",
+                    "group": "navigation@2"
+                },
+                {
                     "command": "octoclock.toggleWorkspaceFilter",
                     "when": "view == octoclock.trackedTime",
-                    "group": "navigation"
+                    "group": "navigation@3"
                 },
                 {
                     "command": "octoclock.configureToken",
@@ -214,7 +232,7 @@
             "view/item/context": [
                 {
                     "command": "octoclock.unpinRepo",
-                    "when": "viewItem == octoclock.repo",
+                    "when": "viewItem == octoclock.repo || viewItem == oc-repo",
                     "group": "octoclock@1"
                 },
                 {
