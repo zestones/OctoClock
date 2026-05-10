@@ -181,30 +181,23 @@ export function IssuesTab({ filter, onFilterChange }) {
                                 <div key={repo.fullName} className="mb-2">
                                     {/* Repo card header */}
                                     <div
-                                        className={`flex items-center justify-between py-2.5 px-3 cursor-pointer rounded-xl border transition-all ${
+                                        className={`flex items-center justify-between py-2.5 px-3 rounded-xl border transition-all ${
                                             isExpanded
                                                 ? 'bg-accent-subtle/40 border-accent-ring/30 shadow-sm'
                                                 : 'bg-surface border-border-subtle hover:border-border-default hover:shadow-sm'
                                         }`}
-                                        onClick={() =>
-                                            setExpandedRepos((prev) => ({
-                                                ...prev,
-                                                [repo.fullName]: !prev[repo.fullName],
-                                            }))
-                                        }
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter' || e.key === ' ') {
-                                                e.preventDefault();
+                                    >
+                                        <button
+                                            type="button"
+                                            onClick={() =>
                                                 setExpandedRepos((prev) => ({
                                                     ...prev,
                                                     [repo.fullName]: !prev[repo.fullName],
-                                                }));
+                                                }))
                                             }
-                                        }}
-                                        role="button"
-                                        tabIndex={0}
-                                    >
-                                        <div className="flex items-center gap-2 min-w-0">
+                                            aria-expanded={isExpanded}
+                                            className="flex items-center gap-2 min-w-0 flex-1 text-left cursor-pointer"
+                                        >
                                             <span
                                                 className="text-muted transition-transform duration-200"
                                                 style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}
@@ -222,7 +215,7 @@ export function IssuesTab({ filter, onFilterChange }) {
                                             {loading[repo.fullName] && (
                                                 <div className="w-3 h-3 border border-accent border-t-transparent rounded-full animate-spin shrink-0" />
                                             )}
-                                        </div>
+                                        </button>
                                         <div className="flex items-center gap-0.5 shrink-0">
                                             <button
                                                 type="button"
