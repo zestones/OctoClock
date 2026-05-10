@@ -20,200 +20,178 @@
  */
 
 :root {
+    /* ── Fonts ─────────────────────────────────────────── */
 
-  /* ── Fonts ─────────────────────────────────────────── */
+    --oc-font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --oc-font-mono: "Cascadia Code", "SF Mono", Consolas, "Courier New", monospace;
 
-  --oc-font-ui:   -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-                  sans-serif;
-  --oc-font-mono: 'Cascadia Code', 'SF Mono', Consolas, 'Courier New',
-                  monospace;
+    /* ── Theme-aware: Backgrounds ───────────────────────── */
 
+    /* Main editor/webview background — prototype: #1e1e1e */
+    --oc-bg: var(--vscode-editor-background);
 
-  /* ── Theme-aware: Backgrounds ───────────────────────── */
+    /* Sidebar panel background — prototype: #252526 */
+    --oc-sidebar-bg: var(--vscode-sideBar-background);
 
-  /* Main editor/webview background — prototype: #1e1e1e */
-  --oc-bg:              var(--vscode-editor-background);
+    /* Activity Bar background — prototype: #333333 */
+    --oc-actbar-bg: var(--vscode-activityBar-background);
 
-  /* Sidebar panel background — prototype: #252526 */
-  --oc-sidebar-bg:      var(--vscode-sideBar-background);
+    /* Hover row background — prototype: #2a2d2e */
+    --oc-hover-bg: var(--vscode-list-hoverBackground);
 
-  /* Activity Bar background — prototype: #333333 */
-  --oc-actbar-bg:       var(--vscode-activityBar-background);
+    /* Subtle card / section background (e.g. stat card, KPI card) */
+    /* prototype: rgba(255,255,255,.04)                             */
+    --oc-card-bg: var(--vscode-sideBarSectionHeader-background, var(--vscode-editor-inactiveSelectionBackground));
 
-  /* Hover row background — prototype: #2a2d2e */
-  --oc-hover-bg:        var(--vscode-list-hoverBackground);
+    /* Input field background — prototype: rgba(255,255,255,.05) */
+    --oc-input-bg: var(--vscode-input-background);
 
-  /* Subtle card / section background (e.g. stat card, KPI card) */
-  /* prototype: rgba(255,255,255,.04)                             */
-  --oc-card-bg:         var(--vscode-sideBarSectionHeader-background,
-                            var(--vscode-editor-inactiveSelectionBackground));
+    /* Panel/dashboard nav background — prototype: #1c1c1c */
+    --oc-panel-bg: var(--vscode-panel-background, var(--vscode-editor-background));
 
-  /* Input field background — prototype: rgba(255,255,255,.05) */
-  --oc-input-bg:        var(--vscode-input-background);
+    /* Tab bar background — prototype: #2d2d2d */
+    --oc-tabbar-bg: var(--vscode-editorGroupHeader-tabsBackground, var(--vscode-editor-background));
 
-  /* Panel/dashboard nav background — prototype: #1c1c1c */
-  --oc-panel-bg:        var(--vscode-panel-background,
-                            var(--vscode-editor-background));
+    /* Notification / toast background — prototype: #252526 */
+    --oc-toast-bg: var(--vscode-notifications-background, var(--vscode-sideBar-background));
 
-  /* Tab bar background — prototype: #2d2d2d */
-  --oc-tabbar-bg:       var(--vscode-editorGroupHeader-tabsBackground,
-                            var(--vscode-editor-background));
+    /* Accent card backgrounds (blue / teal / purple variants) */
+    /* prototype: rgba(0,122,204,.07-18), rgba(78,201,176,.05-14),             */
+    /*            rgba(124,77,255,.05-16)                                       */
+    --oc-accent-card-bg: var(--vscode-inputValidation-infoBackground, rgba(0, 122, 204, 0.07));
+    --oc-timer-card-bg: rgba(78, 201, 176, 0.05); /* timer row tint        */
+    --oc-purple-card-bg: rgba(124, 77, 255, 0.05); /* "sessions" KPI tint   */
 
-  /* Notification / toast background — prototype: #252526 */
-  --oc-toast-bg:        var(--vscode-notifications-background,
-                            var(--vscode-sideBar-background));
+    /* Scrollbar thumb — prototype: #424242 */
+    --oc-scrollbar-thumb: var(--vscode-scrollbarSlider-background);
 
-  /* Accent card backgrounds (blue / teal / purple variants) */
-  /* prototype: rgba(0,122,204,.07-18), rgba(78,201,176,.05-14),             */
-  /*            rgba(124,77,255,.05-16)                                       */
-  --oc-accent-card-bg:  var(--vscode-inputValidation-infoBackground,
-                            rgba(0, 122, 204, 0.07));
-  --oc-timer-card-bg:   rgba(78, 201, 176, 0.05);   /* timer row tint        */
-  --oc-purple-card-bg:  rgba(124, 77, 255, 0.05);   /* "sessions" KPI tint   */
+    /* ── Theme-aware: Foregrounds ───────────────────────── */
 
-  /* Scrollbar thumb — prototype: #424242 */
-  --oc-scrollbar-thumb: var(--vscode-scrollbarSlider-background);
+    /* Primary text — prototype: #cccccc */
+    --oc-fg: var(--vscode-editor-foreground);
 
+    /* Activity Bar icon active — prototype: #fff */
+    --oc-actbar-fg: var(--vscode-activityBar-foreground);
 
-  /* ── Theme-aware: Foregrounds ───────────────────────── */
+    /* Activity Bar icon inactive — prototype: rgba(255,255,255,.4) */
+    --oc-actbar-fg-dim: var(--vscode-activityBar-inactiveForeground);
 
-  /* Primary text — prototype: #cccccc */
-  --oc-fg:              var(--vscode-editor-foreground);
+    /* Section header / panel title — prototype: #bbbbbe */
+    --oc-section-hdr: var(
+        --vscode-sideBarSectionHeader-foreground,
+        var(--vscode-sideBar-foreground, var(--vscode-editor-foreground))
+    );
 
-  /* Activity Bar icon active — prototype: #fff */
-  --oc-actbar-fg:       var(--vscode-activityBar-foreground);
+    /* Secondary / description text — prototype: #868686 */
+    --oc-desc: var(--vscode-descriptionForeground);
 
-  /* Activity Bar icon inactive — prototype: rgba(255,255,255,.4) */
-  --oc-actbar-fg-dim:   var(--vscode-activityBar-inactiveForeground);
+    /* Muted / disabled text — prototype: #525252 */
+    --oc-muted: var(--vscode-disabledForeground, var(--vscode-descriptionForeground));
 
-  /* Section header / panel title — prototype: #bbbbbe */
-  --oc-section-hdr:     var(--vscode-sideBarSectionHeader-foreground,
-                            var(--vscode-sideBar-foreground,
-                            var(--vscode-editor-foreground)));
+    /* Heading text (dashboard, member hero) — prototype: #e4e4e4 */
+    --oc-heading: var(--vscode-editor-foreground);
 
-  /* Secondary / description text — prototype: #868686 */
-  --oc-desc:            var(--vscode-descriptionForeground);
+    /* Value text in KPI cards — prototype: #e0e0e0, #e4e4e4 */
+    --oc-value: var(--vscode-editor-foreground);
 
-  /* Muted / disabled text — prototype: #525252 */
-  --oc-muted:           var(--vscode-disabledForeground,
-                            var(--vscode-descriptionForeground));
+    /* Inactive tab text — prototype: #969696 */
+    --oc-tab-inactive-fg: var(--vscode-tab-inactiveForeground, var(--vscode-descriptionForeground));
 
-  /* Heading text (dashboard, member hero) — prototype: #e4e4e4 */
-  --oc-heading:         var(--vscode-editor-foreground);
+    /* Active tab / highlighted text (lighter accent blue) — prototype: #6fb3e8 */
+    --oc-accent-fg: var(--vscode-textLink-activeForeground, var(--vscode-focusBorder));
 
-  /* Value text in KPI cards — prototype: #e0e0e0, #e4e4e4 */
-  --oc-value:           var(--vscode-editor-foreground);
+    /* Link / action text color — prototype: --c-badge (#007acc) */
+    --oc-link: var(--vscode-textLink-foreground);
 
-  /* Inactive tab text — prototype: #969696 */
-  --oc-tab-inactive-fg: var(--vscode-tab-inactiveForeground,
-                            var(--vscode-descriptionForeground));
+    /* Line-number gutter — prototype: #5a5a5a */
+    --oc-line-number: var(--vscode-editorLineNumber-foreground);
 
-  /* Active tab / highlighted text (lighter accent blue) — prototype: #6fb3e8 */
-  --oc-accent-fg:       var(--vscode-textLink-activeForeground,
-                            var(--vscode-focusBorder));
+    /* ── Theme-aware: Borders & Separators ──────────────── */
 
-  /* Link / action text color — prototype: --c-badge (#007acc) */
-  --oc-link:            var(--vscode-textLink-foreground);
+    /* Standard panel border — prototype: #3e3e42, #1a1a1a */
+    --oc-border: var(--vscode-panel-border);
 
-  /* Line-number gutter — prototype: #5a5a5a */
-  --oc-line-number:     var(--vscode-editorLineNumber-foreground);
+    /* Sidebar right border */
+    --oc-sidebar-border: var(--vscode-sideBar-border, var(--vscode-panel-border));
 
+    /* Input field border */
+    --oc-input-border: var(--vscode-input-border);
 
-  /* ── Theme-aware: Borders & Separators ──────────────── */
+    /* Notification / toast border — prototype: #454545 */
+    --oc-toast-border: var(--vscode-notifications-border, var(--vscode-panel-border));
 
-  /* Standard panel border — prototype: #3e3e42, #1a1a1a */
-  --oc-border:          var(--vscode-panel-border);
+    /* Subtle hairline separator — prototype: rgba(255,255,255,.04-09) */
+    --oc-hairline: var(--vscode-widget-border, var(--vscode-panel-border));
 
-  /* Sidebar right border */
-  --oc-sidebar-border:  var(--vscode-sideBar-border, var(--vscode-panel-border));
+    /* ── Theme-aware: Interactive controls ──────────────── */
 
-  /* Input field border */
-  --oc-input-border:    var(--vscode-input-border);
+    /* Primary button background — prototype: #0e639c */
+    --oc-btn-bg: var(--vscode-button-background);
 
-  /* Notification / toast border — prototype: #454545 */
-  --oc-toast-border:    var(--vscode-notifications-border,
-                            var(--vscode-panel-border));
+    /* Primary button hover — prototype: #1177bb */
+    --oc-btn-bg-hover: var(--vscode-button-hoverBackground);
 
-  /* Subtle hairline separator — prototype: rgba(255,255,255,.04-09) */
-  --oc-hairline:        var(--vscode-widget-border, var(--vscode-panel-border));
+    /* Primary button foreground */
+    --oc-btn-fg: var(--vscode-button-foreground);
 
+    /* Accent / badge background — prototype: #007acc */
+    /* Used for bar fills, active badges, focus accents.                      */
+    --oc-accent: var(--vscode-button-background);
 
-  /* ── Theme-aware: Interactive controls ──────────────── */
+    /* Focus ring */
+    --oc-focus: var(--vscode-focusBorder);
 
-  /* Primary button background — prototype: #0e639c */
-  --oc-btn-bg:          var(--vscode-button-background);
+    /* Secondary button border — prototype: #555 */
+    --oc-btn-sec-border: var(--vscode-button-secondaryBackground, var(--vscode-panel-border));
 
-  /* Primary button hover — prototype: #1177bb */
-  --oc-btn-bg-hover:    var(--vscode-button-hoverBackground);
+    /* Secondary button foreground */
+    --oc-btn-sec-fg: var(--vscode-button-secondaryForeground, var(--vscode-editor-foreground));
 
-  /* Primary button foreground */
-  --oc-btn-fg:          var(--vscode-button-foreground);
+    /* ── Theme-aware: Inputs & Dropdowns ────────────────── */
 
-  /* Accent / badge background — prototype: #007acc */
-  /* Used for bar fills, active badges, focus accents.                      */
-  --oc-accent:          var(--vscode-button-background);
+    --oc-input-fg: var(--vscode-input-foreground);
+    --oc-input-placeholder: var(--vscode-input-placeholderForeground);
+    --oc-select-bg: var(--vscode-dropdown-background, var(--vscode-input-background));
+    --oc-select-border: var(--vscode-dropdown-border, var(--vscode-input-border));
 
-  /* Focus ring */
-  --oc-focus:           var(--vscode-focusBorder);
+    /* ── Theme-aware: Progress / Badges ─────────────────── */
 
-  /* Secondary button border — prototype: #555 */
-  --oc-btn-sec-border:  var(--vscode-button-secondaryBackground,
-                            var(--vscode-panel-border));
+    --oc-badge-bg: var(--vscode-badge-background);
+    --oc-badge-fg: var(--vscode-badge-foreground);
 
-  /* Secondary button foreground */
-  --oc-btn-sec-fg:      var(--vscode-button-secondaryForeground,
-                            var(--vscode-editor-foreground));
+    /* ── Brand fixed: Semantic UI indicators ────────────── */
+    /*                                                                         */
+    /* The colours below have NO equivalent in VS Code's theme variable set.  */
+    /* They convey OctoClock-specific meaning (timer state, issue state,       */
+    /* branch association, destructive action) and must remain visually        */
+    /* distinct across all themes. Verified contrast ratio >= 3:1 against     */
+    /* both Light+ (#ffffff) and Dark+ (#1e1e1e) backgrounds.                 */
 
+    /* Active timer: pulsing dot, live h:mm:ss digits.                        */
+    /* prototype: #4ec9b0  (teal)                                              */
+    --oc-timer: #4ec9b0;
 
-  /* ── Theme-aware: Inputs & Dropdowns ────────────────── */
+    /* Issue open / "in progress" status indicator.                           */
+    /* prototype: #3fb950  (green)                                             */
+    --oc-open: #3fb950;
 
-  --oc-input-fg:            var(--vscode-input-foreground);
-  --oc-input-placeholder:   var(--vscode-input-placeholderForeground);
-  --oc-select-bg:           var(--vscode-dropdown-background,
-                                var(--vscode-input-background));
-  --oc-select-border:       var(--vscode-dropdown-border,
-                                var(--vscode-input-border));
+    /* Branch-suggestion pill and branch-row accent.                          */
+    /* prototype: #c586c0  (purple)                                            */
+    --oc-branch: #c586c0;
 
+    /* Stop / destructive action, negative delta.                             */
+    /* prototype: #f48771  (salmon-red)                                        */
+    --oc-danger: #f48771;
 
-  /* ── Theme-aware: Progress / Badges ─────────────────── */
+    /* Positive trend delta arrow.                                            */
+    /* prototype: #89d185  (light green)                                       */
+    --oc-positive: #89d185;
 
-  --oc-badge-bg:        var(--vscode-badge-background);
-  --oc-badge-fg:        var(--vscode-badge-foreground);
+    /* Idle-reminder warning header, caution state.                           */
+    /* prototype: #e2c08d  (warm yellow)                                       */
+    --oc-warning: #e2c08d;
 
-
-  /* ── Brand fixed: Semantic UI indicators ────────────── */
-  /*                                                                         */
-  /* The colours below have NO equivalent in VS Code's theme variable set.  */
-  /* They convey OctoClock-specific meaning (timer state, issue state,       */
-  /* branch association, destructive action) and must remain visually        */
-  /* distinct across all themes. Verified contrast ratio >= 3:1 against     */
-  /* both Light+ (#ffffff) and Dark+ (#1e1e1e) backgrounds.                 */
-
-  /* Active timer: pulsing dot, live h:mm:ss digits.                        */
-  /* prototype: #4ec9b0  (teal)                                              */
-  --oc-timer:     #4ec9b0;
-
-  /* Issue open / "in progress" status indicator.                           */
-  /* prototype: #3fb950  (green)                                             */
-  --oc-open:      #3fb950;
-
-  /* Branch-suggestion pill and branch-row accent.                          */
-  /* prototype: #c586c0  (purple)                                            */
-  --oc-branch:    #c586c0;
-
-  /* Stop / destructive action, negative delta.                             */
-  /* prototype: #f48771  (salmon-red)                                        */
-  --oc-danger:    #f48771;
-
-  /* Positive trend delta arrow.                                            */
-  /* prototype: #89d185  (light green)                                       */
-  --oc-positive:  #89d185;
-
-  /* Idle-reminder warning header, caution state.                           */
-  /* prototype: #e2c08d  (warm yellow)                                       */
-  --oc-warning:   #e2c08d;
-
-  /* Purple KPI card accent (Sessions view).                                */
-  /* prototype: #b39dff                                                      */
-  --oc-purple:    #b39dff;
+    /* Purple KPI card accent (Sessions view).                                */
+    /* prototype: #b39dff                                                      */
+    --oc-purple: #b39dff;
 }

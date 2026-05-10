@@ -19,7 +19,7 @@ describe('SyncQueue', () => {
 
     it('has() returns true while a job is in progress', async () => {
         /** @type {(value?: unknown) => void} */
-        let resolve = () => { };
+        let resolve = () => {};
         const pending = new Promise((r) => {
             resolve = r;
         });
