@@ -26,21 +26,21 @@ const TABS = /** @type {Array<{ id: TabId, label: string, icon: string }>} */ ([
 ]);
 
 export function DashboardApp() {
-    const [activeTab, setActiveTab] = useState(/** @type {TabId} */('overview'));
-    const [range, setRange] = useState(/** @type {'today'|'week'|'month'|'all'} */('week'));
+    const [activeTab, setActiveTab] = useState(/** @type {TabId} */ ('overview'));
+    const [range, setRange] = useState(/** @type {'today'|'week'|'month'|'all'} */ ('week'));
     const [weekOffset, setWeekOffset] = useState(0);
-    const [memberFilter, setMemberFilter] = useState(/** @type {string|null} */(null));
-    const [issueFilter, setIssueFilter] = useState(/** @type {string|null} */(null));
-    const [payload, setPayload] = useState(/** @type {any} */(null));
+    const [memberFilter, setMemberFilter] = useState(/** @type {string|null} */ (null));
+    const [issueFilter, setIssueFilter] = useState(/** @type {string|null} */ (null));
+    const [payload, setPayload] = useState(/** @type {any} */ (null));
     const [windowRange, setWindowRange] = useState(
-        /** @type {{ start: string|null, end: string|null }} */({ start: null, end: null }),
+        /** @type {{ start: string|null, end: string|null }} */ ({ start: null, end: null }),
     );
 
     // Member drill-down state.
-    const [selectedMember, setSelectedMember] = useState(/** @type {string|null} */(null));
-    const [memberDetail, setMemberDetail] = useState(/** @type {any} */(null));
+    const [selectedMember, setSelectedMember] = useState(/** @type {string|null} */ (null));
+    const [memberDetail, setMemberDetail] = useState(/** @type {any} */ (null));
     const savedScrollRef = useRef(0);
-    const contentRef = useRef(/** @type {HTMLDivElement|null} */(null));
+    const contentRef = useRef(/** @type {HTMLDivElement|null} */ (null));
 
     useEffect(() => {
         vscode.postMessage({ type: 'ready' });
@@ -70,7 +70,7 @@ export function DashboardApp() {
             memberFilter: patch.memberFilter !== undefined ? patch.memberFilter : memberFilter,
             issueFilter: patch.issueFilter !== undefined ? patch.issueFilter : issueFilter,
         };
-        if (patch.range !== undefined) setRange(/** @type {any} */(patch.range));
+        if (patch.range !== undefined) setRange(/** @type {any} */ (patch.range));
         if (patch.weekOffset !== undefined) setWeekOffset(patch.weekOffset);
         if (patch.memberFilter !== undefined) setMemberFilter(patch.memberFilter);
         if (patch.issueFilter !== undefined) setIssueFilter(patch.issueFilter);

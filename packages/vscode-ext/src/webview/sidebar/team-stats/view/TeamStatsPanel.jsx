@@ -45,7 +45,7 @@ function recencyLabel(dateStr) {
 }
 
 export function TeamStatsPanel() {
-    const [stats, setStats] = useState(/** @type {any} */(null));
+    const [stats, setStats] = useState(/** @type {any} */ (null));
 
     useVscodeMessage('stats', (msg) => setStats(msg.payload));
 

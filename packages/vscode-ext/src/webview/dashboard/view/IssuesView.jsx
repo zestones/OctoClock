@@ -17,7 +17,7 @@ function fmtHM(seconds) {
 
 /** @param {{ payload: any }} props */
 export function IssuesView({ payload }) {
-    const [open, setOpen] = useState(/** @type {Record<string, boolean>} */({}));
+    const [open, setOpen] = useState(/** @type {Record<string, boolean>} */ ({}));
     const { issueRows } = payload;
 
     /** @param {string} url */

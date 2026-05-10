@@ -5,4 +5,4 @@
 import { h, render } from 'preact';
 import { TeamStatsPanel } from './TeamStatsPanel.jsx';
 
-render(h(TeamStatsPanel, null), /** @type {Element} */(document.getElementById('app')));
+render(h(TeamStatsPanel, null), /** @type {Element} */ (document.getElementById('app')));
