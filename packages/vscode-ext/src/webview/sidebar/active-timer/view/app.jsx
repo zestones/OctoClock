@@ -6,4 +6,4 @@
 import { h, render } from 'preact';
 import { ActiveTimerPanel } from './ActiveTimerPanel.jsx';
 
-render(h(ActiveTimerPanel, null), /** @type {Element} */(document.getElementById('app')));
+render(h(ActiveTimerPanel, null), /** @type {Element} */ (document.getElementById('app')));

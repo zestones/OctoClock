@@ -15,11 +15,7 @@ import { h } from 'preact';
  * @returns {string}
  */
 function escHtml(s) {
-    return String(s)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 /**
@@ -60,10 +56,7 @@ export function IssueList({ issues, query, statusTab, timerRunning, activeIssueI
 
     const filtered = issues.filter((issue) => {
         const matchStatus = statusTab === 'all' || issue.status === statusTab;
-        const matchQuery =
-            !q ||
-            issue.title.toLowerCase().includes(q) ||
-            String(issue.id).includes(q.replace('#', ''));
+        const matchQuery = !q || issue.title.toLowerCase().includes(q) || String(issue.id).includes(q.replace('#', ''));
         return matchStatus && matchQuery;
     });
 
@@ -77,16 +70,12 @@ export function IssueList({ issues, query, statusTab, timerRunning, activeIssueI
             {filtered.map((issue) => {
                 const isActive = timerRunning && issue.id === activeIssueId;
                 const isClosed = issue.status === 'closed';
-                const iconColor = isActive
-                    ? 'var(--oc-timer)'
-                    : isClosed
-                        ? 'var(--oc-muted)'
-                        : 'var(--oc-open)';
+                const iconColor = isActive ? 'var(--oc-timer)' : isClosed ? 'var(--oc-muted)' : 'var(--oc-open)';
                 const iconName = isActive
                     ? 'codicon-clock'
                     : isClosed
-                        ? 'codicon-issue-closed'
-                        : 'codicon-issue-opened';
+                      ? 'codicon-issue-closed'
+                      : 'codicon-issue-opened';
 
                 // dangerouslySetInnerHTML is safe here — highlight() HTML-escapes
                 // both text and query before inserting <mark>.

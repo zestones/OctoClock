@@ -33,7 +33,7 @@ export function ActiveTimerPanel() {
     const [issueNumber, setIssueNumber] = useState('?');
     const [repo, setRepo] = useState('');
     const [elapsed, setElapsed] = useState(0);
-    const startTimeRef = useRef(/** @type {number|null} */(null));
+    const startTimeRef = useRef(/** @type {number|null} */ (null));
 
     useVscodeMessage('timerUpdate', (msg) => {
         const p = msg.payload;
@@ -72,11 +72,7 @@ export function ActiveTimerPanel() {
                 </span>
                 <span class="timer">{fmtTimer(elapsed)}</span>
                 <div class="row-always">
-                    <button
-                        type="button"
-                        class="btn-stop"
-                        onClick={() => vscode.postMessage({ type: 'stop' })}
-                    >
+                    <button type="button" class="btn-stop" onClick={() => vscode.postMessage({ type: 'stop' })}>
                         <i class="codicon codicon-debug-stop" />
                         &nbsp;Stop
                     </button>

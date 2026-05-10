@@ -44,7 +44,7 @@ body {
    webview URI that is only available at runtime. */
 
 .codicon {
-    font: normal normal 16px/1 codicon;
+    font: normal normal 16px / 1 codicon;
     display: inline-block;
 }
 

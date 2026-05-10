@@ -6,4 +6,4 @@
 import { h, render } from 'preact';
 import { MyIssuesPanel } from './MyIssuesPanel.jsx';
 
-render(h(MyIssuesPanel, null), /** @type {Element} */(document.getElementById('app')));
+render(h(MyIssuesPanel, null), /** @type {Element} */ (document.getElementById('app')));

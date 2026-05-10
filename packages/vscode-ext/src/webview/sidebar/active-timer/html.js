@@ -21,15 +21,11 @@ export function getHtml(webview, extensionUri) {
     const nonce = getNonce();
     const csp = buildCsp(nonce, webview);
 
-    const tokensUri = webview.asWebviewUri(
-        vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'tokens.css'),
-    );
+    const tokensUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'tokens.css'));
     const componentsUri = webview.asWebviewUri(
         vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'shared', 'components.css'),
     );
-    const codiconsUri = webview.asWebviewUri(
-        vscode.Uri.joinPath(extensionUri, 'dist', 'fonts', 'codicon.ttf'),
-    );
+    const codiconsUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'fonts', 'codicon.ttf'));
     const appUri = webview.asWebviewUri(
         vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'sidebar', 'active-timer', 'app.js'),
     );

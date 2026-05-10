@@ -40,14 +40,8 @@ function copyWebviewCss() {
         name: 'copy-webview-css',
         closeBundle() {
             mkdirSync(resolve(outDir, 'shared'), { recursive: true });
-            copyFileSync(
-                resolve(webviewSrc, 'tokens.css'),
-                resolve(outDir, 'tokens.css'),
-            );
-            copyFileSync(
-                resolve(webviewSrc, 'shared/components.css'),
-                resolve(outDir, 'shared/components.css'),
-            );
+            copyFileSync(resolve(webviewSrc, 'tokens.css'), resolve(outDir, 'tokens.css'));
+            copyFileSync(resolve(webviewSrc, 'shared/components.css'), resolve(outDir, 'shared/components.css'));
         },
     };
 }

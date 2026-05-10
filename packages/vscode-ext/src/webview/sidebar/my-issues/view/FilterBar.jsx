@@ -17,7 +17,7 @@ const TABS = /** @type {const} */ (['open', 'closed', 'all']);
  * }} props
  */
 export function FilterBar({ query, onQuery, tab, onTab }) {
-    const debounce = useRef(/** @type {ReturnType<typeof setTimeout>|null} */(null));
+    const debounce = useRef(/** @type {ReturnType<typeof setTimeout>|null} */ (null));
 
     const handleInput = (/** @type {Event} */ e) => {
         const value = /** @type {HTMLInputElement} */ (e.target).value;
@@ -37,12 +37,7 @@ export function FilterBar({ query, onQuery, tab, onTab }) {
             />
             <div class="filter-tabs">
                 {TABS.map((t) => (
-                    <button
-                        key={t}
-                        type="button"
-                        class={`ftab${tab === t ? ' on' : ''}`}
-                        onClick={() => onTab(t)}
-                    >
+                    <button key={t} type="button" class={`ftab${tab === t ? ' on' : ''}`} onClick={() => onTab(t)}>
                         {t.charAt(0).toUpperCase() + t.slice(1)}
                     </button>
                 ))}

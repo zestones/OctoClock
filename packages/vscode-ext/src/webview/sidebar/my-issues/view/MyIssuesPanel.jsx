@@ -22,12 +22,14 @@ import { IssueList } from './IssueList.jsx';
 const vscode = acquireVsCodeApi();
 
 export function MyIssuesPanel() {
-    const [issues, setIssues] = useState(/** @type {any[]} */([]));
+    const [issues, setIssues] = useState(/** @type {any[]} */ ([]));
     const [query, setQuery] = useState('');
     const [statusTab, setStatusTab] = useState('open');
     const [timerRunning, setTimerRunning] = useState(false);
-    const [activeIssueId, setActiveIssueId] = useState(/** @type {number|null} */(null));
-    const [branch, setBranch] = useState(/** @type {{ issueId: number, branch: string, url: string, title: string }|null} */(null));
+    const [activeIssueId, setActiveIssueId] = useState(/** @type {number|null} */ (null));
+    const [branch, setBranch] = useState(
+        /** @type {{ issueId: number, branch: string, url: string, title: string }|null} */ (null),
+    );
 
     useVscodeMessage('issues', (msg) => setIssues(msg.items));
 
@@ -38,7 +40,10 @@ export function MyIssuesPanel() {
 
     useVscodeMessage('branchSuggestion', (msg) => {
         const issue = issues.find((i) => i.id === msg.issueId);
-        if (!issue) { setBranch(null); return; }
+        if (!issue) {
+            setBranch(null);
+            return;
+        }
         setBranch({ issueId: msg.issueId, branch: msg.branch, url: issue.url, title: issue.title });
     });
 
