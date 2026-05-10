@@ -68,23 +68,27 @@ export function normalizeIssueUrl(raw) {
 export function registerCommands(context) {
     context.subscriptions.push(
         // ----------------------------------------------------------------
-        // octoclock.startTimer
-        // Prompt for an issue URL, normalise it, then delegate to TimerService.
+        // octoclock.startTimer [issueUrl?]
+        // When called with a URL (e.g. from the My Issues panel), skip the
+        // input prompt and start immediately. Without an argument, fall back
+        // to the interactive InputBox flow.
         // ----------------------------------------------------------------
-        vscode.commands.registerCommand('octoclock.startTimer', async () => {
-            const raw = await vscode.window.showInputBox({
-                prompt: 'Enter the GitHub issue URL',
-                placeHolder: 'https://github.com/owner/repo/issues/123',
-            });
-
-            if (!raw) return; // user pressed Escape or left the input empty
-
-            const issueUrl = normalizeIssueUrl(raw);
+        vscode.commands.registerCommand('octoclock.startTimer', async (issueUrl) => {
             if (!issueUrl) {
-                vscode.window.showErrorMessage(
-                    `OctoClock: Invalid issue URL — expected https://github.com/owner/repo/issues/123 format`,
-                );
-                return;
+                const raw = await vscode.window.showInputBox({
+                    prompt: 'Enter the GitHub issue URL',
+                    placeHolder: 'https://github.com/owner/repo/issues/123',
+                });
+
+                if (!raw) return; // user pressed Escape or left the input empty
+
+                issueUrl = normalizeIssueUrl(raw);
+                if (!issueUrl) {
+                    vscode.window.showErrorMessage(
+                        `OctoClock: Invalid issue URL — expected https://github.com/owner/repo/issues/123 format`,
+                    );
+                    return;
+                }
             }
 
             try {

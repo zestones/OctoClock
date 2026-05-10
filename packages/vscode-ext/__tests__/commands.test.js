@@ -191,6 +191,13 @@ describe('OctoClock commands', () => {
 
             expect(win.showErrorMessage).toHaveBeenCalledWith(expect.stringContaining('network failure'));
         });
+
+        it('skips the input prompt when called with a URL argument', async () => {
+            await getHandler('octoclock.startTimer')('/owner/repo/issues/7');
+
+            expect(win.showInputBox).not.toHaveBeenCalled();
+            expect(startTimerSpy).toHaveBeenCalledWith('/owner/repo/issues/7');
+        });
     });
 
     // -----------------------------------------------------------------------
