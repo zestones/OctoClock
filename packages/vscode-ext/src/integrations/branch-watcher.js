@@ -98,9 +98,9 @@ export class BranchWatcher {
         }
         // Initial check for when activation happens after a branch is already
         // checked out.
-        this._onHeadChanged(repo).catch(() => { });
+        this._onHeadChanged(repo).catch(() => {});
         this._stateSubscription = repo.state.onDidChange(() => {
-            this._onHeadChanged(repo).catch(() => { });
+            this._onHeadChanged(repo).catch(() => {});
         });
         this._context.subscriptions.push(this._stateSubscription);
     }

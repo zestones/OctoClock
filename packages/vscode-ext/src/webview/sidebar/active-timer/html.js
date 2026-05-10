@@ -18,19 +18,19 @@ import { getNonce } from '../../nonce.js';
  * @returns {string}
  */
 export function getHtml(webview, extensionUri) {
-  const nonce = getNonce();
-  const csp = buildCsp(nonce, webview);
+    const nonce = getNonce();
+    const csp = buildCsp(nonce, webview);
 
-  const tokensUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'tokens.css'));
-  const componentsUri = webview.asWebviewUri(
-    vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'shared', 'components.css'),
-  );
-  const codiconsCssUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'fonts', 'codicon.css'));
-  const appUri = webview.asWebviewUri(
-    vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'sidebar', 'active-timer', 'app.js'),
-  );
+    const tokensUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'tokens.css'));
+    const componentsUri = webview.asWebviewUri(
+        vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'shared', 'components.css'),
+    );
+    const codiconsCssUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'fonts', 'codicon.css'));
+    const appUri = webview.asWebviewUri(
+        vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'sidebar', 'active-timer', 'app.js'),
+    );
 
-  return /* html */ `<!DOCTYPE html>
+    return /* html */ `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">

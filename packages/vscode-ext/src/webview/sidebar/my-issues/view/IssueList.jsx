@@ -72,8 +72,8 @@ export function IssueList({ issues, query, statusTab, timerRunning, activeIssueI
                 const iconName = isActive
                     ? 'codicon-clock'
                     : isClosed
-                        ? 'codicon-issue-closed'
-                        : 'codicon-issue-opened';
+                      ? 'codicon-issue-closed'
+                      : 'codicon-issue-opened';
 
                 // dangerouslySetInnerHTML is safe here — highlight() HTML-escapes
                 // both text and query before inserting <mark>.

@@ -33,7 +33,7 @@ export function ActiveTimerPanel() {
     const [issueNumber, setIssueNumber] = useState('?');
     const [repo, setRepo] = useState('');
     const [elapsed, setElapsed] = useState(0);
-    const startTimeRef = useRef(/** @type {number|null} */(null));
+    const startTimeRef = useRef(/** @type {number|null} */ (null));
 
     useVscodeMessage('timerUpdate', (msg) => {
         const p = msg.payload;
