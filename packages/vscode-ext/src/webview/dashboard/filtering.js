@@ -67,6 +67,65 @@ export function filterByWindow(entries, { start, end }) {
 }
 
 /**
+ * Extract `owner/repo` from a GitHub issue URL. Returns an empty string when
+ * the URL does not match the expected GitHub layout.
+ *
+ * @param {string} url
+ * @returns {string}
+ */
+export function parseRepoFromUrl(url) {
+    if (!url) return '';
+    const m = /github\.com\/([^/]+\/[^/]+)\//.exec(url);
+    return m ? m[1] : '';
+}
+
+/**
+ * Compute per-member drill-down stats from the already-filtered entries.
+ *
+ * @param {Array<{ issueUrl: string, title: string, seconds: number, date: string, user?: string }>} entries
+ * @param {string} user
+ * @returns {{
+ *   user: string,
+ *   total: number,
+ *   sessionsCount: number,
+ *   issuesTouched: number,
+ *   issueRows: Array<{ issueUrl: string, title: string, seconds: number, sessions: number }>,
+ *   sessionLog: Array<{ issueUrl: string, title: string, seconds: number, date: string }>
+ * }}
+ */
+export function computeMemberDetail(entries, user) {
+    const own = entries.filter((e) => (e.user || '(you)') === user);
+    /** @type {Map<string, { issueUrl: string, title: string, seconds: number, sessions: number }>} */
+    const issueMap = new Map();
+    let total = 0;
+    for (const e of own) {
+        total += e.seconds || 0;
+        const cleanTitle = AggregationService.extractCleanTitle(e.title);
+        const r = issueMap.get(e.issueUrl) ?? { issueUrl: e.issueUrl, title: cleanTitle, seconds: 0, sessions: 0 };
+        r.seconds += e.seconds || 0;
+        r.sessions += 1;
+        issueMap.set(e.issueUrl, r);
+    }
+    const issueRows = [...issueMap.values()].sort((a, b) => b.seconds - a.seconds);
+    const sessionLog = own
+        .map((e) => ({
+            issueUrl: e.issueUrl,
+            title: AggregationService.extractCleanTitle(e.title),
+            seconds: e.seconds || 0,
+            date: e.date,
+        }))
+        .sort((a, b) => (a.date < b.date ? 1 : -1));
+    return {
+        user,
+        total,
+        sessionsCount: own.length,
+        issuesTouched: issueMap.size,
+        issueRows,
+        sessionLog,
+    };
+}
+
+/**
  * Aggregate filtered entries into the Dashboard's `data` payload.
  *
  * `entries` is the canonical sessions array; we treat it as `EveryoneDataEntry[]`
@@ -80,7 +139,7 @@ export function filterByWindow(entries, { start, end }) {
  *   issuesTouched: number,
  *   membersCount: number,
  *   dailyBuckets: Array<{ date: string, seconds: number }>,
- *   issueRows: Array<{ issueUrl: string, title: string, seconds: number, sessions: number, members: string[] }>,
+ *   issueRows: Array<{ issueUrl: string, title: string, repo: string, seconds: number, sessions: number, members: string[], byMember: Array<{ user: string, seconds: number, sessions: number }> }>,
  *   memberRows: Array<{ user: string, seconds: number, sessions: number, lastIssueTitle: string, lastDate: string }>,
  *   sessionLog: Array<{ issueUrl: string, title: string, seconds: number, date: string, user: string }>
  * }}
@@ -91,7 +150,7 @@ export function aggregate(entries) {
 
     /** @type {Map<string, { date: string, seconds: number }>} */
     const dayMap = new Map();
-    /** @type {Map<string, { issueUrl: string, title: string, seconds: number, sessions: number, members: Set<string> }>} */
+    /** @type {Map<string, { issueUrl: string, title: string, seconds: number, sessions: number, members: Set<string>, byMember: Map<string, { user: string, seconds: number, sessions: number }> }>} */
     const issueMap = new Map();
     /** @type {Map<string, { user: string, seconds: number, sessions: number, lastIssueTitle: string, lastDate: string }>} */
     const memberMap = new Map();
@@ -113,10 +172,15 @@ export function aggregate(entries) {
             seconds: 0,
             sessions: 0,
             members: new Set(),
+            byMember: new Map(),
         };
         ir.seconds += seconds;
         ir.sessions += 1;
         ir.members.add(user);
+        const im = ir.byMember.get(user) ?? { user, seconds: 0, sessions: 0 };
+        im.seconds += seconds;
+        im.sessions += 1;
+        ir.byMember.set(user, im);
         issueMap.set(e.issueUrl, ir);
 
         // Per-member.
@@ -138,7 +202,15 @@ export function aggregate(entries) {
 
     const dailyBuckets = [...dayMap.values()].sort((a, b) => (a.date < b.date ? -1 : 1));
     const issueRows = [...issueMap.values()]
-        .map((r) => ({ ...r, members: [...r.members] }))
+        .map((r) => ({
+            issueUrl: r.issueUrl,
+            title: r.title,
+            repo: parseRepoFromUrl(r.issueUrl),
+            seconds: r.seconds,
+            sessions: r.sessions,
+            members: [...r.members],
+            byMember: [...r.byMember.values()].sort((a, b) => b.seconds - a.seconds),
+        }))
         .sort((a, b) => b.seconds - a.seconds);
     const memberRows = [...memberMap.values()].sort((a, b) => b.seconds - a.seconds);
     const sessionLog = [...entries]

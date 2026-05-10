@@ -26,7 +26,7 @@
 import * as vscode from 'vscode';
 import { StorageService } from '../../../../core/src/services/storage.service.js';
 import { STORAGE_KEYS } from '../../../../core/src/utils/constants.utils.js';
-import { aggregate, applyFilters, computeDateRange, filterByWindow } from './filtering.js';
+import { aggregate, applyFilters, computeDateRange, computeMemberDetail, filterByWindow } from './filtering.js';
 import { getHtml } from './html.js';
 
 export class DashboardPanel {
@@ -75,7 +75,32 @@ export class DashboardPanel {
     async _handleMessage(msg) {
         if (msg.type === 'ready') return this._sendInit();
         if (msg.type === 'rangeChange' || msg.type === 'filterChange') return this._sendFiltered(msg);
-        // 'memberDrill' is UI-6 — accept now without crashing if a stale build sends it.
+        if (msg.type === 'memberDrill') return this._sendMemberDetail(msg);
+    }
+
+    /**
+     * Send a per-member drill-down payload. Re-uses the most recent
+     * range + filters provided by the webview so the detail view stays
+     * consistent with the list it was launched from.
+     *
+     * @param {{ memberId: string, range?: string, weekOffset?: number, customStart?: string, customEnd?: string, memberFilter?: string|null, issueFilter?: string|null }} msg
+     */
+    async _sendMemberDetail(msg) {
+        const allSessions = await DashboardPanel._loadSessions();
+        const window = computeDateRange({
+            range: /** @type {any} */ (msg.range || 'week'),
+            weekOffset: msg.weekOffset || 0,
+            customStart: msg.customStart,
+            customEnd: msg.customEnd,
+        });
+        const inRange = filterByWindow(allSessions, window);
+        const detail = computeMemberDetail(inRange, msg.memberId);
+        this._panel.webview.postMessage({
+            type: 'memberDetail',
+            member: msg.memberId,
+            window,
+            payload: detail,
+        });
     }
 
     async _sendInit() {

@@ -98,6 +98,40 @@ export function getHtml(webview, extensionUri) {
     .sess-row .user  { font-size: 11px; color: var(--oc-desc); }
     .sess-row .dur   { font-family: var(--oc-font-mono); text-align: right; color: var(--oc-fg); }
 
+    /* Issues view (UI-6) */
+    .issue-row { border-bottom: 1px solid var(--oc-border); }
+    .issue-row .hdr { display: grid; grid-template-columns: 16px 1fr 140px 80px; gap: 8px; padding: 8px 0; align-items: center; cursor: pointer; font-size: 12px; }
+    .issue-row .hdr:hover { background: var(--oc-bg-alt, rgba(255,255,255,.04)); }
+    .issue-row .caret { color: var(--oc-muted); transition: transform .12s ease; }
+    .issue-row.open .caret { transform: rotate(90deg); }
+    .issue-row .title { color: var(--oc-fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .issue-row .repo  { font-size: 11px; color: var(--oc-desc); font-family: var(--oc-font-mono); }
+    .issue-row .total { font-family: var(--oc-font-mono); text-align: right; color: var(--oc-fg); }
+    .issue-row .breakdown { padding: 4px 0 8px 32px; display: flex; flex-direction: column; gap: 2px; }
+    .issue-row .br-row { display: grid; grid-template-columns: 1fr 80px 60px; gap: 8px; font-size: 11px; padding: 2px 0; }
+    .issue-row .br-row .u { color: var(--oc-fg); }
+    .issue-row .br-row .s { color: var(--oc-desc); text-align: right; }
+    .issue-row .br-row .t { font-family: var(--oc-font-mono); text-align: right; color: var(--oc-fg); }
+
+    /* Members view (UI-6) */
+    .members-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .member-card { background: var(--oc-bg-alt, rgba(255,255,255,.03)); border: 1px solid var(--oc-border); border-radius: 6px; padding: 12px; cursor: pointer; transition: border-color .12s ease; }
+    .member-card:hover { border-color: var(--oc-accent, var(--oc-fg)); }
+    .member-card .top { display: flex; align-items: center; gap: 10px; }
+    .member-card .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--oc-accent, #4a8fe7); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 12px; }
+    .member-card .name { font-size: 13px; color: var(--oc-fg); font-weight: 600; }
+    .member-card .stats { margin-top: 8px; display: flex; gap: 12px; font-size: 11px; color: var(--oc-desc); }
+    .member-card .stats .v { font-family: var(--oc-font-mono); color: var(--oc-fg); }
+    .member-card .bar { margin-top: 8px; height: 4px; background: var(--oc-border); border-radius: 2px; overflow: hidden; }
+    .member-card .bar .fill { height: 100%; background: var(--oc-accent, #4a8fe7); }
+
+    /* Member drill-down (UI-6) */
+    .drill-back { display: inline-flex; align-items: center; gap: 6px; background: none; border: 1px solid var(--oc-border); color: var(--oc-fg); padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-bottom: 12px; }
+    .drill-back:hover { border-color: var(--oc-accent, var(--oc-fg)); }
+    .drill-hdr { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .drill-hdr .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--oc-accent, #4a8fe7); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; }
+    .drill-hdr .name { font-size: 16px; color: var(--oc-fg); font-weight: 600; }
+
     .empty-msg { color: var(--oc-muted); font-style: italic; padding: 12px 0; font-size: 12px; }
   </style>
   <title>OctoClock Dashboard</title>
