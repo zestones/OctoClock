@@ -15,6 +15,7 @@ import { VSCodeStorageAdapter } from './adapters/vscode-storage.adapter.js';
 import { registerCommands } from './commands.js';
 import { createStatusBarController } from './status-bar.js';
 import { RepoTreeProvider } from './tree-view.js';
+import { ActiveTimerProvider } from './webview/sidebar/active-timer/provider.js';
 
 /**
  * Called by VS Code when the extension is activated.
@@ -56,6 +57,16 @@ export function activate(context) {
     const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
     context.subscriptions.push(createStatusBarController(statusBarItem, storageEvents));
 
+    const activeTimerProvider = new ActiveTimerProvider(context, storageEvents);
+    context.subscriptions.push(
+        vscode.window.registerWebviewViewProvider(
+            ActiveTimerProvider.viewType,
+            activeTimerProvider,
+            { webviewOptions: { retainContextWhenHidden: true } },
+        ),
+        activeTimerProvider,
+    );
+
     const treeProvider = new RepoTreeProvider(storageEvents);
     context.subscriptions.push(
         vscode.window.createTreeView('octoclock.repoTree', { treeDataProvider: treeProvider }),
@@ -65,4 +76,4 @@ export function activate(context) {
     console.log('OctoClock: activated');
 }
 
-export function deactivate() {}
+export function deactivate() { }

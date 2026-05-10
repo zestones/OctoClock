@@ -5,6 +5,7 @@ import { activate, deactivate } from '../src/extension.js';
 vi.mock('vscode', () => ({
     commands: {
         registerCommand: vi.fn(() => ({ dispose: vi.fn() })),
+        executeCommand: vi.fn(),
     },
     StatusBarAlignment: { Left: 1, Right: 2 },
     TreeItemCollapsibleState: { None: 0, Collapsed: 1, Expanded: 2 },
@@ -19,13 +20,13 @@ vi.mock('vscode', () => ({
             this._listeners = [];
             this.event = (listener) => {
                 this._listeners.push(listener);
-                return { dispose: () => {} };
+                return { dispose: () => { } };
             };
         }
         fire(data) {
             for (const l of this._listeners) l(data);
         }
-        dispose() {}
+        dispose() { }
     },
     window: {
         showInputBox: vi.fn(),
@@ -40,6 +41,7 @@ vi.mock('vscode', () => ({
             command: undefined,
         })),
         createTreeView: vi.fn(() => ({ dispose: vi.fn() })),
+        registerWebviewViewProvider: vi.fn(() => ({ dispose: vi.fn() })),
     },
 }));
 
@@ -52,14 +54,14 @@ import { syncFromGitHub } from '../../core/src/services/sync.service.js';
 import { STORAGE_KEYS } from '../../core/src/utils/constants.utils.js';
 
 const makeContext = (overrides = {}) =>
-    /** @type {import('vscode').ExtensionContext} */ (
+    /** @type {import('vscode').ExtensionContext} */(
         /** @type {any} */ ({
-            globalState: { get: () => undefined, update: async () => {} },
-            secrets: { get: async () => undefined, store: async () => {}, delete: async () => {} },
-            subscriptions: [],
-            ...overrides,
-        })
-    );
+        globalState: { get: () => undefined, update: async () => { } },
+        secrets: { get: async () => undefined, store: async () => { }, delete: async () => { } },
+        subscriptions: [],
+        ...overrides,
+    })
+);
 
 describe('activate', () => {
     it('does not throw when globalState and secrets are present', () => {
@@ -97,12 +99,12 @@ describe('activate — auto-sync recovery', () => {
         const ctx = makeContext({
             globalState: {
                 get: (key) => (key === STORAGE_KEYS.AUTO_SYNC ? true : undefined),
-                update: async () => {},
+                update: async () => { },
             },
             secrets: {
                 get: async (key) => (key === STORAGE_KEYS.GITHUB_TOKEN ? JSON.stringify('my-token') : undefined),
-                store: async () => {},
-                delete: async () => {},
+                store: async () => { },
+                delete: async () => { },
             },
         });
 
@@ -116,12 +118,12 @@ describe('activate — auto-sync recovery', () => {
         const ctx = makeContext({
             globalState: {
                 get: (key) => (key === STORAGE_KEYS.AUTO_SYNC ? false : undefined),
-                update: async () => {},
+                update: async () => { },
             },
             secrets: {
                 get: async (key) => (key === STORAGE_KEYS.GITHUB_TOKEN ? JSON.stringify('my-token') : undefined),
-                store: async () => {},
-                delete: async () => {},
+                store: async () => { },
+                delete: async () => { },
             },
         });
 
@@ -135,12 +137,12 @@ describe('activate — auto-sync recovery', () => {
         const ctx = makeContext({
             globalState: {
                 get: (key) => (key === STORAGE_KEYS.AUTO_SYNC ? true : undefined),
-                update: async () => {},
+                update: async () => { },
             },
             secrets: {
                 get: async () => undefined,
-                store: async () => {},
-                delete: async () => {},
+                store: async () => { },
+                delete: async () => { },
             },
         });
 
@@ -158,12 +160,12 @@ describe('activate — auto-sync recovery', () => {
         const ctx = makeContext({
             globalState: {
                 get: (key) => (key === STORAGE_KEYS.AUTO_SYNC ? true : undefined),
-                update: async () => {},
+                update: async () => { },
             },
             secrets: {
                 get: async (key) => (key === STORAGE_KEYS.GITHUB_TOKEN ? JSON.stringify('tok') : undefined),
-                store: async () => {},
-                delete: async () => {},
+                store: async () => { },
+                delete: async () => { },
             },
         });
 

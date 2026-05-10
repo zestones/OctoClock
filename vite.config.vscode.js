@@ -35,7 +35,11 @@ export default defineConfig({
             fileName: () => 'extension.js',
         },
         rollupOptions: {
-            external: ['vscode'],
+            // 'vscode' is provided by the extension host at runtime.
+            // /^node:/ externalises all Node.js built-in modules (e.g.
+            // node:crypto used by nonce.js) so they are required() at
+            // runtime rather than bundled into the CJS output.
+            external: ['vscode', /^node:/],
         },
         outDir: 'packages/vscode-ext/dist',
         emptyOutDir: true,
