@@ -7,9 +7,10 @@
 
 import * as vscode from 'vscode';
 import { GitHubService } from '../../core/src/services/github.service.js';
+import { GitHubStorageService } from '../../core/src/services/github-storage.service.js';
 import { PinnedReposService } from '../../core/src/services/pinned-repos.service.js';
 import { StorageService } from '../../core/src/services/storage.service.js';
-import { syncRepoFromGitHub } from '../../core/src/services/sync.service.js';
+import { syncFromGitHub, syncRepoFromGitHub } from '../../core/src/services/sync.service.js';
 import { TimerService } from '../../core/src/services/timer.service.js';
 import { STORAGE_KEYS } from '../../core/src/utils/constants.utils.js';
 import { TimeService } from '../../core/src/utils/time.utils.js';
@@ -261,6 +262,111 @@ export function registerCommands(context) {
             } catch (error) {
                 vscode.window.showErrorMessage(`OctoClock: ${error instanceof Error ? error.message : String(error)}`);
             }
+        }),
+
+        // ----------------------------------------------------------------
+        // octoclock.configureToken  (UI-8 #65)
+        // Prompt for a GitHub personal access token and persist it.
+        // The token is routed by VSCodeStorageAdapter into context.secrets
+        // (OS keychain). Submitting an empty value clears the stored token.
+        // After a successful update we trigger a non-blocking sync so freshly
+        // authorised users see their data without a manual refresh.
+        // ----------------------------------------------------------------
+        vscode.commands.registerCommand('octoclock.configureToken', async () => {
+            const existing = await GitHubStorageService.getGitHubToken().catch(() => null);
+            const raw = await vscode.window.showInputBox({
+                password: true,
+                prompt: existing
+                    ? 'Replace GitHub personal access token (leave empty to remove)'
+                    : 'Enter your GitHub personal access token',
+                placeHolder: 'ghp_… or github_pat_…',
+                ignoreFocusOut: true,
+            });
+            if (raw === undefined) return; // user pressed Escape
+
+            const token = raw.trim();
+            if (token === '') {
+                await GitHubStorageService.removeGitHubToken();
+                vscode.window.showInformationMessage('OctoClock: GitHub token removed');
+                return;
+            }
+
+            if (!GitHubStorageService.isValidTokenFormat(token)) {
+                vscode.window.showErrorMessage(
+                    'OctoClock: Token format not recognised — expected ghp_… or github_pat_…',
+                );
+                return;
+            }
+
+            try {
+                await GitHubStorageService.setGitHubToken(token);
+                vscode.window.showInformationMessage('OctoClock: GitHub token saved');
+                syncFromGitHub().catch((e) => console.error('OctoClock: post-token sync failed:', e));
+            } catch (error) {
+                vscode.window.showErrorMessage(
+                    `OctoClock: Failed to save token — ${error instanceof Error ? error.message : String(error)}`,
+                );
+            }
+        }),
+
+        // ----------------------------------------------------------------
+        // octoclock.toggleAutoSync  (UI-8)
+        // Flip the AUTO_SYNC flag in StorageService. The browser-ext share
+        // this storage key, so the toggle lives in StorageService rather
+        // than in vscode configuration.
+        // ----------------------------------------------------------------
+        vscode.commands.registerCommand('octoclock.toggleAutoSync', async () => {
+            const current = await StorageService.get(STORAGE_KEYS.AUTO_SYNC);
+            const next = !current;
+            await StorageService.set(STORAGE_KEYS.AUTO_SYNC, next);
+            vscode.window.showInformationMessage(`OctoClock: Auto Sync ${next ? 'enabled' : 'disabled'}`);
+        }),
+
+        // ----------------------------------------------------------------
+        // octoclock.toggleIdleReminder  (UI-8)
+        // Flip the octoclock.idleReminderEnabled configuration value at
+        // the Global scope so it follows the user across workspaces.
+        // ----------------------------------------------------------------
+        vscode.commands.registerCommand('octoclock.toggleIdleReminder', async () => {
+            const cfg = vscode.workspace.getConfiguration('octoclock');
+            const next = !(cfg.get('idleReminderEnabled', true) !== false);
+            await cfg.update('idleReminderEnabled', next, vscode.ConfigurationTarget.Global);
+            vscode.window.showInformationMessage(`OctoClock: Idle Reminder ${next ? 'enabled' : 'disabled'}`);
+        }),
+
+        // ----------------------------------------------------------------
+        // octoclock.editIdleMinutes  (UI-8)
+        // Prompt for an integer in [1, 240] and persist as
+        // octoclock.idleReminderMinutes (Global scope).
+        // ----------------------------------------------------------------
+        vscode.commands.registerCommand('octoclock.editIdleMinutes', async () => {
+            const cfg = vscode.workspace.getConfiguration('octoclock');
+            const current = String(Number(cfg.get('idleReminderMinutes', 30)) || 30);
+            const raw = await vscode.window.showInputBox({
+                prompt: 'Idle reminder threshold in minutes (1–240)',
+                value: current,
+                validateInput(v) {
+                    const n = Number(v);
+                    if (!Number.isInteger(n) || n < 1 || n > 240) return 'Enter an integer between 1 and 240';
+                    return null;
+                },
+            });
+            if (raw === undefined) return;
+            const minutes = Number(raw);
+            await cfg.update('idleReminderMinutes', minutes, vscode.ConfigurationTarget.Global);
+            vscode.window.showInformationMessage(`OctoClock: Idle Reminder set to ${minutes} minutes`);
+        }),
+
+        // ----------------------------------------------------------------
+        // octoclock.toggleCodeLens  (UI-8)
+        // Flip octoclock.enableCodeLens. The CodeLens provider listens on
+        // onDidChangeConfiguration and refreshes automatically.
+        // ----------------------------------------------------------------
+        vscode.commands.registerCommand('octoclock.toggleCodeLens', async () => {
+            const cfg = vscode.workspace.getConfiguration('octoclock');
+            const next = cfg.get('enableCodeLens', false) !== true;
+            await cfg.update('enableCodeLens', next, vscode.ConfigurationTarget.Global);
+            vscode.window.showInformationMessage(`OctoClock: Code Lens ${next ? 'enabled' : 'disabled'}`);
         }),
     );
 }

@@ -32,12 +32,20 @@ export function FilterBar({ query, onQuery, tab, onTab }) {
                 type="text"
                 placeholder="Filter by title or #id\u2026"
                 autocomplete="off"
+                aria-label="Filter issues by title or number"
                 value={query}
                 onInput={handleInput}
             />
-            <div class="filter-tabs">
+            <div class="filter-tabs" role="tablist" aria-label="Issue state filter">
                 {TABS.map((t) => (
-                    <button key={t} type="button" class={`ftab${tab === t ? ' on' : ''}`} onClick={() => onTab(t)}>
+                    <button
+                        key={t}
+                        type="button"
+                        class={`ftab${tab === t ? ' on' : ''}`}
+                        role="tab"
+                        aria-selected={tab === t}
+                        onClick={() => onTab(t)}
+                    >
                         {t.charAt(0).toUpperCase() + t.slice(1)}
                     </button>
                 ))}

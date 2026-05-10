@@ -11,7 +11,7 @@
 // CSS classes are defined in html.js's <style nonce> block.
 
 import { h } from 'preact';
-import { useState, useEffect, useCallback } from 'preact/hooks';
+import { useCallback, useEffect, useState } from 'preact/hooks';
 import { useVscodeMessage } from '../../../shared/hooks/useVscodeMessage.js';
 import { BranchRow } from './BranchRow.jsx';
 import { FilterBar } from './FilterBar.jsx';

@@ -1,10 +1,33 @@
 {
     "name": "octoclock",
-    "displayName": "GitHub Time Tracker",
+    "displayName": "OctoClock — GitHub Time Tracker",
     "publisher": "zestones",
-    "description": "Track time spent on GitHub issues",
+    "description": "Track time spent on GitHub issues directly from VS Code. Start and stop timers per issue, sync sessions back to a tracker comment, and review where your time goes with team-aware dashboards.",
     "version": "1.0.3",
     "private": true,
+    "license": "MIT",
+    "categories": [
+        "Other",
+        "SCM Providers",
+        "Visualization"
+    ],
+    "keywords": [
+        "github",
+        "time tracking",
+        "timer",
+        "issues",
+        "productivity",
+        "dashboard"
+    ],
+    "icon": "src/icons/octoclock.svg",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/zestones/OctoClock.git"
+    },
+    "bugs": {
+        "url": "https://github.com/zestones/OctoClock/issues"
+    },
+    "homepage": "https://github.com/zestones/OctoClock#readme",
     "engines": {
         "vscode": "^1.85.0"
     },
@@ -16,6 +39,28 @@
     ],
     "main": "./dist/extension.js",
     "contributes": {
+        "configuration": {
+            "title": "OctoClock",
+            "properties": {
+                "octoclock.idleReminderEnabled": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Show a reminder when no editor activity has been detected for a while and a timer is running."
+                },
+                "octoclock.idleReminderMinutes": {
+                    "type": "number",
+                    "default": 30,
+                    "minimum": 1,
+                    "maximum": 240,
+                    "description": "Minutes of editor inactivity before the idle reminder is shown."
+                },
+                "octoclock.enableCodeLens": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Show 'Track #N' CodeLenses on issue references in source files."
+                }
+            }
+        },
         "viewsContainers": {
             "activitybar": [
                 {
@@ -47,7 +92,6 @@
                     "name": "Team Stats"
                 },
                 {
-                    "type": "webview",
                     "id": "octoclock.settings",
                     "name": "Settings"
                 }
@@ -110,6 +154,38 @@
                 "command": "octoclock.openDashboard",
                 "title": "Open Dashboard",
                 "category": "OctoClock"
+            },
+            {
+                "command": "octoclock.configureToken",
+                "title": "Configure GitHub Token",
+                "category": "OctoClock",
+                "icon": "$(key)"
+            },
+            {
+                "command": "octoclock.toggleAutoSync",
+                "title": "Toggle Auto Sync",
+                "category": "OctoClock"
+            },
+            {
+                "command": "octoclock.toggleIdleReminder",
+                "title": "Toggle Idle Reminder",
+                "category": "OctoClock"
+            },
+            {
+                "command": "octoclock.editIdleMinutes",
+                "title": "Edit Idle Reminder Minutes",
+                "category": "OctoClock"
+            },
+            {
+                "command": "octoclock.toggleCodeLens",
+                "title": "Toggle Code Lens",
+                "category": "OctoClock"
+            },
+            {
+                "command": "octoclock.refreshSettings",
+                "title": "Refresh Settings",
+                "category": "OctoClock",
+                "icon": "$(refresh)"
             }
         ],
         "menus": {
@@ -123,6 +199,16 @@
                     "command": "octoclock.toggleWorkspaceFilter",
                     "when": "view == octoclock.trackedTime",
                     "group": "navigation"
+                },
+                {
+                    "command": "octoclock.configureToken",
+                    "when": "view == octoclock.settings",
+                    "group": "navigation@1"
+                },
+                {
+                    "command": "octoclock.refreshSettings",
+                    "when": "view == octoclock.settings",
+                    "group": "navigation@2"
                 }
             ],
             "view/item/context": [

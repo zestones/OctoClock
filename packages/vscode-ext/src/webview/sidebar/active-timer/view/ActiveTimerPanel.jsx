@@ -9,7 +9,7 @@
 // CSS classes are defined in html.js's <style nonce> block so they pass CSP.
 
 import { h } from 'preact';
-import { useState, useEffect, useRef } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { useVscodeMessage } from '../../../shared/hooks/useVscodeMessage.js';
 
 // acquireVsCodeApi is injected by VS Code into every webview context.
@@ -33,7 +33,7 @@ export function ActiveTimerPanel() {
     const [issueNumber, setIssueNumber] = useState('?');
     const [repo, setRepo] = useState('');
     const [elapsed, setElapsed] = useState(0);
-    const startTimeRef = useRef(/** @type {number|null} */ (null));
+    const startTimeRef = useRef(/** @type {number|null} */(null));
 
     useVscodeMessage('timerUpdate', (msg) => {
         const p = msg.payload;
@@ -61,19 +61,28 @@ export function ActiveTimerPanel() {
     }, [running]);
 
     if (running) {
+        const counter = fmtTimer(elapsed);
+        const ariaSummary = `Tracking ${repo ? `${repo} ` : ''}#${issueNumber}, elapsed ${counter}`;
         return (
-            <div class="row timer-row h28">
-                <span class="dot pulse" />
-                <i class="codicon codicon-repo row-icon icon-desc" />
+            <div class="row timer-row h28" role="status" aria-live="polite" aria-label={ariaSummary}>
+                <span class="dot pulse" aria-hidden="true" />
+                <i class="codicon codicon-repo row-icon icon-desc" aria-hidden="true" />
                 <span class="row-lbl">
                     <span class="dim-fg">{repo}</span>
                     &nbsp;&rsaquo;&nbsp;
-                    <span>{'#' + issueNumber}</span>
+                    <span>{`#${issueNumber}`}</span>
                 </span>
-                <span class="timer">{fmtTimer(elapsed)}</span>
+                <span class="timer" aria-hidden="true">
+                    {counter}
+                </span>
                 <div class="row-always">
-                    <button type="button" class="btn-stop" onClick={() => vscode.postMessage({ type: 'stop' })}>
-                        <i class="codicon codicon-debug-stop" />
+                    <button
+                        type="button"
+                        class="btn-stop"
+                        aria-label={`Stop timer for #${issueNumber}`}
+                        onClick={() => vscode.postMessage({ type: 'stop' })}
+                    >
+                        <i class="codicon codicon-debug-stop" aria-hidden="true" />
                         &nbsp;Stop
                     </button>
                 </div>
@@ -82,8 +91,8 @@ export function ActiveTimerPanel() {
     }
 
     return (
-        <div class="row">
-            <i class="codicon codicon-clock row-icon icon-muted" />
+        <div class="row" role="status" aria-live="polite">
+            <i class="codicon codicon-clock row-icon icon-muted" aria-hidden="true" />
             <span class="row-lbl dim">No active timer &mdash; start from My Issues</span>
         </div>
     );

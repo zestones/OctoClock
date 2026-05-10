@@ -13,6 +13,11 @@ import { STORAGE_KEYS } from '../../core/src/utils/constants.utils.js';
 import { VSCodeMessagingAdapter } from './adapters/vscode-messaging.adapter.js';
 import { VSCodeStorageAdapter } from './adapters/vscode-storage.adapter.js';
 import { registerCommands } from './commands.js';
+import { BranchWatcher } from './integrations/branch-watcher.js';
+import { IssueCodeLensProvider } from './integrations/codelens-provider.js';
+import { IdleWatcher } from './integrations/idle-watcher.js';
+import { WorkspaceRepoDetector } from './integrations/repo-detector.js';
+import { SettingsProvider } from './settings-tree.js';
 import { createStatusBarController } from './status-bar.js';
 import { TrackedTimeProvider } from './tracked-time-tree.js';
 import { RepoTreeProvider } from './tree-view.js';
@@ -106,6 +111,34 @@ export function activate(context) {
         }),
         teamStatsProvider,
         vscode.commands.registerCommand('octoclock.openDashboard', () => DashboardPanel.open(context)),
+    );
+    // ---------- UI-7 — Smart integrations ----------
+    // #60 Auto-detect workspace repos on activation + workspace folder change.
+    const repoDetector = new WorkspaceRepoDetector(context);
+    repoDetector.run().catch((e) => console.error('OctoClock: repo detector failed:', e));
+
+    // #61 Branch → issue suggestion notification.
+    new BranchWatcher(context);
+
+    // #62 Idle reminder watcher.
+    new IdleWatcher(context, storageEvents);
+
+    // #63 CodeLens for #N references (opt-in).
+    const codeLensProvider = new IssueCodeLensProvider(storageEvents);
+    context.subscriptions.push(
+        vscode.languages.registerCodeLensProvider({ scheme: 'file' }, codeLensProvider),
+        codeLensProvider,
+        vscode.workspace.onDidChangeConfiguration((e) => {
+            if (e.affectsConfiguration('octoclock.enableCodeLens')) codeLensProvider.refresh();
+        }),
+    );
+
+    // ---------- UI-8 — Settings tree view ----------
+    const settingsProvider = new SettingsProvider(context, storageEvents);
+    context.subscriptions.push(
+        vscode.window.createTreeView(SettingsProvider.viewType, { treeDataProvider: settingsProvider }),
+        { dispose: () => settingsProvider.dispose?.() },
+        vscode.commands.registerCommand('octoclock.refreshSettings', () => settingsProvider.refresh()),
     );
 
     console.log('OctoClock: activated');

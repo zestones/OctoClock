@@ -46,7 +46,28 @@ vi.mock('vscode', () => ({
     workspace: {
         workspaceFolders: [],
         onDidChangeWorkspaceFolders: vi.fn(() => ({ dispose: vi.fn() })),
+        onDidChangeTextDocument: vi.fn(() => ({ dispose: vi.fn() })),
+        onDidChangeConfiguration: vi.fn(() => ({ dispose: vi.fn() })),
+        getConfiguration: vi.fn(() => ({ get: vi.fn((_k, def) => def) })),
         fs: { readFile: vi.fn().mockRejectedValue(new Error('not found')) },
+    },
+    extensions: {
+        getExtension: vi.fn(() => undefined),
+    },
+    languages: {
+        registerCodeLensProvider: vi.fn(() => ({ dispose: vi.fn() })),
+    },
+    CodeLens: class CodeLens {
+        constructor(range, command) {
+            this.range = range;
+            this.command = command;
+        }
+    },
+    Range: class Range {
+        constructor(sl, sc, el, ec) {
+            this.start = { line: sl, character: sc };
+            this.end = { line: el, character: ec };
+        }
     },
     Uri: { joinPath: vi.fn((base, ...segs) => ({ ...base, path: `${base?.path ?? ''}/${segs.join('/')}` })) },
     ThemeIcon: class ThemeIcon {

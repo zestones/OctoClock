@@ -83,7 +83,7 @@ export function IssueList({ issues, query, statusTab, timerRunning, activeIssueI
 
                 return (
                     <div key={issue.id} class="row">
-                        <i class={`codicon ${iconName} row-icon`} style={`color:${iconColor}`} />
+                        <i class={`codicon ${iconName} row-icon`} style={`color:${iconColor}`} aria-hidden="true" />
                         {/* eslint-disable-next-line react/no-danger */}
                         <span
                             class={`row-lbl${isClosed ? ' dim' : ''}`}
@@ -95,19 +95,28 @@ export function IssueList({ issues, query, statusTab, timerRunning, activeIssueI
                                     type="button"
                                     class="ib btn-start"
                                     title={isActive ? 'Already tracking' : 'Start timer'}
+                                    aria-label={
+                                        isActive
+                                            ? `Already tracking issue #${issue.number}`
+                                            : `Start timer for issue #${issue.number}`
+                                    }
                                     disabled={isActive}
                                     onClick={() => !isActive && onStart(issue.url)}
                                 >
-                                    <i class={`codicon ${isActive ? 'codicon-clock' : 'codicon-play'}`} />
+                                    <i
+                                        class={`codicon ${isActive ? 'codicon-clock' : 'codicon-play'}`}
+                                        aria-hidden="true"
+                                    />
                                 </button>
                             )}
                             <button
                                 type="button"
                                 class="ib btn-open"
                                 title="Open in GitHub"
+                                aria-label={`Open issue #${issue.number} on GitHub`}
                                 onClick={() => onOpen(issue.url)}
                             >
-                                <i class="codicon codicon-link-external" />
+                                <i class="codicon codicon-link-external" aria-hidden="true" />
                             </button>
                         </div>
                     </div>
