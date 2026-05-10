@@ -21,9 +21,11 @@
  * Builds the Content-Security-Policy string for an OctoClock webview.
  *
  * Directives:
- *   default-src  'none'          — deny everything not listed below
- *   script-src   'nonce-<N>'     — only scripts carrying the matching nonce run
- *   style-src    cspSource nonce — stylesheets from localResourceRoots + <style nonce>
+ *   default-src  'none'              — deny everything not listed below
+ *   script-src   'nonce-<N>' src     — nonce covers the <script> entry tag;
+ *                                      src covers Vite bundle files loaded from
+ *                                      localResourceRoots (dist/)
+ *   style-src    cspSource nonce     — stylesheets from localResourceRoots + <style nonce>
  *   img-src      cspSource https: data:
  *                                — local icons, remote GitHub avatars, data URIs
  *   font-src     cspSource       — codicons font from localResourceRoots
@@ -39,7 +41,7 @@ export function buildCsp(nonce, webview) {
     const src = webview.cspSource;
     return [
         `default-src 'none'`,
-        `script-src 'nonce-${nonce}'`,
+        `script-src 'nonce-${nonce}' ${src}`,
         `style-src ${src} 'nonce-${nonce}'`,
         `img-src ${src} https: data:`,
         `font-src ${src}`,

@@ -11,6 +11,9 @@ importers:
       '@biomejs/biome':
         specifier: 2.4.6
         version: 2.4.6
+      '@preact/preset-vite':
+        specifier: ^2.10.5
+        version: 2.10.5(@babel/core@7.29.0)(preact@10.29.1)(rollup@4.60.3)(vite@6.4.2(@types/node@25.6.2)(jiti@2.7.0)(lightningcss@1.32.0))
       '@testing-library/preact':
         specifier: ^3.2.4
         version: 3.2.4(preact@10.29.1)
@@ -26,6 +29,9 @@ importers:
       happy-dom:
         specifier: ^20.9.0
         version: 20.9.0
+      preact:
+        specifier: ^10.29.1
+        version: 10.29.1
       typescript:
         specifier: ^5.9.3
         version: 5.9.3

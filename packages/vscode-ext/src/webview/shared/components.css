@@ -1,0 +1,219 @@
+/**
+ * OctoClock — Shared Webview Component Styles
+ *
+ * Layout primitives and component classes shared across all sidebar and
+ * dashboard panels. Loaded via <link> in every panel's html.js shell, so
+ * none of these rules need to be repeated in per-panel <style nonce> blocks.
+ *
+ * What lives here:
+ *   - Reset / body defaults
+ *   - Codicon icon utility (.codicon — NOT @font-face, which needs a runtime
+ *     URI and must stay in each panel's nonce'd <style> block)
+ *   - Row layout primitives (.row, .row-icon, .row-lbl, .row-act, .row-always)
+ *   - Icon button (.ib)
+ *   - Filter bar (.filter-bar, .filter-input, .filter-tabs, .ftab)
+ *   - Empty / loading state (.no-results)
+ *   - Search highlight (mark)
+ *
+ * What does NOT live here (stays in per-panel <style nonce>):
+ *   - @font-face for codicons — needs webview.asWebviewUri() at runtime
+ *   - Panel-specific accent rows (e.g. .timer-row, .branch-row)
+ *   - Panel-specific widget styles (.dot, .timer, .btn-stop, .bpill, etc.)
+ */
+
+/* ── Reset ─────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--oc-font-ui);
+    font-size: 13px;
+    color: var(--oc-fg);
+    background: transparent;
+    line-height: 1;
+}
+
+/* ── Codicon font utility ────────────────────────
+   Note: @font-face is declared per-panel because it references a
+   webview URI that is only available at runtime. */
+
+.codicon {
+    font: normal normal 16px/1 codicon;
+    display: inline-block;
+}
+
+/* ── Row layout ──────────────────────────────────
+   Base row used by every panel for tree-view style list items. */
+
+.row {
+    display: flex;
+    align-items: center;
+    height: 22px;
+    padding: 0 6px 0 20px;
+    gap: 5px;
+    user-select: none;
+}
+
+.row.h28 {
+    height: 28px;
+}
+
+.row:hover {
+    background: var(--oc-hover-bg);
+}
+
+.row-icon {
+    flex-shrink: 0;
+    width: 16px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.row-lbl {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 13px;
+    color: var(--oc-fg);
+}
+
+.row-lbl.dim {
+    color: var(--oc-muted);
+}
+
+/* Shown on hover only — used for action buttons in a row */
+.row-act {
+    display: none;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.row:hover .row-act {
+    display: flex;
+}
+
+/* Always-visible right slot — used when buttons must be visible at all times */
+.row-always {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+/* Muted helper colours */
+.dim-fg {
+    color: var(--oc-desc);
+}
+
+/* ── Icon button (.ib) ───────────────────────────
+   Small square button for inline actions (play, stop, open-link…). */
+
+.ib {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background: none;
+    border: none;
+    border-radius: 3px;
+    color: var(--oc-fg);
+    cursor: pointer;
+    padding: 0;
+}
+
+.ib:hover {
+    background: var(--oc-hover-bg);
+}
+
+.ib:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+.ib .codicon {
+    font-size: 14px;
+}
+
+/* ── Filter bar ──────────────────────────────────
+   Search input + tab switcher used by My Issues and future list panels. */
+
+.filter-bar {
+    padding: 4px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.filter-input {
+    width: 100%;
+    font-size: 12px;
+    font-family: var(--oc-font-ui);
+    color: var(--oc-input-fg);
+    background: var(--oc-input-bg);
+    border: 1px solid var(--oc-input-border);
+    border-radius: 2px;
+    padding: 3px 6px;
+    outline: none;
+}
+
+.filter-input:focus {
+    border-color: var(--oc-focus);
+}
+
+.filter-input::placeholder {
+    color: var(--oc-input-placeholder);
+}
+
+.filter-tabs {
+    display: flex;
+    gap: 3px;
+}
+
+.ftab {
+    font-size: 11px;
+    font-family: var(--oc-font-ui);
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    color: var(--oc-tab-inactive-fg);
+    cursor: pointer;
+    padding: 2px 7px;
+}
+
+.ftab:hover {
+    background: var(--oc-hover-bg);
+}
+
+.ftab.on {
+    color: var(--oc-fg);
+    border-color: var(--oc-btn-sec-border);
+    background: var(--oc-card-bg);
+}
+
+/* ── Empty / loading state ───────────────────────
+   Shown when a list has no items to display. */
+
+.no-results {
+    padding: 8px 20px;
+    font-size: 12px;
+    color: var(--oc-muted);
+}
+
+/* ── Search highlight ────────────────────────────
+   Applied by IssueList's highlight() function via dangerouslySetInnerHTML. */
+
+mark {
+    background: rgba(226, 192, 141, 0.25);
+    color: inherit;
+    border-radius: 2px;
+    padding: 0 1px;
+}
