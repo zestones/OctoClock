@@ -1,0 +1,2827 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OctoClock — VS Code UI Mockup</title>
+    <link rel="stylesheet" href="https://unpkg.com/@vscode/codicons@0.0.35/dist/codicon.css" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --font-ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-mono: 'Cascadia Code', 'SF Mono', Consolas, 'Courier New', monospace;
+            --c-editor: #1e1e1e;
+            --c-sidebar: #252526;
+            --c-actbar: #333333;
+            --c-actfg: rgba(255, 255, 255, .4);
+            --c-actfg-on: #fff;
+            --c-fg: #cccccc;
+            --c-hover: #2a2d2e;
+            --c-desc: #868686;
+            --c-muted: #525252;
+            --c-sep: #3e3e42;
+            --c-badge: #007acc;
+            --c-btn: #0e639c;
+            --c-btn-h: #1177bb;
+            --c-active: #4ec9b0;
+            --c-open: #3fb950;
+            --c-branch: #c586c0;
+            --c-stop: #f48771;
+            --c-green: #89d185;
+            --c-orange: #e2c08d;
+            font-family: var(--font-ui);
+            font-size: 13px;
+            line-height: 1;
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+            background: var(--c-editor);
+            color: var(--c-fg);
+        }
+
+        .app {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .spacer {
+            flex: 1;
+        }
+
+        /* Activity Bar */
+        .actbar {
+            width: 48px;
+            background: var(--c-actbar);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-shrink: 0;
+            padding-top: 2px;
+        }
+
+        .ai {
+            position: relative;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--c-actfg);
+            cursor: pointer;
+        }
+
+        .ai:hover {
+            color: rgba(255, 255, 255, .75);
+        }
+
+        .ai.on {
+            color: var(--c-actfg-on);
+        }
+
+        .ai.on::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 10px;
+            bottom: 10px;
+            width: 2px;
+            background: var(--c-actfg-on);
+        }
+
+        .ai .codicon {
+            font-size: 24px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 285px;
+            background: var(--c-sidebar);
+            border-right: 1px solid #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            overflow-x: hidden;
+            flex-shrink: 0;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #424242;
+            border-radius: 3px;
+        }
+
+        .sb-title {
+            padding: 9px 12px 6px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .1em;
+            color: #bbbbbe;
+            text-transform: uppercase;
+            user-select: none;
+        }
+
+        /* Sections */
+        .sec {
+            flex-shrink: 0;
+        }
+
+        .sec-hdr {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 22px;
+            padding: 0 6px 0 4px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .08em;
+            color: #bbbbbe;
+            text-transform: uppercase;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .sec-hdr:hover {
+            background: var(--c-hover);
+        }
+
+        .sec-hdr:hover .sec-acts {
+            opacity: 1;
+        }
+
+        .sec-l {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .sec-chv {
+            font-size: 11px;
+            color: var(--c-desc);
+            transition: transform .15s;
+        }
+
+        .sec-chv.closed {
+            transform: rotate(-90deg);
+        }
+
+        .sec-acts {
+            display: flex;
+            gap: 1px;
+            opacity: 0;
+            transition: opacity .1s;
+        }
+
+        .sec-body {
+            overflow: hidden;
+        }
+
+        .sec-body.closed {
+            display: none;
+        }
+
+        .sep {
+            height: 1px;
+            background: var(--c-sep);
+        }
+
+        .glbl {
+            padding: 5px 20px 2px;
+            font-size: 11px;
+            color: var(--c-desc);
+            user-select: none;
+        }
+
+        /* Icon button */
+        .ib {
+            width: 20px;
+            height: 20px;
+            border: none;
+            background: none;
+            color: var(--c-desc);
+            cursor: pointer;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+
+        .ib:hover {
+            background: rgba(255, 255, 255, .1);
+            color: var(--c-fg);
+        }
+
+        .ib .codicon {
+            font-size: 14px;
+        }
+
+        /* Rows */
+        .row {
+            display: flex;
+            align-items: center;
+            height: 22px;
+            padding: 0 6px 0 20px;
+            gap: 5px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .row:hover {
+            background: var(--c-hover);
+        }
+
+        .row:hover .row-act {
+            display: flex;
+        }
+
+        .row.h28 {
+            height: 28px;
+        }
+
+        .row.i1 {
+            padding-left: 32px;
+        }
+
+        .row.timer-row {
+            background: rgba(0, 122, 204, .08);
+            border-left: 2px solid rgba(0, 122, 204, .45);
+            padding-left: 18px;
+        }
+
+        .row.timer-row:hover {
+            background: rgba(0, 122, 204, .13);
+        }
+
+        .row.branch-row {
+            background: rgba(78, 201, 176, .05);
+            border-left: 2px solid rgba(78, 201, 176, .35);
+            padding-left: 10px;
+            gap: 7px;
+        }
+
+        .row.branch-row:hover {
+            background: rgba(78, 201, 176, .1);
+        }
+
+        .row-icon {
+            flex-shrink: 0;
+            width: 16px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .row-lbl {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 13px;
+            color: var(--c-fg);
+        }
+
+        .row-lbl.dim {
+            color: var(--c-muted);
+            font-style: italic;
+        }
+
+        .row-desc {
+            font-size: 12px;
+            color: var(--c-desc);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .row-act {
+            display: none;
+            align-items: center;
+            gap: 1px;
+            flex-shrink: 0;
+        }
+
+        .row-always {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .dim-fg {
+            color: var(--c-desc);
+        }
+
+        /* Dot */
+        .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .dot.teal {
+            background: var(--c-active);
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .25
+            }
+        }
+
+        .dot.pulse {
+            animation: pulse 1.8s ease-in-out infinite;
+        }
+
+        /* Timer digits */
+        .timer {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--c-active);
+            letter-spacing: .03em;
+            flex-shrink: 0;
+        }
+
+        /* Branch pill */
+        .bpill {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 11px;
+            color: var(--c-branch);
+            background: rgba(197, 134, 192, .1);
+            border-radius: 3px;
+            padding: 0 5px;
+            height: 16px;
+            flex-shrink: 0;
+            max-width: 110px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Buttons */
+        .btn-track {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 11px;
+            font-family: var(--font-ui);
+            background: var(--c-btn);
+            color: #fff;
+            border: none;
+            border-radius: 2px;
+            padding: 0 7px;
+            height: 20px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .btn-track:hover {
+            background: var(--c-btn-h);
+        }
+
+        .btn-track:disabled {
+            opacity: .4;
+            cursor: default;
+            background: var(--c-btn);
+        }
+
+        .btn-track .codicon {
+            font-size: 11px;
+        }
+
+        .btn-stop {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 11px;
+            font-family: var(--font-ui);
+            background: rgba(244, 135, 113, .1);
+            color: var(--c-stop);
+            border: 1px solid rgba(244, 135, 113, .2);
+            border-radius: 2px;
+            padding: 0 6px;
+            height: 20px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .btn-stop:hover {
+            background: rgba(244, 135, 113, .2);
+        }
+
+        .btn-stop .codicon {
+            font-size: 12px;
+        }
+
+        /* Filter bar */
+        .filter-bar {
+            padding: 5px 8px 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .filter-input {
+            width: 100%;
+            background: rgba(255, 255, 255, .05);
+            border: 1px solid rgba(255, 255, 255, .09);
+            border-radius: 3px;
+            padding: 3px 7px;
+            font-size: 12px;
+            color: var(--c-fg);
+            font-family: var(--font-ui);
+            outline: none;
+        }
+
+        .filter-input:focus {
+            border-color: var(--c-badge);
+            background: rgba(255, 255, 255, .07);
+        }
+
+        .filter-input::placeholder {
+            color: var(--c-muted);
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 3px;
+        }
+
+        .ftab {
+            flex: 1;
+            height: 19px;
+            border: none;
+            border-radius: 2px;
+            background: none;
+            color: var(--c-desc);
+            font-size: 11px;
+            font-family: var(--font-ui);
+            cursor: pointer;
+        }
+
+        .ftab:hover {
+            background: rgba(255, 255, 255, .07);
+            color: var(--c-fg);
+        }
+
+        .ftab.on {
+            background: rgba(0, 122, 204, .18);
+            color: #6fb3e8;
+        }
+
+        /* Workspace chip */
+        .ws-filter {
+            padding: 4px 8px 3px;
+        }
+
+        .ws-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            color: var(--c-desc);
+            background: rgba(255, 255, 255, .05);
+            border: 1px solid rgba(255, 255, 255, .08);
+            border-radius: 3px;
+            padding: 1px 6px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .ws-chip:hover {
+            background: rgba(255, 255, 255, .09);
+        }
+
+        .ws-chip.on {
+            color: #6fb3e8;
+            background: rgba(0, 122, 204, .12);
+            border-color: rgba(0, 122, 204, .25);
+        }
+
+        .ws-chip .codicon {
+            font-size: 11px;
+        }
+
+        /* Stat cards */
+        .stat-cards {
+            display: flex;
+            gap: 6px;
+            padding: 8px 8px 4px;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: rgba(255, 255, 255, .04);
+            border: 1px solid rgba(255, 255, 255, .06);
+            border-radius: 4px;
+            padding: 9px 10px;
+        }
+
+        .stat-card.accent {
+            background: rgba(0, 122, 204, .07);
+            border-color: rgba(0, 122, 204, .18);
+        }
+
+        .sc-val {
+            font-size: 18px;
+            font-weight: 700;
+            color: #e0e0e0;
+            letter-spacing: -.5px;
+        }
+
+        .sc-lbl {
+            font-size: 11px;
+            color: var(--c-desc);
+            margin-top: 3px;
+        }
+
+        .sc-sub {
+            font-size: 11px;
+            color: var(--c-badge);
+            margin-top: 3px;
+            cursor: pointer;
+        }
+
+        .sc-sub:hover {
+            text-decoration: underline;
+        }
+
+        /* Bar rows */
+        .bar-row {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 3px 8px;
+        }
+
+        .bar-lbl {
+            width: 70px;
+            font-size: 11px;
+            color: var(--c-desc);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-shrink: 0;
+        }
+
+        .bar-track {
+            flex: 1;
+            height: 3px;
+            background: rgba(255, 255, 255, .07);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 2px;
+            background: var(--c-badge);
+        }
+
+        .bar-val {
+            width: 44px;
+            font-size: 11px;
+            color: var(--c-fg);
+            text-align: right;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        /* Team */
+        .av {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            font-weight: 700;
+            color: #fff;
+            text-transform: uppercase;
+            flex-shrink: 0;
+        }
+
+        .team-hdr {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .08em;
+            color: #555;
+            text-transform: uppercase;
+            padding: 7px 8px 2px;
+        }
+
+        .when {
+            font-size: 11px;
+            color: #484848;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        /* Dashboard button */
+        .dashboard-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin: 10px 8px 8px;
+            height: 28px;
+            width: calc(100% - 16px);
+            border: 1px solid rgba(255, 255, 255, .1);
+            border-radius: 3px;
+            background: rgba(255, 255, 255, .04);
+            color: var(--c-fg);
+            font-size: 12px;
+            font-family: var(--font-ui);
+            cursor: pointer;
+        }
+
+        .dashboard-btn:hover {
+            background: rgba(255, 255, 255, .08);
+            border-color: rgba(255, 255, 255, .18);
+        }
+
+        .dashboard-btn .codicon {
+            font-size: 14px;
+        }
+
+        /* Settings */
+        .s-row {
+            display: flex;
+            align-items: center;
+            height: 22px;
+            padding: 0 10px 0 20px;
+            gap: 7px;
+            cursor: pointer;
+        }
+
+        .s-row:hover {
+            background: var(--c-hover);
+        }
+
+        .s-lbl {
+            flex: 1;
+            font-size: 13px;
+            color: var(--c-fg);
+        }
+
+        .s-val {
+            font-size: 12px;
+            color: var(--c-desc);
+        }
+
+        .s-val.ok {
+            color: var(--c-green);
+        }
+
+        .toggle {
+            width: 26px;
+            height: 14px;
+            border-radius: 7px;
+            position: relative;
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: background .15s;
+            background: var(--c-badge);
+        }
+
+        .toggle.off {
+            background: #555;
+        }
+
+        .toggle::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            transition: right .15s, left .15s;
+            left: auto;
+        }
+
+        .toggle.off::after {
+            right: auto;
+            left: 2px;
+        }
+
+        /* Editor */
+        .editor {
+            flex: 1;
+            background: var(--c-editor);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .tabbar {
+            background: #2d2d2d;
+            display: flex;
+            height: 35px;
+            align-items: flex-end;
+            flex-shrink: 0;
+        }
+
+        .tab {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0 12px;
+            height: 35px;
+            font-size: 13px;
+            color: #969696;
+            cursor: pointer;
+            white-space: nowrap;
+            border-top: 1px solid transparent;
+            border-right: 1px solid #1e1e1e;
+        }
+
+        .tab.on {
+            background: var(--c-editor);
+            color: #cccccc;
+            border-top-color: var(--c-badge);
+        }
+
+        .tab .codicon-file-code {
+            color: #cbcb41;
+        }
+
+        .tab .tc {
+            font-size: 12px;
+            color: transparent;
+            margin-left: 2px;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 3px;
+        }
+
+        .tab:hover .tc {
+            color: var(--c-desc);
+        }
+
+        .tab .tc:hover {
+            background: rgba(255, 255, 255, .1);
+            color: var(--c-fg);
+        }
+
+        /* Code */
+        .ed-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 0;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            line-height: 19px;
+        }
+
+        .ed-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .ed-body::-webkit-scrollbar-thumb {
+            background: #424242;
+            border-radius: 4px;
+        }
+
+        .ln {
+            display: flex;
+            height: 19px;
+        }
+
+        .ln.cl {
+            height: 17px;
+        }
+
+        .lnum {
+            width: 42px;
+            text-align: right;
+            padding-right: 14px;
+            color: #5a5a5a;
+            font-size: 13px;
+            flex-shrink: 0;
+            user-select: none;
+        }
+
+        .lcode {
+            flex: 1;
+            white-space: pre;
+            padding-left: 4px;
+        }
+
+        .cl-txt {
+            font-family: var(--font-ui);
+            font-size: 11px;
+            color: #3c8c4a;
+            cursor: pointer;
+        }
+
+        .cl-txt:hover {
+            text-decoration: underline;
+        }
+
+        .kw {
+            color: #569cd6
+        }
+
+        .fn {
+            color: #dcdcaa
+        }
+
+        .str {
+            color: #ce9178
+        }
+
+        .cmt {
+            color: #6a9955
+        }
+
+        .v {
+            color: #9cdcfe
+        }
+
+        .n {
+            color: #b5cea8
+        }
+
+        .tp {
+            color: #4ec9b0
+        }
+
+        .p {
+            color: #cccccc
+        }
+
+        /* ── Dashboard ──────────────────────────────────────────────────────── */
+        .d-wrap {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Left nav */
+        .d-nav {
+            width: 150px;
+            background: #1c1c1c;
+            border-right: 1px solid rgba(255, 255, 255, .05);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            padding-top: 14px;
+        }
+
+        .d-nav-repo {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin: 0 10px 14px;
+            padding: 5px 8px;
+            background: rgba(255, 255, 255, .05);
+            border: 1px solid rgba(255, 255, 255, .08);
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            color: var(--c-fg);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .d-nav-repo:hover {
+            background: rgba(255, 255, 255, .09);
+        }
+
+        .d-nav-repo .codicon {
+            font-size: 11px;
+            color: var(--c-desc);
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+
+        .d-nav-sep {
+            height: 1px;
+            background: rgba(255, 255, 255, .04);
+            margin: 6px 0;
+        }
+
+        .d-ntab {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            height: 32px;
+            padding: 0 14px;
+            font-size: 13px;
+            color: var(--c-desc);
+            cursor: pointer;
+            border-left: 2px solid transparent;
+            user-select: none;
+        }
+
+        .d-ntab:hover {
+            background: rgba(255, 255, 255, .04);
+            color: var(--c-fg);
+        }
+
+        .d-ntab.on {
+            color: var(--c-fg);
+            background: rgba(255, 255, 255, .06);
+            border-left-color: var(--c-badge);
+        }
+
+        .d-ntab .codicon {
+            font-size: 14px;
+        }
+
+        .d-ntab-badge {
+            margin-left: auto;
+            font-size: 10px;
+            background: rgba(255, 255, 255, .1);
+            border-radius: 8px;
+            padding: 0 5px;
+            color: var(--c-desc);
+        }
+
+        /* Right content */
+        .d-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .d-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .d-content::-webkit-scrollbar-thumb {
+            background: #3a3a3a;
+            border-radius: 4px;
+        }
+
+        .d-inner {
+            padding: 18px 22px 28px;
+        }
+
+        /* Top bar */
+        .d-topbar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+
+        .d-heading {
+            font-size: 15px;
+            font-weight: 600;
+            color: #e4e4e4;
+            flex: 1;
+            white-space: nowrap;
+        }
+
+        .d-range-tabs {
+            display: flex;
+            background: rgba(255, 255, 255, .04);
+            border: 1px solid rgba(255, 255, 255, .07);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .d-rtab {
+            height: 24px;
+            padding: 0 10px;
+            font-size: 11px;
+            font-family: var(--font-ui);
+            border: none;
+            background: none;
+            color: var(--c-desc);
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .d-rtab:hover {
+            background: rgba(255, 255, 255, .06);
+            color: var(--c-fg);
+        }
+
+        .d-rtab.on {
+            background: rgba(0, 122, 204, .22);
+            color: #6fb3e8;
+        }
+
+        .d-range-nav {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            color: var(--c-desc);
+            white-space: nowrap;
+        }
+
+        .d-rnav {
+            width: 20px;
+            height: 20px;
+            border: none;
+            background: rgba(255, 255, 255, .05);
+            border-radius: 3px;
+            color: var(--c-desc);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .d-rnav:hover {
+            background: rgba(255, 255, 255, .1);
+            color: var(--c-fg);
+        }
+
+        /* KPI cards */
+        .d-kpi-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .d-kpi {
+            flex: 1;
+            background: rgba(255, 255, 255, .04);
+            border: 1px solid rgba(255, 255, 255, .07);
+            border-radius: 5px;
+            padding: 11px 13px;
+            min-width: 0;
+        }
+
+        .d-kpi.hi {
+            background: rgba(0, 122, 204, .07);
+            border-color: rgba(0, 122, 204, .18);
+        }
+
+        .d-kpi.gr {
+            background: rgba(78, 201, 176, .05);
+            border-color: rgba(78, 201, 176, .14);
+        }
+
+        .d-kpi.pu {
+            background: rgba(124, 77, 255, .05);
+            border-color: rgba(124, 77, 255, .16);
+        }
+
+        .d-kpi-val {
+            font-size: 18px;
+            font-weight: 700;
+            color: #e4e4e4;
+            letter-spacing: -.5px;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        .d-kpi.hi .d-kpi-val {
+            color: #6fb3e8;
+        }
+
+        .d-kpi.gr .d-kpi-val {
+            color: var(--c-active);
+        }
+
+        .d-kpi.pu .d-kpi-val {
+            color: #b39dff;
+        }
+
+        .d-kpi-lbl {
+            font-size: 11px;
+            color: var(--c-desc);
+            margin-top: 4px;
+        }
+
+        .d-kpi-delta {
+            font-size: 10px;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .d-kpi-delta.up {
+            color: var(--c-green);
+        }
+
+        .d-kpi-delta.dn {
+            color: var(--c-stop);
+        }
+
+        .d-kpi-delta.neu {
+            color: var(--c-muted);
+        }
+
+        /* Section */
+        .d-sec {
+            margin-bottom: 22px;
+        }
+
+        .d-sec-hdr {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .d-sec-lbl {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: #484848;
+        }
+
+        .d-sec-act {
+            font-size: 11px;
+            color: var(--c-badge);
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-family: var(--font-ui);
+        }
+
+        .d-sec-act:hover {
+            text-decoration: underline;
+        }
+
+        /* Daily chart */
+        .d-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            height: 72px;
+            padding-bottom: 20px;
+            position: relative;
+        }
+
+        .d-chart::after {
+            content: '';
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: rgba(255, 255, 255, .05);
+        }
+
+        .d-bar-wrap {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .d-bar-wrap:hover .d-bar-col {
+            opacity: .75;
+        }
+
+        .d-bar-col {
+            width: 100%;
+            border-radius: 2px 2px 0 0;
+            min-height: 2px;
+            transition: opacity .1s;
+        }
+
+        .d-bar-col.team {
+            background: rgba(0, 122, 204, .3);
+        }
+
+        .d-bar-col.today {
+            background: rgba(0, 122, 204, .7);
+        }
+
+        .d-bar-col.empty {
+            background: rgba(255, 255, 255, .04);
+        }
+
+        .d-bar-col.me {
+            background: rgba(78, 201, 176, .5);
+        }
+
+        .d-bar-day {
+            font-size: 10px;
+            color: #3e3e3e;
+            margin-top: 5px;
+        }
+
+        .d-bar-day.today {
+            color: var(--c-badge);
+            font-weight: 600;
+        }
+
+        /* Issue table */
+        .d-issue-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .d-issue-row:hover {
+            background: rgba(255, 255, 255, .04);
+        }
+
+        .d-i-num {
+            font-size: 11px;
+            color: var(--c-muted);
+            width: 28px;
+            flex-shrink: 0;
+        }
+
+        .d-i-title {
+            flex: 1;
+            font-size: 13px;
+            color: var(--c-fg);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .d-i-sess {
+            font-size: 11px;
+            color: var(--c-desc);
+            width: 52px;
+            text-align: right;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .d-i-bar {
+            width: 72px;
+            height: 4px;
+            background: rgba(255, 255, 255, .06);
+            border-radius: 2px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .d-i-fill {
+            height: 100%;
+            border-radius: 2px;
+            background: var(--c-badge);
+        }
+
+        .d-i-time {
+            width: 42px;
+            font-size: 12px;
+            color: var(--c-fg);
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .d-i-avatars {
+            display: flex;
+            flex-shrink: 0;
+        }
+
+        .d-i-avatars .av {
+            width: 14px;
+            height: 14px;
+            font-size: 7px;
+            margin-left: -3px;
+            border: 1px solid #1c1c1c;
+        }
+
+        .d-i-avatars .av:first-child {
+            margin-left: 0;
+        }
+
+        /* Issue detail expand */
+        .d-issue-detail {
+            padding: 8px 6px 12px 34px;
+            border-bottom: 1px solid rgba(255, 255, 255, .04);
+        }
+
+        .d-id-bar-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 5px;
+        }
+
+        .d-id-who {
+            width: 44px;
+            font-size: 11px;
+            color: var(--c-desc);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .d-id-trk {
+            flex: 1;
+            height: 5px;
+            background: rgba(255, 255, 255, .06);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .d-id-fill {
+            height: 100%;
+            border-radius: 3px;
+        }
+
+        .d-id-val {
+            width: 54px;
+            font-size: 11px;
+            color: var(--c-fg);
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        /* Member cards */
+        .d-member-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .d-mc {
+            background: rgba(255, 255, 255, .04);
+            border: 1px solid rgba(255, 255, 255, .07);
+            border-radius: 5px;
+            padding: 12px 13px;
+            cursor: pointer;
+            transition: background .12s, border-color .12s;
+        }
+
+        .d-mc:hover {
+            background: rgba(255, 255, 255, .07);
+            border-color: rgba(255, 255, 255, .14);
+        }
+
+        .d-mc-top {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 9px;
+        }
+
+        .av-lg {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            color: #fff;
+            flex-shrink: 0;
+            text-transform: uppercase;
+        }
+
+        .d-mc-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--c-fg);
+        }
+
+        .d-mc-role {
+            font-size: 10px;
+            color: var(--c-desc);
+            margin-top: 1px;
+        }
+
+        .d-mc-kpis {
+            display: flex;
+            gap: 10px;
+        }
+
+        .d-mc-kv {
+            font-size: 14px;
+            font-weight: 700;
+            color: #e4e4e4;
+        }
+
+        .d-mc-kl {
+            font-size: 10px;
+            color: var(--c-desc);
+            margin-top: 1px;
+        }
+
+        .d-mc-bar {
+            margin-top: 9px;
+            height: 3px;
+            background: rgba(255, 255, 255, .06);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .d-mc-bfill {
+            height: 100%;
+            border-radius: 2px;
+        }
+
+        /* Member detail */
+        .d-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            color: var(--c-desc);
+            cursor: pointer;
+            margin-bottom: 14px;
+            background: none;
+            border: none;
+            font-family: var(--font-ui);
+        }
+
+        .d-back:hover {
+            color: var(--c-fg);
+        }
+
+        .d-mhero {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .d-mhero-name {
+            font-size: 17px;
+            font-weight: 600;
+            color: #e4e4e4;
+        }
+
+        .d-mhero-sub {
+            font-size: 12px;
+            color: var(--c-desc);
+            margin-top: 2px;
+        }
+
+        /* Sessions */
+        .d-sess-filters {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+
+        .d-sel {
+            height: 24px;
+            padding: 0 8px;
+            background: rgba(255, 255, 255, .05);
+            border: 1px solid rgba(255, 255, 255, .09);
+            border-radius: 3px;
+            font-size: 12px;
+            font-family: var(--font-ui);
+            color: var(--c-fg);
+        }
+
+        .d-sel:focus {
+            outline: none;
+            border-color: var(--c-badge);
+        }
+
+        .d-day-group {
+            margin-bottom: 12px;
+        }
+
+        .d-day-lbl {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .07em;
+            color: #404040;
+            text-transform: uppercase;
+            padding-bottom: 5px;
+            border-bottom: 1px solid rgba(255, 255, 255, .04);
+            margin-bottom: 3px;
+        }
+
+        .d-sess-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 4px;
+            border-radius: 3px;
+        }
+
+        .d-sess-row:hover {
+            background: rgba(255, 255, 255, .04);
+        }
+
+        .d-sess-who {
+            width: 54px;
+            font-size: 12px;
+            color: var(--c-fg);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-shrink: 0;
+        }
+
+        .d-sess-issue {
+            flex: 1;
+            font-size: 12px;
+            color: var(--c-desc);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .d-sess-issue strong {
+            color: var(--c-fg);
+            font-weight: normal;
+        }
+
+        .d-sess-dur {
+            width: 38px;
+            font-size: 12px;
+            font-family: var(--font-mono);
+            color: var(--c-fg);
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .d-sess-time {
+            width: 88px;
+            font-size: 11px;
+            color: #404040;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .d-sess-total {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--c-muted);
+            padding: 8px 4px 0;
+            border-top: 1px solid rgba(255, 255, 255, .04);
+            margin-top: 6px;
+        }
+
+        /* Toast */
+        .toast {
+            position: absolute;
+            bottom: 28px;
+            right: 14px;
+            width: 292px;
+            background: #252526;
+            border: 1px solid #454545;
+            border-radius: 4px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, .6);
+            padding: 12px 14px;
+            z-index: 50;
+            transition: opacity .2s, transform .2s;
+        }
+
+        .toast.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(8px);
+        }
+
+        .toast-hdr {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--c-orange);
+            margin-bottom: 7px;
+        }
+
+        .toast-hdr .codicon {
+            font-size: 14px;
+        }
+
+        .toast-body {
+            font-size: 12px;
+            color: var(--c-desc);
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .toast-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .tbtn {
+            flex: 1;
+            height: 26px;
+            border: none;
+            border-radius: 2px;
+            font-size: 12px;
+            font-family: var(--font-ui);
+            cursor: pointer;
+        }
+
+        .tbtn.p {
+            background: var(--c-btn);
+            color: #fff;
+        }
+
+        .tbtn.p:hover {
+            background: var(--c-btn-h);
+        }
+
+        .tbtn.s {
+            background: rgba(255, 255, 255, .07);
+            color: var(--c-fg);
+            border: 1px solid #555;
+        }
+
+        .tbtn.s:hover {
+            background: rgba(255, 255, 255, .12);
+        }
+
+        /* Status bar */
+        .statusbar {
+            height: 22px;
+            background: #007acc;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .si {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 0 8px;
+            height: 22px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .si:hover {
+            background: rgba(255, 255, 255, .15);
+        }
+
+        .si .codicon {
+            font-size: 13px;
+        }
+
+        .si.timer-si {
+            background: rgba(255, 255, 255, .12);
+        }
+
+        .si.timer-si:hover {
+            background: rgba(255, 255, 255, .2);
+        }
+
+        .no-results {
+            padding: 8px 20px;
+            font-size: 12px;
+            color: var(--c-muted);
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <div class="main">
+
+            <!-- ACTIVITY BAR -->
+            <div class="actbar">
+                <div class="ai"><i class="codicon codicon-files"></i></div>
+                <div class="ai"><i class="codicon codicon-search"></i></div>
+                <div class="ai"><i class="codicon codicon-source-control"></i></div>
+                <div class="ai on"><i class="codicon codicon-clock"></i></div>
+                <div class="ai"><i class="codicon codicon-extensions"></i></div>
+                <div class="spacer"></div>
+                <div class="ai"><i class="codicon codicon-account"></i></div>
+                <div class="ai"><i class="codicon codicon-settings-gear"></i></div>
+            </div>
+
+            <!-- SIDEBAR -->
+            <div class="sidebar">
+                <div class="sb-title">OctoClock</div>
+
+                <!-- Active Timer -->
+                <div class="sec">
+                    <div class="sec-hdr" onclick="toggleSection('activeTimer')">
+                        <div class="sec-l">
+                            <i class="codicon codicon-chevron-down sec-chv" id="chv-activeTimer"></i>Active Timer
+                        </div>
+                        <div class="sec-acts">
+                            <button class="ib" title="Open issue on GitHub" onclick="event.stopPropagation()">
+                                <i class="codicon codicon-link-external"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="sec-body" id="body-activeTimer">
+                        <div class="row timer-row h28" id="timer-running-row">
+                            <div class="dot teal pulse"></div>
+                            <i class="codicon codicon-repo row-icon" style="color:#8a8a8a"></i>
+                            <span class="row-lbl">
+                                <span class="dim-fg" id="timer-repo">owner/repo-1</span>&nbsp;›&nbsp;<span
+                                    id="timer-issue-lbl">#42 Fix login redirect b…</span>
+                            </span>
+                            <span class="timer" id="timer-display">1:23:47</span>
+                            <div class="row-always">
+                                <button class="btn-stop" onclick="stopTimer()"><i
+                                        class="codicon codicon-debug-stop"></i>&nbsp;Stop</button>
+                            </div>
+                        </div>
+                        <div class="row" id="timer-idle-row" style="display:none">
+                            <i class="codicon codicon-clock row-icon" style="color:var(--c-muted)"></i>
+                            <span class="row-lbl dim">No active timer — start from My Issues</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sep"></div>
+
+                <!-- My Issues -->
+                <div class="sec">
+                    <div class="sec-hdr" onclick="toggleSection('myIssues')">
+                        <div class="sec-l">
+                            <i class="codicon codicon-chevron-down sec-chv" id="chv-myIssues"></i>My Issues
+                        </div>
+                        <div class="sec-acts">
+                            <button class="ib" title="Refresh from GitHub" onclick="event.stopPropagation()">
+                                <i class="codicon codicon-refresh"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="sec-body" id="body-myIssues">
+                        <!-- Branch suggestion -->
+                        <div class="row branch-row h28" id="branch-row">
+                            <i class="codicon codicon-git-branch"
+                                style="font-size:13px;color:var(--c-branch);flex-shrink:0"></i>
+                            <span class="bpill">fix/42-login-redirect</span>
+                            <span class="row-lbl" style="color:var(--c-desc);font-size:12px">#42 Fix login redirect
+                                bug</span>
+                            <button class="btn-track" id="branch-track-btn" onclick="trackIssue(42)">
+                                <i class="codicon codicon-play"></i>&nbsp;Track
+                            </button>
+                        </div>
+                        <!-- Filter -->
+                        <div class="filter-bar">
+                            <input class="filter-input" id="issue-search" placeholder="Filter by title or #id…"
+                                oninput="renderIssueList()" />
+                            <div class="filter-tabs">
+                                <button class="ftab on" id="ftab-open" onclick="setStatusTab('open')">Open</button>
+                                <button class="ftab" id="ftab-closed" onclick="setStatusTab('closed')">Closed</button>
+                                <button class="ftab" id="ftab-all" onclick="setStatusTab('all')">All</button>
+                            </div>
+                        </div>
+                        <div id="issues-list"></div>
+                    </div>
+                </div>
+
+                <div class="sep"></div>
+
+                <!-- Tracked Time -->
+                <div class="sec">
+                    <div class="sec-hdr" onclick="toggleSection('trackedTime')">
+                        <div class="sec-l">
+                            <i class="codicon codicon-chevron-down sec-chv" id="chv-trackedTime"></i>Tracked Time
+                        </div>
+                        <div class="sec-acts">
+                            <button class="ib" title="Pin repository" onclick="event.stopPropagation()"><i
+                                    class="codicon codicon-pin"></i></button>
+                            <button class="ib" title="Refresh" onclick="event.stopPropagation()"><i
+                                    class="codicon codicon-refresh"></i></button>
+                        </div>
+                    </div>
+                    <div class="sec-body" id="body-trackedTime">
+                        <div class="ws-filter">
+                            <span class="ws-chip on" id="ws-chip" onclick="toggleWorkspace()">
+                                <i class="codicon codicon-folder"></i>&nbsp;Workspace&nbsp;<span id="ws-dot"
+                                    style="font-size:9px">●</span>
+                            </span>
+                        </div>
+                        <!-- Repo 1 -->
+                        <div class="row" onclick="toggleRepo('repo1')">
+                            <i class="codicon codicon-chevron-down row-icon" style="font-size:12px;color:var(--c-desc)"
+                                id="repo1-chv"></i>
+                            <i class="codicon codicon-repo row-icon"></i>
+                            <span class="row-lbl">owner/repo-1</span>
+                            <span class="row-desc" id="repo1-total">3h 12m</span>
+                            <div class="row-act"><button class="ib" title="Unpin"><i
+                                        class="codicon codicon-pin"></i></button></div>
+                        </div>
+                        <div id="repo1-issues">
+                            <div class="row i1" id="tracked-42">
+                                <i class="codicon codicon-clock row-icon" style="color:var(--c-active)"
+                                    id="tracked-42-icon"></i>
+                                <span class="row-lbl">#42&nbsp;<span class="dim-fg">Fix login redirect b…</span></span>
+                                <span class="row-desc" style="color:var(--c-active)" id="tracked-42-time">1h 23m</span>
+                                <div class="row-act">
+                                    <button class="ib" title="Stop timer" onclick="stopTimer()">
+                                        <i class="codicon codicon-debug-stop" style="color:var(--c-stop)"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="row i1">
+                                <i class="codicon codicon-history row-icon" style="color:var(--c-desc)"></i>
+                                <span class="row-lbl">#38&nbsp;<span class="dim-fg">Add dark mode toggle</span></span>
+                                <span class="row-desc">1h 49m</span>
+                                <div class="row-act">
+                                    <button class="ib" title="Start timer" onclick="trackIssue(38)"><i
+                                            class="codicon codicon-play"></i></button>
+                                    <button class="ib" title="Delete sessions"><i
+                                            class="codicon codicon-trash"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Repo 2 — hidden when workspace filter is on -->
+                        <div class="row" id="repo2-row" style="display:none">
+                            <i class="codicon codicon-chevron-right row-icon"
+                                style="font-size:12px;color:var(--c-desc)"></i>
+                            <i class="codicon codicon-repo row-icon"></i>
+                            <span class="row-lbl">owner/repo-2</span>
+                            <span class="row-desc">0h 00m</span>
+                            <div class="row-act"><button class="ib" title="Unpin"><i
+                                        class="codicon codicon-pin"></i></button></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sep"></div>
+
+                <!-- Stats & Team -->
+                <div class="sec">
+                    <div class="sec-hdr" onclick="toggleSection('stats')">
+                        <div class="sec-l">
+                            <i class="codicon codicon-chevron-down sec-chv" id="chv-stats"></i>Stats &amp; Team
+                        </div>
+                        <div class="sec-acts">
+                            <button class="ib" title="Sync team data" onclick="event.stopPropagation()">
+                                <i class="codicon codicon-sync"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="sec-body" id="body-stats">
+                        <div class="stat-cards">
+                            <div class="stat-card">
+                                <div class="sc-val">3h 12m</div>
+                                <div class="sc-lbl">You today</div>
+                            </div>
+                            <div class="stat-card accent">
+                                <div class="sc-val">10h 48m</div>
+                                <div class="sc-lbl">Team this week</div>
+                                <div class="sc-sub" onclick="showDashboard()">4 contributors ↗</div>
+                            </div>
+                        </div>
+                        <div class="bar-row">
+                            <span class="bar-lbl">#42 login</span>
+                            <div class="bar-track">
+                                <div class="bar-fill" style="width:100%"></div>
+                            </div>
+                            <span class="bar-val">4h 33m</span>
+                        </div>
+                        <div class="bar-row">
+                            <span class="bar-lbl">#38 dark</span>
+                            <div class="bar-track">
+                                <div class="bar-fill" style="width:87%"></div>
+                            </div>
+                            <span class="bar-val">3h 57m</span>
+                        </div>
+                        <div class="bar-row">
+                            <span class="bar-lbl">#51 api</span>
+                            <div class="bar-track">
+                                <div class="bar-fill" style="width:50%"></div>
+                            </div>
+                            <span class="bar-val">2h 17m</span>
+                        </div>
+                        <div class="team-hdr">Team Today</div>
+                        <div class="row" style="gap:7px">
+                            <div class="av" style="background:#1a7fe8">al</div>
+                            <span class="row-lbl">alice&nbsp;<span class="dim-fg">#42 Fix login…</span></span>
+                            <span class="row-desc">2h 10m</span><span class="when">today</span>
+                        </div>
+                        <div class="row" style="gap:7px">
+                            <div class="av" style="background:#7c4dff">bo</div>
+                            <span class="row-lbl">bob&nbsp;<span class="dim-fg">#38 Dark mode…</span></span>
+                            <span class="row-desc">45m</span><span class="when">today</span>
+                        </div>
+                        <div class="row" style="gap:7px">
+                            <div class="av" style="background:#2e7d32">ca</div>
+                            <span class="row-lbl">carol&nbsp;<span class="dim-fg">#51 API rate…</span></span>
+                            <span class="row-desc">1h 02m</span><span class="when">yest.</span>
+                        </div>
+                        <button class="dashboard-btn" onclick="showDashboard()">
+                            <i class="codicon codicon-graph"></i>&nbsp;Full dashboard
+                        </button>
+                    </div>
+                </div>
+
+                <div class="sep"></div>
+
+                <!-- Settings (collapsed by default) -->
+                <div class="sec">
+                    <div class="sec-hdr" onclick="toggleSection('settings')">
+                        <div class="sec-l">
+                            <i class="codicon codicon-chevron-down sec-chv closed" id="chv-settings"></i>Settings
+                        </div>
+                    </div>
+                    <div class="sec-body closed" id="body-settings">
+                        <div class="s-row">
+                            <i class="codicon codicon-key row-icon" style="color:var(--c-desc)"></i>
+                            <span class="s-lbl">GitHub Token</span>
+                            <span class="s-val ok">✓ Configured</span>
+                        </div>
+                        <div class="s-row" onclick="toggleSetting('autosync')">
+                            <i class="codicon codicon-sync row-icon" style="color:var(--c-desc)"></i>
+                            <span class="s-lbl">Auto-sync</span>
+                            <div class="toggle" id="toggle-autosync"></div>
+                        </div>
+                        <div class="s-row" onclick="toggleSetting('idle')">
+                            <i class="codicon codicon-bell row-icon" style="color:var(--c-desc)"></i>
+                            <span class="s-lbl">Idle reminder</span>
+                            <span class="s-val" id="idle-val">30 min</span>
+                            <div class="toggle" id="toggle-idle"></div>
+                        </div>
+                        <div class="s-row">
+                            <i class="codicon codicon-cloud-upload row-icon" style="color:var(--c-desc)"></i>
+                            <span class="s-lbl">Sync now</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="height:16px"></div>
+            </div><!-- /sidebar -->
+
+            <!-- EDITOR -->
+            <div class="editor">
+                <div class="tabbar">
+                    <div class="tab on" id="tab-code" onclick="showTab('code')">
+                        <i class="codicon codicon-file-code"></i>auth/login.js
+                        <span class="tc"><i class="codicon codicon-close"></i></span>
+                    </div>
+                    <div class="tab" id="tab-dash" onclick="showTab('dash')" style="display:none">
+                        <i class="codicon codicon-graph" style="color:var(--c-badge)"></i>OctoClock Stats
+                        <span class="tc" onclick="event.stopPropagation();closeDashboard()">
+                            <i class="codicon codicon-close"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Code panel -->
+                <div id="panel-code" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
+                    <div class="ed-body">
+                        <div class="ln cl">
+                            <div class="lnum"></div>
+                            <div class="lcode"><span class="cl-txt">⏱ 1h 23m tracked · #42 Fix login redirect bug</span>
+                            </div>
+                        </div>
+                        <div class="ln">
+                            <div class="lnum">1</div>
+                            <div class="lcode"><span class="kw">async function</span> <span
+                                    class="fn">handleLogin</span><span class="p">(</span><span class="v">req</span><span
+                                    class="p">,</span> <span class="v">res</span><span class="p">) {</span></div>
+                        </div>
+                        <div class="ln">
+                            <div class="lnum">2</div>
+                            <div class="lcode"> <span class="kw">const</span> <span class="p">{</span> <span
+                                    class="v">email</span><span class="p">,</span> <span class="v">password</span> <span
+                                    class="p">} =</span> <span class="v">req</span><span class="p">.</span><span
+                                    class="v">body</span><span class="p">;</span></div>
+                        </div>
+                        <div class="ln">
+                            <div class="lnum">3</div>
+                            <div class="lcode"></div>
+                        </div>
+                        <div class="ln">
+                            <div class="lnum">4</div>
+                            <div class="lcode"> <span class="kw">try</span> <span class="p">{</span></div>
+                        </div>
+                        <div class="ln">
+                            <div class="lnum">5</div>
+                            <div class="lcode"> <span class="kw">const</span> <span class="v">user</span> <span
+                                    class="p">=</span> <span class="kw">await</span> <span class="tp">User</span><span
+                                    class="p">.</span><span class="fn">findOne</span><span class="p">({</span> <span
+                                    class="v">email</span> <span class="p">});</span></div>
+                        </div>
+                        <div class="ln">
+                            <div class="lnum">6</div>
+                            <div class="lcode"> <span class="kw">if</span> <span class="p">(!</span><span
+                                    class="v">user</span><span class="p">)</span> <span class="kw">return</span> <span
+                                    class="v">res</span><span class="p">.</span><span class="fn">redirect</span><span
+                                    class="p">(</span><span class="str">'/login?err=notfound'</span><span
+                                    class="p">);</span></div>
+                        </div>
+                        <div class="ln">
+                            <div class="lnum">7</div>
+                            <div class="lcode"></div>
+                        </div>
+                        <div class="ln">
+                            <div class="lnum">8</div>
+                            <div class="lcode"> <span class="kw">const</span> <span class="v">valid</span> <span
+                                    class="p">=</span> <span class="kw">await</span> <span class="v">bcrypt</span><span
+                                    class="p">.</span><span class="fn">compare</span><span class="p">(</span><span
+                                    class="v">password</span><span class="p">,</span> <span class="v">user</span><span
+                                    class="p">.</span><span class="v">hash</span><span class="p">);</span></div>
+                        </div>
+                        <div class="ln">
+                            <div class="lnum">9</div>
+                            <div class="lcode"> <span class="kw">if</span> <span class="p">(!</span><span
+                                    class="v">valid</span><span class="p">)</span> <span class="kw">return</span> <span
+                                    class="v">res</span><span class="p">.</span><span class="fn">redirect</span><span
+                                    class="p">(</span><span class="str">'/login?err=badpw'</span><span
+                                    class="p">);</span></div>
+                        </div>
+                        <div class="ln">
+                            <div class="lnum">10</div>
+                            <div class="lcode"></div>
+                        </div>
+                        <div class="ln">
+                            <div class="lnum">11</div>
+                            <div class="lcode"> <span class="cmt">// TODO: fix redirect after auth — issue #42</span>
+                            </div>
+                        </div>
+                        <div class="ln">
+                            <div class="lnum">12</div>
+                            <div class="lcode"> <span class="v">req</span><span class="p">.</span><span
+                                    class="v">session</span><span class="p">.</span><span class="v">userId</span> <span
+                                    class="p">=</span> <span class="v">user</span><span class="p">.</span><span
+                                    class="v">_id</span><span class="p">;</span></div>
+                        </div>
+                        <div class="ln">
+                            <div class="lnum">13</div>
+                            <div class="lcode"> <span class="v">res</span><span class="p">.</span><span
+                                    class="fn">redirect</span><span class="p">(</span><span class="v">req</span><span
+                                    class="p">.</span><span class="v">session</span><span class="p">.</span><span
+                                    class="v">returnTo</span> <span class="p">||</span> <span
+                                    class="str">'/'</span><span class="p">);</span></div>
+                        </div>
+                        <div class="ln">
+                            <div class="lnum">14</div>
+                            <div class="lcode"> <span class="p">}</span> <span class="kw">catch</span> <span
+                                    class="p">(</span><span class="v">err</span><span class="p">) {</span></div>
+                        </div>
+                        <div class="ln">
+                            <div class="lnum">15</div>
+                            <div class="lcode"> <span class="v">res</span><span class="p">.</span><span
+                                    class="fn">status</span><span class="p">(</span><span class="n">500</span><span
+                                    class="p">).</span><span class="fn">json</span><span class="p">({</span> <span
+                                    class="v">error</span><span class="p">:</span> <span class="v">err</span><span
+                                    class="p">.</span><span class="v">message</span> <span class="p">});</span></div>
+                        </div>
+                        <div class="ln">
+                            <div class="lnum">16</div>
+                            <div class="lcode"> <span class="p">}</span></div>
+                        </div>
+                        <div class="ln">
+                            <div class="lnum">17</div>
+                            <div class="lcode"><span class="p">}</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard panel -->
+                <div id="panel-dash" style="display:none;flex:1;overflow:hidden">
+                    <div class="d-wrap">
+                        <!-- Left nav -->
+                        <div class="d-nav">
+                            <div class="d-nav-repo" title="owner/repo-1">
+                                <i class="codicon codicon-repo"
+                                    style="font-size:12px;color:var(--c-desc);flex-shrink:0"></i>
+                                <span
+                                    style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">owner/repo-1</span>
+                                <i class="codicon codicon-chevron-down"></i>
+                            </div>
+                            <div class="d-nav-sep"></div>
+                            <div class="d-ntab on" id="dntab-overview" onclick="setDashView('overview')">
+                                <i class="codicon codicon-graph"></i>Overview
+                            </div>
+                            <div class="d-ntab" id="dntab-issues" onclick="setDashView('issues')">
+                                <i class="codicon codicon-issues"></i>Issues
+                                <span class="d-ntab-badge">4</span>
+                            </div>
+                            <div class="d-ntab" id="dntab-members" onclick="setDashView('members')">
+                                <i class="codicon codicon-organization"></i>Members
+                                <span class="d-ntab-badge">4</span>
+                            </div>
+                            <div class="d-ntab" id="dntab-sessions" onclick="setDashView('sessions')">
+                                <i class="codicon codicon-list-unordered"></i>Sessions
+                                <span class="d-ntab-badge">12</span>
+                            </div>
+                        </div>
+                        <!-- Right content -->
+                        <div class="d-content">
+                            <div class="d-inner" id="d-inner-content">
+                                <!-- rendered by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Idle toast -->
+                <div class="toast" id="toast">
+                    <div class="toast-hdr"><i class="codicon codicon-clock"></i>OctoClock</div>
+                    <div class="toast-body">You've been coding for 32 min with no active timer.</div>
+                    <div class="toast-btns">
+                        <button class="tbtn p" onclick="toastStartTimer()">Start timer</button>
+                        <button class="tbtn s" onclick="dismissToast()">Dismiss</button>
+                    </div>
+                </div>
+            </div><!-- /editor -->
+        </div><!-- /main -->
+
+        <!-- STATUS BAR -->
+        <div class="statusbar">
+            <div class="si"><i class="codicon codicon-git-branch"></i>fix/42-login-redirect</div>
+            <div class="si timer-si" onclick="showTab('code')" id="sb-timer-item">
+                <i class="codicon codicon-clock"></i><span id="sb-timer">1h 23m · #42</span>
+            </div>
+            <div class="spacer"></div>
+            <div class="si"><i class="codicon codicon-check"></i>&nbsp;0</div>
+            <div class="si"><i class="codicon codicon-warning"></i>&nbsp;2</div>
+            <div class="si">UTF-8</div>
+            <div class="si">JavaScript</div>
+        </div>
+    </div><!-- /app -->
+
+    <script>
+        // ── MOCK DATA ─────────────────────────────────────────────────────────────────
+        const MEMBERS = [
+            { id: 'me', name: 'you', initials: 'ME', color: '#4ec9b0', role: 'You' },
+            { id: 'alice', name: 'alice', initials: 'AL', color: '#1a7fe8', role: 'Contributor' },
+            { id: 'bob', name: 'bob', initials: 'BO', color: '#7c4dff', role: 'Contributor' },
+            { id: 'carol', name: 'carol', initials: 'CA', color: '#e8851a', role: 'Contributor' },
+        ];
+
+        const ISSUES_DATA = [
+            { id: 42, title: 'Fix login redirect bug', status: 'open', repo: 'owner/repo-1' },
+            { id: 38, title: 'Add dark mode toggle', status: 'open', repo: 'owner/repo-1' },
+            { id: 51, title: 'API rate limit handling', status: 'open', repo: 'owner/repo-1' },
+            { id: 31, title: 'Update README', status: 'closed', repo: 'owner/repo-1' },
+        ];
+
+        // sessions: { date, member, issueId, startH, startM, durMin }
+        const ALL_SESSIONS = [
+            { date: '2026-05-10', member: 'me', issueId: 42, startH: 9, startM: 15, durMin: 83 },
+            { date: '2026-05-10', member: 'alice', issueId: 42, startH: 10, startM: 0, durMin: 80 },
+            { date: '2026-05-10', member: 'carol', issueId: 51, startH: 11, startM: 30, durMin: 45 },
+            { date: '2026-05-10', member: 'bob', issueId: 38, startH: 13, startM: 0, durMin: 75 },
+            { date: '2026-05-09', member: 'alice', issueId: 38, startH: 14, startM: 0, durMin: 45 },
+            { date: '2026-05-09', member: 'bob', issueId: 38, startH: 15, startM: 0, durMin: 60 },
+            { date: '2026-05-09', member: 'me', issueId: 38, startH: 10, startM: 30, durMin: 109 },
+            { date: '2026-05-09', member: 'carol', issueId: 51, startH: 11, startM: 30, durMin: 37 },
+            { date: '2026-05-08', member: 'alice', issueId: 42, startH: 10, startM: 30, durMin: 50 },
+            { date: '2026-05-08', member: 'bob', issueId: 51, startH: 14, startM: 0, durMin: 75 },
+            { date: '2026-05-07', member: 'alice', issueId: 38, startH: 9, startM: 0, durMin: 40 },
+            { date: '2026-05-07', member: 'carol', issueId: 42, startH: 13, startM: 15, durMin: 60 },
+            // all-time extras
+            { date: '2026-04-28', member: 'me', issueId: 31, startH: 9, startM: 0, durMin: 50 },
+            { date: '2026-04-29', member: 'alice', issueId: 31, startH: 10, startM: 0, durMin: 32 },
+        ];
+
+        // ── SIDEBAR ISSUES (for My Issues panel) ─────────────────────────────────────
+        const ISSUES = ISSUES_DATA;
+
+        // ── STATE ─────────────────────────────────────────────────────────────────────
+        const state = {
+            // timer
+            timerRunning: true,
+            timerIssueId: 42,
+            timerStartEpoch: Date.now() - (1 * 3600 + 23 * 60 + 47) * 1000,
+            timerStopped: 0,
+            // sidebar
+            statusTab: 'open',
+            workspaceOnly: true,
+            repoExpanded: { repo1: true },
+            // dashboard
+            dashView: 'overview',
+            dashRange: 'week',        // today | week | month | alltime
+            dashWeekOffset: 0,             // 0 = current week, -1 = last week, etc.
+            dashMember: null,          // member id for drill-down
+            dashIssueOpen: null,          // issue id expanded in Issues view
+            dashSessFilter: { member: 'all', issue: 'all' },
+        };
+
+        // ── TIME HELPERS ──────────────────────────────────────────────────────────────
+        function fmtTimer(s) {
+            const h = Math.floor(s / 3600);
+            const m = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
+            const sec = String(s % 60).padStart(2, '0');
+            return h + ':' + m + ':' + sec;
+        }
+        function fmtShort(s) {
+            const h = Math.floor(s / 3600);
+            const m = Math.floor((s % 3600) / 60);
+            if (h === 0) return m + 'm';
+            return m === 0 ? h + 'h' : h + 'h ' + m + 'm';
+        }
+        function minToShort(min) {
+            const h = Math.floor(min / 60), m = min % 60;
+            if (h === 0) return m + 'm';
+            return m === 0 ? h + 'h' : h + 'h ' + m + 'm';
+        }
+        function elapsed() {
+            return state.timerRunning
+                ? Math.floor((Date.now() - state.timerStartEpoch) / 1000)
+                : state.timerStopped;
+        }
+
+        // Date utils
+        function isoToday() { return new Date().toISOString().slice(0, 10); }
+        function addDays(iso, n) {
+            const d = new Date(iso + 'T00:00:00');
+            d.setDate(d.getDate() + n);
+            return d.toISOString().slice(0, 10);
+        }
+        function weekStart(offset) {
+            const d = new Date();
+            const day = d.getDay(); // 0=Sun
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Mon
+            d.setDate(diff + offset * 7);
+            return d.toISOString().slice(0, 10);
+        }
+        function fmtDate(iso) {
+            const [y, m, d] = iso.split('-');
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            return months[parseInt(m) - 1] + ' ' + parseInt(d);
+        }
+        function dayLabel(iso) {
+            const days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+            return days[new Date(iso + 'T12:00:00').getDay()];
+        }
+
+        // ── SESSION FILTER BY RANGE ────────────────────────────────────────────────────
+        function sessionsInRange(extraFilter) {
+            const today = isoToday();
+            return ALL_SESSIONS.filter(s => {
+                let inRange = true;
+                if (state.dashRange === 'today') {
+                    inRange = s.date === today;
+                } else if (state.dashRange === 'week') {
+                    const ws = weekStart(state.dashWeekOffset);
+                    const we = addDays(ws, 6);
+                    inRange = s.date >= ws && s.date <= we;
+                } else if (state.dashRange === 'month') {
+                    inRange = s.date.slice(0, 7) === today.slice(0, 7);
+                }
+                // alltime: inRange = true
+                if (extraFilter) inRange = inRange && extraFilter(s);
+                return inRange;
+            });
+        }
+
+        // ── TIMER ─────────────────────────────────────────────────────────────────────
+        let timerInterval = null;
+        function tick() {
+            const s = elapsed();
+            const td = document.getElementById('timer-display');
+            if (td) td.textContent = fmtTimer(s);
+            const sb = document.getElementById('sb-timer');
+            if (sb) sb.textContent = state.timerRunning
+                ? fmtShort(s) + ' · #' + state.timerIssueId : 'OctoClock';
+            const t42 = document.getElementById('tracked-42-time');
+            if (t42 && state.timerRunning && state.timerIssueId === 42)
+                t42.textContent = fmtShort(s);
+        }
+        function startTick() { clearInterval(timerInterval); timerInterval = setInterval(tick, 1000); tick(); }
+        function stopTimer() {
+            if (!state.timerRunning) return;
+            state.timerStopped = elapsed();
+            state.timerRunning = false;
+            clearInterval(timerInterval); timerInterval = null;
+            document.getElementById('timer-running-row').style.display = 'none';
+            document.getElementById('timer-idle-row').style.display = '';
+            const icon = document.getElementById('tracked-42-icon');
+            if (icon) icon.style.color = 'var(--c-desc)';
+            tick(); renderIssueList();
+        }
+        function trackIssue(id) {
+            const issue = ISSUES.find(i => i.id === id);
+            if (!issue) return;
+            state.timerRunning = true; state.timerIssueId = id; state.timerStartEpoch = Date.now();
+            document.getElementById('timer-repo').textContent = issue.repo;
+            document.getElementById('timer-issue-lbl').textContent = '#' + id + ' ' + issue.title.slice(0, 22) + '…';
+            document.getElementById('timer-running-row').style.display = '';
+            document.getElementById('timer-idle-row').style.display = 'none';
+            const icon = document.getElementById('tracked-42-icon');
+            if (icon) icon.style.color = id === 42 ? 'var(--c-active)' : 'var(--c-desc)';
+            startTick(); renderIssueList(); dismissToast();
+        }
+
+        // ── SIDEBAR SECTIONS ──────────────────────────────────────────────────────────
+        function toggleSection(name) {
+            const body = document.getElementById('body-' + name);
+            const chv = document.getElementById('chv-' + name);
+            if (!body || !chv) return;
+            const closed = body.classList.toggle('closed');
+            chv.classList.toggle('closed', closed);
+        }
+        function setStatusTab(status) {
+            state.statusTab = status;
+            ['open', 'closed', 'all'].forEach(s => document.getElementById('ftab-' + s).classList.toggle('on', s === status));
+            renderIssueList();
+        }
+        function renderIssueList() {
+            const query = (document.getElementById('issue-search').value || '').toLowerCase();
+            const tab = state.statusTab;
+            const active = state.timerRunning ? state.timerIssueId : null;
+            const filtered = ISSUES.filter(issue => {
+                const matchStatus = tab === 'all' || issue.status === tab;
+                const matchQuery = !query || issue.title.toLowerCase().includes(query) || String(issue.id).includes(query.replace('#', ''));
+                return matchStatus && matchQuery;
+            });
+            const container = document.getElementById('issues-list');
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="no-results">No matching issues</div>';
+            } else {
+                container.innerHTML = filtered.map(issue => {
+                    const isActive = issue.id === active;
+                    const isClosed = issue.status === 'closed';
+                    const iconColor = isActive ? 'var(--c-active)' : isClosed ? 'var(--c-muted)' : 'var(--c-open)';
+                    const iconName = isActive ? 'codicon-clock' : isClosed ? 'codicon-issue-closed' : 'codicon-issue-opened';
+                    const lblClass = isClosed ? ' dim' : '';
+                    const playBtn = isClosed ? '' : isActive
+                        ? '<button class="ib" title="Already tracking" style="opacity:.35" disabled><i class="codicon codicon-play"></i></button>'
+                        : '<button class="ib" title="Start timer" onclick="trackIssue(' + issue.id + ')"><i class="codicon codicon-play"></i></button>';
+                    return '<div class="row" data-id="' + issue.id + '">'
+                        + '<i class="codicon ' + iconName + ' row-icon" style="color:' + iconColor + '"></i>'
+                        + '<span class="row-lbl' + lblClass + '">#' + issue.id + '&nbsp;&nbsp;' + issue.title + '</span>'
+                        + '<div class="row-act">' + playBtn + '<button class="ib" title="Open in GitHub"><i class="codicon codicon-link-external"></i></button></div>'
+                        + '</div>';
+                }).join('');
+            }
+            const branchBtn = document.getElementById('branch-track-btn');
+            if (branchBtn) {
+                const tracking = active === 42;
+                branchBtn.disabled = tracking;
+                branchBtn.innerHTML = tracking
+                    ? '<i class="codicon codicon-clock"></i>&nbsp;Tracking'
+                    : '<i class="codicon codicon-play"></i>&nbsp;Track';
+            }
+        }
+        function toggleWorkspace() {
+            state.workspaceOnly = !state.workspaceOnly;
+            document.getElementById('ws-chip').classList.toggle('on', state.workspaceOnly);
+            document.getElementById('ws-dot').style.opacity = state.workspaceOnly ? '1' : '.3';
+            document.getElementById('repo2-row').style.display = state.workspaceOnly ? 'none' : '';
+        }
+        function toggleRepo(id) {
+            state.repoExpanded[id] = !state.repoExpanded[id];
+            const issues = document.getElementById(id + '-issues');
+            const chv = document.getElementById(id + '-chv');
+            if (!issues || !chv) return;
+            const open = state.repoExpanded[id];
+            issues.style.display = open ? '' : 'none';
+            chv.className = (open ? 'codicon codicon-chevron-down' : 'codicon codicon-chevron-right') + ' row-icon';
+            chv.style.cssText = 'font-size:12px;color:var(--c-desc)';
+        }
+
+        // ── TABS ─────────────────────────────────────────────────────────────────────
+        function showTab(name) {
+            const isDash = name === 'dash';
+            document.getElementById('panel-code').style.display = isDash ? 'none' : 'flex';
+            document.getElementById('panel-dash').style.display = isDash ? 'flex' : 'none';
+            document.getElementById('tab-code').classList.toggle('on', !isDash);
+            document.getElementById('tab-dash').classList.toggle('on', isDash);
+            if (isDash) renderDashboard();
+        }
+        function showDashboard() {
+            document.getElementById('tab-dash').style.display = '';
+            showTab('dash');
+        }
+        function closeDashboard() {
+            document.getElementById('tab-dash').style.display = 'none';
+            showTab('code');
+        }
+
+        // ── TOAST ─────────────────────────────────────────────────────────────────────
+        function dismissToast() { document.getElementById('toast').classList.add('hidden'); }
+        function toastStartTimer() { dismissToast(); document.getElementById('issue-search').focus(); }
+
+        // ── SETTINGS ─────────────────────────────────────────────────────────────────
+        function toggleSetting(name) {
+            const el = document.getElementById('toggle-' + name);
+            if (el) el.classList.toggle('off');
+            if (name === 'idle') {
+                const val = document.getElementById('idle-val');
+                if (val) val.style.opacity = el.classList.contains('off') ? '.3' : '1';
+            }
+        }
+
+        // ── DASHBOARD RANGE ────────────────────────────────────────────────────────────
+        function setDashRange(r) {
+            state.dashRange = r;
+            state.dashWeekOffset = 0;
+            renderDashboard();
+        }
+        function shiftWeek(delta) {
+            state.dashWeekOffset += delta;
+            renderDashboard();
+        }
+        function rangeLabel() {
+            if (state.dashRange === 'today') return 'Today · ' + fmtDate(isoToday());
+            if (state.dashRange === 'month') return 'This month · ' + new Date().toLocaleString('en', { month: 'long' }) + ' ' + new Date().getFullYear();
+            if (state.dashRange === 'alltime') return 'All time';
+            // week
+            const ws = weekStart(state.dashWeekOffset);
+            const we = addDays(ws, 6);
+            const label = state.dashWeekOffset === 0 ? 'This week' : state.dashWeekOffset === -1 ? 'Last week' : fmtDate(ws);
+            return label + ' · ' + fmtDate(ws) + ' – ' + fmtDate(we);
+        }
+
+        // ── DASHBOARD VIEW SWITCH ──────────────────────────────────────────────────────
+        function setDashView(v) {
+            state.dashView = v;
+            state.dashMember = null;
+            ['overview', 'issues', 'members', 'sessions'].forEach(id => {
+                document.getElementById('dntab-' + id).classList.toggle('on', id === v);
+            });
+            renderDashboard();
+        }
+        function drillMember(id) {
+            state.dashMember = id;
+            renderDashboard();
+        }
+
+        // ── AVATAR HTML ───────────────────────────────────────────────────────────────
+        function avHtml(m, size) {
+            const cls = size === 'lg' ? 'av-lg' : 'av';
+            return '<div class="' + cls + '" style="background:' + m.color + '">' + m.initials + '</div>';
+        }
+        function memberById(id) { return MEMBERS.find(m => m.id === id); }
+        function issueById(id) { return ISSUES_DATA.find(i => i.id === id); }
+
+        // ── KPI CARD HTML ─────────────────────────────────────────────────────────────
+        function kpiCard(val, lbl, delta, mod) {
+            const cls = mod ? ' ' + mod : '';
+            return '<div class="d-kpi' + cls + '"><div class="d-kpi-val">' + val + '</div><div class="d-kpi-lbl">' + lbl + '</div>'
+                + (delta ? '<div class="d-kpi-delta ' + delta.cls + '">' + delta.txt + '</div>' : '')
+                + '</div>';
+        }
+
+        // ── RANGE TOPBAR HTML ─────────────────────────────────────────────────────────
+        function topbarHtml(heading) {
+            const showNav = state.dashRange === 'week';
+            return '<div class="d-topbar">'
+                + '<span class="d-heading">' + heading + '</span>'
+                + '<div class="d-range-tabs">'
+                + ['today', 'week', 'month', 'alltime'].map(r =>
+                    '<button class="d-rtab' + (state.dashRange === r ? ' on' : '') + '" onclick="setDashRange(\'' + r + '\')">'
+                    + { today: 'Today', week: 'Week', month: 'Month', alltime: 'All time' }[r] + '</button>'
+                ).join('')
+                + '</div>'
+                + (showNav
+                    ? '<div class="d-range-nav">'
+                    + '<button class="d-rnav" onclick="shiftWeek(-1)"><i class="codicon codicon-chevron-left" style="font-size:11px"></i></button>'
+                    + '<span>' + rangeLabel() + '</span>'
+                    + '<button class="d-rnav" onclick="shiftWeek(1)"' + (state.dashWeekOffset >= 0 ? ' disabled style="opacity:.3"' : '') + ' ><i class="codicon codicon-chevron-right" style="font-size:11px"></i></button>'
+                    + '</div>'
+                    : '<span style="font-size:11px;color:var(--c-desc)">' + rangeLabel() + '</span>')
+                + '</div>';
+        }
+
+        // ── RENDER OVERVIEW ───────────────────────────────────────────────────────────
+        function renderOverview() {
+            const sess = sessionsInRange();
+            const totalMin = sess.reduce((a, s) => a + s.durMin, 0);
+            const myMin = sess.filter(s => s.member === 'me').reduce((a, s) => a + s.durMin, 0);
+            const contribs = new Set(sess.map(s => s.member)).size;
+            const sessCount = sess.length;
+
+            // daily chart — for week view show Mon–Sun, else last 7 days
+            const today = isoToday();
+            let days = [];
+            if (state.dashRange === 'week') {
+                const ws = weekStart(state.dashWeekOffset);
+                for (let i = 0; i < 7; i++) days.push(addDays(ws, i));
+            } else if (state.dashRange === 'today') {
+                days = [today];
+            } else {
+                for (let i = 6; i >= 0; i--) days.push(addDays(today, -i));
+            }
+            const maxDayMin = Math.max(1, ...days.map(d =>
+                sess.filter(s => s.date === d).reduce((a, s) => a + s.durMin, 0)
+            ));
+            const chartHtml = days.map(d => {
+                const dayMin = sess.filter(s => s.date === d).reduce((a, s) => a + s.durMin, 0);
+                const myDayMin = sess.filter(s => s.date === d && s.member === 'me').reduce((a, s) => a + s.durMin, 0);
+                const isToday = d === today;
+                const pct = Math.round(dayMin / maxDayMin * 100);
+                const barClass = dayMin === 0 ? 'empty' : isToday ? 'today' : 'team';
+                return '<div class="d-bar-wrap" title="' + fmtDate(d) + ': ' + minToShort(dayMin) + '">'
+                    + '<div class="d-bar-col ' + barClass + '" style="height:' + Math.max(2, pct) + '%"></div>'
+                    + '<span class="d-bar-day' + (isToday ? ' today' : '') + '" style="font-size:9px">' + dayLabel(d) + '</span>'
+                    + '</div>';
+            }).join('');
+
+            // issue rows
+            const issueStats = ISSUES_DATA.map(issue => {
+                const iSess = sess.filter(s => s.issueId === issue.id);
+                const iMin = iSess.reduce((a, s) => a + s.durMin, 0);
+                const iContribs = [...new Set(iSess.map(s => s.member))];
+                return { issue, iMin, iSess, iContribs };
+            }).filter(x => x.iMin > 0).sort((a, b) => b.iMin - a.iMin);
+            const maxIssueMin = Math.max(1, ...issueStats.map(x => x.iMin));
+
+            const issueRowsHtml = issueStats.map(x => {
+                const pct = Math.round(x.iMin / maxIssueMin * 100);
+                const avatars = x.iContribs.map(mid => {
+                    const m = memberById(mid);
+                    return m ? '<div class="av" style="background:' + m.color + ';width:14px;height:14px;font-size:7px">' + m.initials + '</div>' : '';
+                }).join('');
+                return '<div class="d-issue-row" onclick="setDashView(\'issues\')">'
+                    + '<span class="d-i-num">#' + x.issue.id + '</span>'
+                    + '<span class="d-i-title">' + x.issue.title + '</span>'
+                    + '<span class="d-i-sess">' + x.iSess.length + ' sess</span>'
+                    + '<div class="d-i-bar"><div class="d-i-fill" style="width:' + pct + '%"></div></div>'
+                    + '<span class="d-i-time">' + minToShort(x.iMin) + '</span>'
+                    + '<div class="d-i-avatars">' + avatars + '</div>'
+                    + '</div>';
+            }).join('') || '<div style="font-size:12px;color:var(--c-muted);padding:8px 0">No sessions in this period</div>';
+
+            // team leaderboard
+            const teamStats = MEMBERS.map(m => {
+                const mMin = sess.filter(s => s.member === m.id).reduce((a, s) => a + s.durMin, 0);
+                const mSess = sess.filter(s => s.member === m.id).length;
+                return { m, mMin, mSess };
+            }).sort((a, b) => b.mMin - a.mMin);
+            const maxTeamMin = Math.max(1, ...teamStats.map(x => x.mMin));
+            const teamHtml = teamStats.map(x =>
+                '<div class="d-issue-row" onclick="setDashView(\'members\')">'
+                + avHtml(x.m, '')
+                + '<span class="d-i-title" style="font-size:12px">' + x.m.name + '</span>'
+                + '<span class="d-i-sess">' + x.mSess + ' sess</span>'
+                + '<div class="d-i-bar"><div class="d-i-fill" style="width:' + Math.round(x.mMin / maxTeamMin * 100) + '%;background:' + x.m.color + '"></div></div>'
+                + '<span class="d-i-time">' + minToShort(x.mMin) + '</span>'
+                + '</div>'
+            ).join('');
+
+            return topbarHtml('owner/repo-1')
+                + '<div class="d-kpi-row">'
+                + kpiCard(minToShort(totalMin), 'Total tracked', { cls: 'up', txt: '↑ +2h vs prev period' }, 'hi')
+                + kpiCard(sessCount, 'Sessions', { cls: 'neu', txt: sessCount > 0 ? Math.round(sessCount / Math.max(days.length, 1) * 10) / 10 + '/day avg' : '—' }, '')
+                + kpiCard(contribs, 'Contributors', { cls: 'neu', txt: 'all active' }, 'pu')
+                + kpiCard(minToShort(myMin), 'Your time', { cls: myMin > 0 ? 'up' : 'neu', txt: myMin > 0 ? minToShort(myMin) + ' logged' : 'none yet' }, 'gr')
+                + '</div>'
+                + '<div class="d-sec"><div class="d-sec-hdr"><span class="d-sec-lbl">Daily activity</span></div>'
+                + '<div class="d-chart" style="height:72px">' + chartHtml + '</div></div>'
+                + '<div class="d-sec"><div class="d-sec-hdr"><span class="d-sec-lbl">Time by issue</span>'
+                + '<button class="d-sec-act" onclick="setDashView(\'issues\')">View all →</button></div>'
+                + issueRowsHtml + '</div>'
+                + '<div class="d-sec"><div class="d-sec-hdr"><span class="d-sec-lbl">Team</span>'
+                + '<button class="d-sec-act" onclick="setDashView(\'members\')">All members →</button></div>'
+                + teamHtml + '</div>';
+        }
+
+        // ── RENDER ISSUES ─────────────────────────────────────────────────────────────
+        function renderIssues() {
+            const sess = sessionsInRange();
+            const issueStats = ISSUES_DATA.map(issue => {
+                const iSess = sess.filter(s => s.issueId === issue.id);
+                const iMin = iSess.reduce((a, s) => a + s.durMin, 0);
+                const iContribs = [...new Set(iSess.map(s => s.member))];
+                return { issue, iMin, iSess, iContribs };
+            }).sort((a, b) => b.iMin - a.iMin);
+            const maxMin = Math.max(1, ...issueStats.map(x => x.iMin));
+
+            const rowsHtml = issueStats.map(x => {
+                const pct = Math.round(x.iMin / maxMin * 100);
+                const isOpen = state.dashIssueOpen === x.issue.id;
+                const avatars = x.iContribs.map(mid => {
+                    const m = memberById(mid); return m ? '<div class="av" style="background:' + m.color + ';width:14px;height:14px;font-size:7px">' + m.initials + '</div>' : '';
+                }).join('');
+                const statusColor = x.issue.status === 'open' ? 'var(--c-open)' : 'var(--c-muted)';
+                let detail = '';
+                if (isOpen) {
+                    const maxContribMin = Math.max(1, ...x.iContribs.map(mid => x.iSess.filter(s => s.member === mid).reduce((a, s) => a + s.durMin, 0)));
+                    detail = '<div class="d-issue-detail">'
+                        + x.iContribs.map(mid => {
+                            const m = memberById(mid);
+                            if (!m) return '';
+                            const mMin = x.iSess.filter(s => s.member === mid).reduce((a, s) => a + s.durMin, 0);
+                            const mSess = x.iSess.filter(s => s.member === mid).length;
+                            const barPct = Math.round(mMin / maxContribMin * 100);
+                            return '<div class="d-id-bar-row">'
+                                + '<div class="d-id-who">' + avHtml(m, '') + '&nbsp;' + m.name + '</div>'
+                                + '<div class="d-id-trk"><div class="d-id-fill" style="width:' + barPct + '%;background:' + m.color + '"></div></div>'
+                                + '<div class="d-id-val">' + minToShort(mMin) + '&nbsp;<span style="color:var(--c-muted)">' + mSess + ' sess</span></div>'
+                                + '</div>';
+                        }).join('')
+                        + '</div>';
+                }
+                return '<div class="d-issue-row" onclick="toggleIssueDetail(' + x.issue.id + ')" style="border-bottom:1px solid rgba(255,255,255,.04)">'
+                    + '<i class="codicon ' + (x.issue.status === 'open' ? 'codicon-issue-opened' : 'codicon-issue-closed') + '" style="color:' + statusColor + ';font-size:14px;flex-shrink:0"></i>'
+                    + '<span class="d-i-num">#' + x.issue.id + '</span>'
+                    + '<span class="d-i-title">' + x.issue.title + '</span>'
+                    + '<span class="d-i-sess">' + x.iSess.length + ' sess · ' + x.iContribs.length + ' contrib</span>'
+                    + '<div class="d-i-bar"><div class="d-i-fill" style="width:' + pct + '%"></div></div>'
+                    + '<span class="d-i-time">' + minToShort(x.iMin) + '</span>'
+                    + '<i class="codicon ' + (isOpen ? 'codicon-chevron-down' : 'codicon-chevron-right') + '" style="font-size:12px;color:var(--c-desc);flex-shrink:0"></i>'
+                    + '</div>'
+                    + detail;
+            }).join('') || '<div style="font-size:12px;color:var(--c-muted);padding:12px 0">No sessions in this period</div>';
+
+            return topbarHtml('Issues')
+                + '<div class="d-sec"><div class="d-sec-hdr"><span class="d-sec-lbl">' + issueStats.filter(x => x.iMin > 0).length + ' issues tracked</span></div>'
+                + rowsHtml + '</div>';
+        }
+        function toggleIssueDetail(id) {
+            state.dashIssueOpen = state.dashIssueOpen === id ? null : id;
+            renderDashboard();
+        }
+
+        // ── RENDER MEMBERS ─────────────────────────────────────────────────────────────
+        function renderMembers() {
+            if (state.dashMember) return renderMemberDetail(state.dashMember);
+            const sess = sessionsInRange();
+            const memberStats = MEMBERS.map(m => {
+                const mSess = sess.filter(s => s.member === m.id);
+                const mMin = mSess.reduce((a, s) => a + s.durMin, 0);
+                const issues = [...new Set(mSess.map(s => s.issueId))];
+                return { m, mMin, mSess, issues };
+            });
+            const maxMin = Math.max(1, ...memberStats.map(x => x.mMin));
+
+            const cardsHtml = memberStats.map(x =>
+                '<div class="d-mc" onclick="drillMember(\'' + x.m.id + '\')"> '
+                + '<div class="d-mc-top">' + avHtml(x.m, 'lg')
+                + '<div><div class="d-mc-name">' + x.m.name + '</div><div class="d-mc-role">' + x.m.role + '</div></div>'
+                + '<i class="codicon codicon-chevron-right" style="font-size:12px;color:var(--c-muted);margin-left:auto"></i>'
+                + '</div>'
+                + '<div class="d-mc-kpis">'
+                + '<div><div class="d-mc-kv" style="color:' + x.m.color + '">' + minToShort(x.mMin) + '</div><div class="d-mc-kl">tracked</div></div>'
+                + '<div><div class="d-mc-kv">' + x.mSess.length + '</div><div class="d-mc-kl">sessions</div></div>'
+                + '<div><div class="d-mc-kv">' + x.issues.length + '</div><div class="d-mc-kl">issues</div></div>'
+                + '</div>'
+                + '<div class="d-mc-bar"><div class="d-mc-bfill" style="width:' + Math.round(x.mMin / maxMin * 100) + '%;background:' + x.m.color + '"></div></div>'
+                + '</div>'
+            ).join('');
+
+            return topbarHtml('Members')
+                + '<div class="d-member-grid">' + cardsHtml + '</div>';
+        }
+
+        function renderMemberDetail(mid) {
+            const m = memberById(mid);
+            if (!m) return '';
+            const sess = sessionsInRange(s => s.member === mid);
+            const totalMin = sess.reduce((a, s) => a + s.durMin, 0);
+            const issueIds = [...new Set(sess.map(s => s.issueId))];
+            const avgMin = sess.length ? Math.round(totalMin / sess.length) : 0;
+
+            // per-issue breakdown
+            const issueStats = issueIds.map(id => {
+                const iSess = sess.filter(s => s.issueId === id);
+                const iMin = iSess.reduce((a, s) => a + s.durMin, 0);
+                return { issue: issueById(id), iMin, iSess };
+            }).sort((a, b) => b.iMin - a.iMin);
+            const maxIMin = Math.max(1, ...issueStats.map(x => x.iMin));
+
+            const issueRowsHtml = issueStats.map(x =>
+                '<div class="d-issue-row">'
+                + '<span class="d-i-num">#' + x.issue.id + '</span>'
+                + '<span class="d-i-title">' + x.issue.title + '</span>'
+                + '<span class="d-i-sess">' + x.iSess.length + ' sess</span>'
+                + '<div class="d-i-bar"><div class="d-i-fill" style="width:' + Math.round(x.iMin / maxIMin * 100) + '%;background:' + m.color + '"></div></div>'
+                + '<span class="d-i-time">' + minToShort(x.iMin) + '</span>'
+                + '</div>'
+            ).join('') || '<div style="font-size:12px;color:var(--c-muted)">No sessions in this period</div>';
+
+            // sessions log
+            const byDate = {};
+            sess.forEach(s => { (byDate[s.date] = byDate[s.date] || []).push(s); });
+            const sessHtml = Object.keys(byDate).sort((a, b) => b.localeCompare(a)).map(date => {
+                const rows = byDate[date].sort((a, b) => a.startH - b.startH || a.startM - b.startM).map(s => {
+                    const issue = issueById(s.issueId);
+                    const endH = Math.floor((s.startH * 60 + s.startM + s.durMin) / 60);
+                    const endM = (s.startM + s.durMin) % 60;
+                    const fmt = (h, m) => String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+                    return '<div class="d-sess-row">'
+                        + '<div class="d-sess-issue"><strong>#' + s.issueId + '</strong> ' + (issue ? issue.title : '') + '</div>'
+                        + '<div class="d-sess-dur">' + minToShort(s.durMin) + '</div>'
+                        + '<div class="d-sess-time">' + fmt(s.startH, s.startM) + '–' + fmt(endH, endM) + '</div>'
+                        + '</div>';
+                }).join('');
+                return '<div class="d-day-group"><div class="d-day-lbl">' + fmtDate(date) + '</div>' + rows + '</div>';
+            }).join('') || '<div style="font-size:12px;color:var(--c-muted)">No sessions in this period</div>';
+
+            return topbarHtml('Members')
+                + '<button class="d-back" onclick="state.dashMember=null;renderDashboard()">'
+                + '<i class="codicon codicon-arrow-left"></i> All members</button>'
+                + '<div class="d-mhero">' + avHtml(m, 'lg')
+                + '<div><div class="d-mhero-name">' + m.name + '</div><div class="d-mhero-sub">' + m.role + '</div></div></div>'
+                + '<div class="d-kpi-row">'
+                + kpiCard(minToShort(totalMin), 'Total tracked', null, '')
+                + kpiCard(sess.length, 'Sessions', null, '')
+                + kpiCard(issueIds.length, 'Issues', null, '')
+                + kpiCard(minToShort(avgMin), 'Avg session', null, '')
+                + '</div>'
+                + '<div class="d-sec"><div class="d-sec-hdr"><span class="d-sec-lbl">Issues worked on</span></div>'
+                + issueRowsHtml + '</div>'
+                + '<div class="d-sec"><div class="d-sec-hdr"><span class="d-sec-lbl">Session log</span></div>'
+                + sessHtml + '</div>';
+        }
+
+        // ── RENDER SESSIONS ────────────────────────────────────────────────────────────
+        function renderSessions() {
+            const mf = state.dashSessFilter.member;
+            const isf = state.dashSessFilter.issue;
+            const sess = sessionsInRange(s =>
+                (mf === 'all' || s.member === mf) &&
+                (isf === 'all' || s.issueId === parseInt(isf))
+            );
+
+            // filter controls
+            const memberOpts = '<option value="all">All members</option>'
+                + MEMBERS.map(m => '<option value="' + m.id + '"' + (mf === m.id ? ' selected' : '') + '>' + m.name + '</option>').join('');
+            const issueOpts = '<option value="all">All issues</option>'
+                + ISSUES_DATA.map(i => '<option value="' + i.id + '"' + (isf == String(i.id) ? ' selected' : '') + '>  #' + i.id + ' ' + i.title.slice(0, 20) + '</option>').join('');
+
+            const filtersHtml = '<div class="d-sess-filters">'
+                + '<select class="d-sel" onchange="state.dashSessFilter.member=this.value;renderDashboard()">' + memberOpts + '</select>'
+                + '<select class="d-sel" onchange="state.dashSessFilter.issue=this.value;renderDashboard()">' + issueOpts + '</select>'
+                + '</div>';
+
+            // group by date
+            const byDate = {};
+            sess.forEach(s => { (byDate[s.date] = byDate[s.date] || []).push(s); });
+            const totalMin = sess.reduce((a, s) => a + s.durMin, 0);
+            const groupsHtml = Object.keys(byDate).sort((a, b) => b.localeCompare(a)).map(date => {
+                const dayMin = byDate[date].reduce((a, s) => a + s.durMin, 0);
+                const rows = byDate[date].sort((a, b) => a.startH - b.startH || a.startM - b.startM).map(s => {
+                    const m = memberById(s.member);
+                    const issue = issueById(s.issueId);
+                    const endH = Math.floor((s.startH * 60 + s.startM + s.durMin) / 60);
+                    const endM = (s.startM + s.durMin) % 60;
+                    const fmt = (h, mm) => String(h).padStart(2, '0') + ':' + String(mm).padStart(2, '0');
+                    return '<div class="d-sess-row">'
+                        + '<div class="d-sess-who">' + (m ? avHtml(m, '') + '&nbsp;' + m.name : '?') + '</div>'
+                        + '<div class="d-sess-issue"><strong>#' + s.issueId + '</strong>&nbsp;' + (issue ? issue.title : '') + '</div>'
+                        + '<div class="d-sess-dur">' + minToShort(s.durMin) + '</div>'
+                        + '<div class="d-sess-time">' + fmt(s.startH, s.startM) + '–' + fmt(endH, endM) + '</div>'
+                        + '</div>';
+                }).join('');
+                return '<div class="d-day-group"><div class="d-day-lbl">' + fmtDate(date)
+                    + '<span style="margin-left:8px;font-weight:400;color:var(--c-muted)">' + byDate[date].length + ' sess · ' + minToShort(dayMin) + '</span></div>'
+                    + rows + '</div>';
+            }).join('') || '<div style="font-size:12px;color:var(--c-muted);padding:12px 0">No sessions match the filters</div>';
+
+            const footer = sess.length
+                ? '<div class="d-sess-total"><span>' + sess.length + ' sessions total</span><span>' + minToShort(totalMin) + '</span></div>' : '';
+
+            return topbarHtml('Sessions')
+                + filtersHtml
+                + groupsHtml + footer;
+        }
+
+        // ── MAIN RENDER ────────────────────────────────────────────────────────────────
+        function renderDashboard() {
+            const el = document.getElementById('d-inner-content');
+            if (!el) return;
+            switch (state.dashView) {
+                case 'overview': el.innerHTML = renderOverview(); break;
+                case 'issues': el.innerHTML = renderIssues(); break;
+                case 'members': el.innerHTML = renderMembers(); break;
+                case 'sessions': el.innerHTML = renderSessions(); break;
+            }
+            // sync nav tabs in case called from drillMember
+            ['overview', 'issues', 'members', 'sessions'].forEach(id => {
+                const el2 = document.getElementById('dntab-' + id);
+                if (el2) el2.classList.toggle('on', id === state.dashView);
+            });
+        }
+
+        // ── INIT ─────────────────────────────────────────────────────────────────────
+        renderIssueList();
+        startTick();
+    </script>
+</body>
+
+</html>
