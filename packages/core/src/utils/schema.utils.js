@@ -27,6 +27,8 @@
  * @typedef {Object} IssueEntry
  * @property {string} url - Issue path, e.g. "/owner/repo/issues/123"
  * @property {string} title - Display title, e.g. "(owner) repo | Fix bug | #123"
+ * @property {'open'|'closed'} [status] - Last-known GitHub state. Absent until
+ *   an issue-status sync has populated it; treat as 'open' by default.
  */
 
 /**
@@ -131,4 +133,4 @@
  * @property {EveryoneDataEntry[]} everyoneData - Aggregated team data
  */
 
-export {};
+export { };

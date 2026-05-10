@@ -13,10 +13,13 @@ const TABS = /** @type {const} */ (['open', 'closed', 'all']);
  *   onQuery: (q: string) => void,
  *   tab: string,
  *   onTab: (t: string) => void,
+ *   workspaceOnly: boolean,
+ *   onToggleWorkspace: () => void,
+ *   workspaceAvailable: boolean,
  * }} props
  */
-export function FilterBar({ query, onQuery, tab, onTab }) {
-    const debounce = useRef(/** @type {ReturnType<typeof setTimeout>|null} */ (null));
+export function FilterBar({ query, onQuery, tab, onTab, workspaceOnly, onToggleWorkspace, workspaceAvailable }) {
+    const debounce = useRef(/** @type {ReturnType<typeof setTimeout>|null} */(null));
 
     const handleInput = (/** @type {Event} */ e) => {
         const value = /** @type {HTMLInputElement} */ (e.target).value;
@@ -49,6 +52,22 @@ export function FilterBar({ query, onQuery, tab, onTab }) {
                     </button>
                 ))}
             </div>
+            {workspaceAvailable && (
+                <button
+                    type="button"
+                    class={`ws-chip${workspaceOnly ? ' on' : ''}`}
+                    onClick={onToggleWorkspace}
+                    aria-pressed={workspaceOnly}
+                    title={
+                        workspaceOnly
+                            ? 'Showing only issues for repos in this workspace'
+                            : 'Showing issues from every tracked repo'
+                    }
+                >
+                    <i class="codicon codicon-filter" aria-hidden="true" />
+                    &nbsp;{workspaceOnly ? 'Workspace only' : 'All repos'}
+                </button>
+            )}
         </div>
     );
 }

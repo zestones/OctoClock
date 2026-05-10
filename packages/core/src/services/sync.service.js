@@ -83,6 +83,55 @@ async function mergeRecoveredTimes(recovered) {
 }
 
 /**
+ * Refreshes the `status` field on every locally-tracked issue by querying
+ * GitHub for each repo's current open/closed list. Best-effort: failures for
+ * individual repos are logged and skipped (e.g. token lacks scope, repo
+ * renamed). Returns the number of issues whose status changed.
+ *
+ * @returns {Promise<number>}
+ */
+export async function syncIssueStatuses() {
+    const issues = await IssueStorageService.getAll();
+    if (issues.length === 0) return 0;
+
+    /** @type {Map<string, string[]>} */
+    const reposToIssues = new Map();
+    for (const issue of issues) {
+        const { owner, repo } = GitHubService.parseIssueUrl(issue.url);
+        const key = `${owner}/${repo}`;
+        const list = reposToIssues.get(key) ?? [];
+        list.push(issue.url);
+        reposToIssues.set(key, list);
+    }
+
+    /** @type {Map<string, 'open'|'closed'>} */
+    const stateByUrl = new Map();
+    for (const repoKey of reposToIssues.keys()) {
+        const [owner, repo] = repoKey.split('/');
+        try {
+            const remote = await GitHubService.getRepoIssues(owner, repo, { state: 'all' });
+            for (const r of remote) {
+                stateByUrl.set(`/${owner}/${repo}/issues/${r.number}`, r.state === 'closed' ? 'closed' : 'open');
+            }
+        } catch (e) {
+            console.error(`OctoClock: status sync failed for ${repoKey}:`, e);
+        }
+    }
+
+    let changed = 0;
+    const updated = issues.map((i) => {
+        const next = stateByUrl.get(i.url);
+        if (!next) return i;
+        if (i.status !== next) changed += 1;
+        return { ...i, status: next };
+    });
+    if (changed > 0) {
+        await StorageService.set(STORAGE_KEYS.ISSUES, updated);
+    }
+    return changed;
+}
+
+/**
  * Recovers tracked times from GitHub comments for all pinned repos.
  * Merges remote data into local storage (imports if no local data or remote has more).
  * Returns { importedCount } or null if nothing to recover.
@@ -92,9 +141,12 @@ export async function syncFromGitHub() {
     if (pinnedRepos.length === 0) return null;
 
     const recovered = await GitHubService.recoverAllTimes(pinnedRepos);
-    if (recovered.length === 0) return null;
+    const merge = recovered.length === 0 ? null : await mergeRecoveredTimes(recovered);
 
-    return mergeRecoveredTimes(recovered);
+    // Best-effort status refresh; never blocks recovery.
+    syncIssueStatuses().catch((e) => console.error('OctoClock: issue-status sync failed:', e));
+
+    return merge;
 }
 
 /**

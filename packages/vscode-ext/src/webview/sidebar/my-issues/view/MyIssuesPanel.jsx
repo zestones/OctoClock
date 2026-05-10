@@ -22,16 +22,19 @@ import { IssueList } from './IssueList.jsx';
 const vscode = acquireVsCodeApi();
 
 export function MyIssuesPanel() {
-    const [issues, setIssues] = useState(/** @type {any[]} */ ([]));
+    const [issues, setIssues] = useState(/** @type {any[]} */([]));
     const [query, setQuery] = useState('');
     const [statusTab, setStatusTab] = useState('open');
     const [timerRunning, setTimerRunning] = useState(false);
-    const [activeIssueId, setActiveIssueId] = useState(/** @type {number|null} */ (null));
+    const [activeIssueId, setActiveIssueId] = useState(/** @type {number|null} */(null));
+    const [workspaceRepos, setWorkspaceRepos] = useState(/** @type {string[]} */([]));
+    const [workspaceOnly, setWorkspaceOnly] = useState(true);
     const [branch, setBranch] = useState(
-        /** @type {{ issueId: number, branch: string, url: string, title: string }|null} */ (null),
+        /** @type {{ issueId: number, branch: string, url: string, title: string }|null} */(null),
     );
 
     useVscodeMessage('issues', (msg) => setIssues(msg.items));
+    useVscodeMessage('workspaceRepos', (msg) => setWorkspaceRepos(msg.items || []));
 
     useVscodeMessage('timerState', (msg) => {
         setTimerRunning(msg.running);
@@ -74,13 +77,23 @@ export function MyIssuesPanel() {
                     onTrack={onStartTimer}
                 />
             )}
-            <FilterBar query={query} onQuery={setQuery} tab={statusTab} onTab={setStatusTab} />
+            <FilterBar
+                query={query}
+                onQuery={setQuery}
+                tab={statusTab}
+                onTab={setStatusTab}
+                workspaceOnly={workspaceOnly}
+                onToggleWorkspace={() => setWorkspaceOnly((v) => !v)}
+                workspaceAvailable={workspaceRepos.length > 0}
+            />
             <IssueList
                 issues={issues}
                 query={query}
                 statusTab={statusTab}
                 timerRunning={timerRunning}
                 activeIssueId={activeIssueId}
+                workspaceRepos={workspaceRepos}
+                workspaceOnly={workspaceOnly && workspaceRepos.length > 0}
                 onStart={onStartTimer}
                 onStop={onStopTimer}
                 onOpen={onOpenUrl}

@@ -145,6 +145,30 @@ export class WorkspaceFilterNode extends vscode.TreeItem {
     }
 }
 
+/**
+ * Synthetic root node displayed at the top of Tracked Time while a timer is
+ * running. Visually elevates the active issue so it is never buried inside a
+ * collapsed repo node (matches the mockup's `timer-row`).
+ */
+export class CurrentlyTrackingNode extends vscode.TreeItem {
+    /**
+     * @param {string} issueUrl
+     * @param {string} displayTitle
+     */
+    constructor(issueUrl, displayTitle) {
+        super(displayTitle, vscode.TreeItemCollapsibleState.None);
+        this.issueUrl = issueUrl;
+        this.iconPath = new vscode.ThemeIcon('record', new vscode.ThemeColor('charts.green'));
+        this.description = 'tracking\u2026';
+        this.tooltip = `Currently tracking ${issueUrl}`;
+        this.contextValue = 'oc-currently-tracking';
+        this.command = {
+            command: 'octoclock.openActiveTimer',
+            title: 'Show active timer',
+        };
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Tree data provider
 // ---------------------------------------------------------------------------
@@ -220,10 +244,37 @@ export class TrackedTimeProvider {
      * @param {TrackedRepoNode | TrackedIssueNode | TrackedSessionNode | undefined} element
      */
     async getChildren(element) {
-        if (!element) return [new WorkspaceFilterNode(this.workspaceFilterEnabled), ...(await this.#buildRepoNodes())];
+        if (!element) {
+            const [repos, activeIssue] = await Promise.all([
+                this.#buildRepoNodes(),
+                StorageService.get(STORAGE_KEYS.ACTIVE_ISSUE),
+            ]);
+            const head = [new WorkspaceFilterNode(this.workspaceFilterEnabled)];
+            if (activeIssue) {
+                const title = this.#findIssueTitle(repos, activeIssue) || activeIssue;
+                head.push(new CurrentlyTrackingNode(activeIssue, title));
+            }
+            return [...head, ...repos];
+        }
         if (element instanceof TrackedRepoNode) return element.issueNodes;
         if (element instanceof TrackedIssueNode) return element.sessionNodes;
         return [];
+    }
+
+    /**
+     * Look up the human title of an active issue from the freshly-built repo
+     * subtree to avoid a second storage read.
+     * @param {TrackedRepoNode[]} repos
+     * @param {string} activeIssueUrl
+     * @returns {string | null}
+     */
+    #findIssueTitle(repos, activeIssueUrl) {
+        for (const repo of repos) {
+            for (const issue of repo.issueNodes) {
+                if (issue.issueUrl === activeIssueUrl) return String(issue.label);
+            }
+        }
+        return null;
     }
 
     /** @returns {Promise<TrackedRepoNode[]>} */

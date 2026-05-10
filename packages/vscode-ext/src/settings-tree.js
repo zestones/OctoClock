@@ -37,17 +37,23 @@ export function maskToken(token) {
  * Convenience constructor for a SettingsNode. Each node embeds the command
  * VS Code should run when the user activates it (Enter / click).
  *
+ * When `iconColor` is provided the icon is rendered with the matching theme
+ * color (e.g. `charts.green` for "on" toggles, `charts.red` for "warning").
+ *
  * @param {string} label
  * @param {string} description
  * @param {string} icon                   ThemeIcon id
  * @param {string} commandId
  * @param {string} contextValue
  * @param {string} [tooltip]
+ * @param {string} [iconColor]            theme color id, e.g. "charts.green"
  */
-function makeNode(label, description, icon, commandId, contextValue, tooltip) {
+function makeNode(label, description, icon, commandId, contextValue, tooltip, iconColor) {
     const item = new vscode.TreeItem(label, vscode.TreeItemCollapsibleState.None);
     item.description = description;
-    item.iconPath = new vscode.ThemeIcon(icon);
+    item.iconPath = iconColor
+        ? new vscode.ThemeIcon(icon, new vscode.ThemeColor(iconColor))
+        : new vscode.ThemeIcon(icon);
     item.command = { command: commandId, title: label };
     item.contextValue = contextValue;
     if (tooltip) item.tooltip = tooltip;
@@ -124,6 +130,7 @@ export class SettingsProvider {
                 token
                     ? 'Token stored in OS keychain — click to replace'
                     : 'Click to set your GitHub personal access token',
+                token ? 'charts.green' : 'charts.yellow',
             ),
             makeNode(
                 'Auto Sync',
@@ -132,6 +139,7 @@ export class SettingsProvider {
                 'octoclock.toggleAutoSync',
                 'oc-setting-toggle',
                 'Pull tracker comments from GitHub on activation',
+                autoSync ? 'charts.green' : undefined,
             ),
             makeNode(
                 'Idle Reminder',
@@ -140,6 +148,7 @@ export class SettingsProvider {
                 'octoclock.toggleIdleReminder',
                 'oc-setting-toggle',
                 'Warn when no editor activity is detected during a timer',
+                idleEnabled ? 'charts.green' : undefined,
             ),
             makeNode(
                 'Idle Minutes',
@@ -156,6 +165,7 @@ export class SettingsProvider {
                 'octoclock.toggleCodeLens',
                 'oc-setting-toggle',
                 "Show 'Track #N' lenses on issue references in source files",
+                codeLens ? 'charts.green' : undefined,
             ),
             makeNode(
                 'Sync Now',

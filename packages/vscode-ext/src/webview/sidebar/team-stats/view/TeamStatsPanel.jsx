@@ -31,6 +31,20 @@ function initials(login) {
     return (parts[0][0] + parts[1][0]).toUpperCase();
 }
 
+/**
+ * Deterministic HSL color from a user login so each teammate gets a stable
+ * avatar color across renders (matches the mockup's per-member avatar hue).
+ * @param {string} login
+ */
+function avatarColor(login) {
+    let hash = 0;
+    for (let i = 0; i < login.length; i += 1) {
+        hash = (hash * 31 + login.charCodeAt(i)) >>> 0;
+    }
+    const hue = hash % 360;
+    return `hsl(${hue}, 55%, 45%)`;
+}
+
 /** @param {string} dateStr — "YYYY-MM-DD" */
 function recencyLabel(dateStr) {
     if (!dateStr) return '';
@@ -45,7 +59,7 @@ function recencyLabel(dateStr) {
 }
 
 export function TeamStatsPanel() {
-    const [stats, setStats] = useState(/** @type {any} */ (null));
+    const [stats, setStats] = useState(/** @type {any} */(null));
 
     useVscodeMessage('stats', (msg) => setStats(msg.payload));
 
@@ -88,7 +102,11 @@ export function TeamStatsPanel() {
             <div class="ts-section">
                 <div class="ts-heading">Top issues</div>
                 {!issueBars || issueBars.length === 0 ? (
-                    <div class="ts-empty">No tracked time yet</div>
+                    <div class="ts-empty">
+                        No tracked time yet.
+                        <br />
+                        <span class="ts-hint">Start a timer on any issue to populate this view.</span>
+                    </div>
                 ) : (
                     <div class="bars">
                         {issueBars.map((b) => (
@@ -111,11 +129,17 @@ export function TeamStatsPanel() {
             <div class="ts-section">
                 <div class="ts-heading">Team today</div>
                 {!teamRows || teamRows.length === 0 ? (
-                    <div class="ts-empty">No team activity today</div>
+                    <div class="ts-empty">
+                        No team activity yet.
+                        <br />
+                        <span class="ts-hint">Enable Auto Sync in Settings to see teammates.</span>
+                    </div>
                 ) : (
                     teamRows.map((r) => (
                         <div key={r.user} class="team-row">
-                            <span class="avatar">{initials(r.user)}</span>
+                            <span class="avatar" style={`background:${avatarColor(r.user)}`}>
+                                {initials(r.user)}
+                            </span>
                             <div>
                                 <div class="team-name">{r.user}</div>
                                 <div class="team-meta">

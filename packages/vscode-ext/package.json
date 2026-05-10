@@ -95,12 +95,6 @@
                     "id": "octoclock.settings",
                     "name": "Settings"
                 }
-            ],
-            "explorer": [
-                {
-                    "id": "octoclock.repoTree",
-                    "name": "OctoClock"
-                }
             ]
         },
         "commands": [
@@ -111,8 +105,9 @@
             },
             {
                 "command": "octoclock.startTimer",
-                "title": "Start timer for issue",
-                "category": "OctoClock"
+                "title": "Track this issue",
+                "category": "OctoClock",
+                "icon": "$(play)"
             },
             {
                 "command": "octoclock.stopTimer",
@@ -200,11 +195,6 @@
             "view/title": [
                 {
                     "command": "octoclock.pinRepo",
-                    "when": "view == octoclock.repoTree",
-                    "group": "navigation"
-                },
-                {
-                    "command": "octoclock.pinRepo",
                     "when": "view == octoclock.trackedTime",
                     "group": "navigation@1"
                 },
@@ -232,17 +222,17 @@
             "view/item/context": [
                 {
                     "command": "octoclock.unpinRepo",
-                    "when": "viewItem == octoclock.repo || viewItem == oc-repo",
+                    "when": "viewItem == oc-repo",
                     "group": "octoclock@1"
                 },
                 {
                     "command": "octoclock.deleteSession",
-                    "when": "viewItem == octoclock.session",
+                    "when": "viewItem == oc-session",
                     "group": "octoclock@1"
                 },
                 {
                     "command": "octoclock.editSession",
-                    "when": "viewItem == octoclock.session",
+                    "when": "viewItem == oc-session",
                     "group": "octoclock@2"
                 },
                 {
@@ -253,16 +243,6 @@
                 {
                     "command": "octoclock.startTimer",
                     "when": "viewItem == oc-issue",
-                    "group": "inline"
-                },
-                {
-                    "command": "octoclock.editSession",
-                    "when": "viewItem == oc-session",
-                    "group": "inline"
-                },
-                {
-                    "command": "octoclock.deleteSession",
-                    "when": "viewItem == oc-session",
                     "group": "inline"
                 }
             ]

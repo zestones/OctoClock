@@ -17,19 +17,19 @@ import { getNonce } from '../../nonce.js';
  * @returns {string}
  */
 export function getHtml(webview, extensionUri) {
-    const nonce = getNonce();
-    const csp = buildCsp(nonce, webview);
+  const nonce = getNonce();
+  const csp = buildCsp(nonce, webview);
 
-    const tokensUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'tokens.css'));
-    const componentsUri = webview.asWebviewUri(
-        vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'shared', 'components.css'),
-    );
-    const codiconsCssUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'fonts', 'codicon.css'));
-    const appUri = webview.asWebviewUri(
-        vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'sidebar', 'my-issues', 'app.js'),
-    );
+  const tokensUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'tokens.css'));
+  const componentsUri = webview.asWebviewUri(
+    vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'shared', 'components.css'),
+  );
+  const codiconsCssUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'fonts', 'codicon.css'));
+  const appUri = webview.asWebviewUri(
+    vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'sidebar', 'my-issues', 'app.js'),
+  );
 
-    return /* html */ `<!DOCTYPE html>
+  return /* html */ `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -55,6 +55,17 @@ export function getHtml(webview, extensionUri) {
     .btn-track:hover { background: rgba(78,201,176,.2); }
     .btn-track:disabled { opacity: .35; cursor: default; }
     .btn-track .codicon { font-size: 12px; }
+
+    /* Repo grouping header */
+    .repo-group-hdr { display: flex; align-items: center; gap: 4px; padding: 6px 8px 3px; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--oc-desc); user-select: none; }
+    .repo-group-hdr .codicon { font-size: 11px; }
+    .repo-group-count { margin-left: auto; font-weight: 500; color: var(--oc-muted); letter-spacing: 0; text-transform: none; }
+
+    /* Workspace-only chip */
+    .ws-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-family: var(--oc-font-ui); background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 3px; color: var(--oc-desc); padding: 1px 8px; height: 22px; cursor: pointer; align-self: flex-start; }
+    .ws-chip:hover { background: rgba(255,255,255,.08); color: var(--oc-fg); }
+    .ws-chip.on { background: rgba(0,122,204,.15); border-color: rgba(0,122,204,.35); color: var(--oc-accent-fg, #6fb3e8); }
+    .ws-chip .codicon { font-size: 11px; }
   </style>
   <title>My Issues</title>
 </head>

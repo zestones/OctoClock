@@ -20,7 +20,6 @@ import { WorkspaceRepoDetector } from './integrations/repo-detector.js';
 import { SettingsProvider } from './settings-tree.js';
 import { createStatusBarController } from './status-bar.js';
 import { TrackedTimeProvider } from './tracked-time-tree.js';
-import { RepoTreeProvider } from './tree-view.js';
 import { DashboardPanel } from './webview/dashboard/panel.js';
 import { ActiveTimerProvider } from './webview/sidebar/active-timer/provider.js';
 import { MyIssuesProvider } from './webview/sidebar/my-issues/provider.js';
@@ -82,12 +81,6 @@ export function activate(context) {
         myIssuesProvider,
     );
 
-    const treeProvider = new RepoTreeProvider(storageEvents);
-    context.subscriptions.push(
-        vscode.window.createTreeView('octoclock.repoTree', { treeDataProvider: treeProvider }),
-        treeProvider,
-    );
-
     const trackedTimeProvider = new TrackedTimeProvider(context, storageEvents);
     context.subscriptions.push(
         vscode.window.createTreeView(TrackedTimeProvider.viewType, { treeDataProvider: trackedTimeProvider }),
@@ -145,4 +138,4 @@ export function activate(context) {
     console.log('OctoClock: activated');
 }
 
-export function deactivate() {}
+export function deactivate() { }
