@@ -38,7 +38,6 @@
                     "name": "My Issues"
                 },
                 {
-                    "type": "webview",
                     "id": "octoclock.trackedTime",
                     "name": "Tracked Time"
                 },
@@ -100,6 +99,17 @@
                 "command": "octoclock.unpinRepo",
                 "title": "Unpin repository",
                 "category": "OctoClock"
+            },
+            {
+                "command": "octoclock.toggleWorkspaceFilter",
+                "title": "Toggle workspace filter",
+                "category": "OctoClock",
+                "icon": "$(filter)"
+            },
+            {
+                "command": "octoclock.openDashboard",
+                "title": "Open Dashboard",
+                "category": "OctoClock"
             }
         ],
         "menus": {
@@ -107,6 +117,11 @@
                 {
                     "command": "octoclock.pinRepo",
                     "when": "view == octoclock.repoTree",
+                    "group": "navigation"
+                },
+                {
+                    "command": "octoclock.toggleWorkspaceFilter",
+                    "when": "view == octoclock.trackedTime",
                     "group": "navigation"
                 }
             ],
@@ -125,6 +140,26 @@
                     "command": "octoclock.editSession",
                     "when": "viewItem == octoclock.session",
                     "group": "octoclock@2"
+                },
+                {
+                    "command": "octoclock.stopTimer",
+                    "when": "viewItem == oc-issue-active",
+                    "group": "inline"
+                },
+                {
+                    "command": "octoclock.startTimer",
+                    "when": "viewItem == oc-issue",
+                    "group": "inline"
+                },
+                {
+                    "command": "octoclock.editSession",
+                    "when": "viewItem == oc-session",
+                    "group": "inline"
+                },
+                {
+                    "command": "octoclock.deleteSession",
+                    "when": "viewItem == oc-session",
+                    "group": "inline"
                 }
             ]
         }

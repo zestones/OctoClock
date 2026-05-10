@@ -14,9 +14,12 @@ import { VSCodeMessagingAdapter } from './adapters/vscode-messaging.adapter.js';
 import { VSCodeStorageAdapter } from './adapters/vscode-storage.adapter.js';
 import { registerCommands } from './commands.js';
 import { createStatusBarController } from './status-bar.js';
+import { TrackedTimeProvider } from './tracked-time-tree.js';
 import { RepoTreeProvider } from './tree-view.js';
+import { DashboardPanel } from './webview/dashboard/panel.js';
 import { ActiveTimerProvider } from './webview/sidebar/active-timer/provider.js';
 import { MyIssuesProvider } from './webview/sidebar/my-issues/provider.js';
+import { TeamStatsProvider } from './webview/sidebar/team-stats/provider.js';
 
 /**
  * Called by VS Code when the extension is activated.
@@ -80,7 +83,32 @@ export function activate(context) {
         treeProvider,
     );
 
+    const trackedTimeProvider = new TrackedTimeProvider(context, storageEvents);
+    context.subscriptions.push(
+        vscode.window.createTreeView(TrackedTimeProvider.viewType, { treeDataProvider: trackedTimeProvider }),
+        trackedTimeProvider,
+        vscode.commands.registerCommand('octoclock.toggleWorkspaceFilter', () =>
+            trackedTimeProvider.toggleWorkspaceFilter(),
+        ),
+    );
+    // Initialise the `setContext` flag so the title-bar icon reflects the
+    // persisted toggle state from the moment the view loads.
+    vscode.commands.executeCommand(
+        'setContext',
+        'octoclock.trackedTime.workspaceFilter',
+        trackedTimeProvider.workspaceFilterEnabled,
+    );
+
+    const teamStatsProvider = new TeamStatsProvider(context, storageEvents);
+    context.subscriptions.push(
+        vscode.window.registerWebviewViewProvider(TeamStatsProvider.viewType, teamStatsProvider, {
+            webviewOptions: { retainContextWhenHidden: true },
+        }),
+        teamStatsProvider,
+        vscode.commands.registerCommand('octoclock.openDashboard', () => DashboardPanel.open(context)),
+    );
+
     console.log('OctoClock: activated');
 }
 
-export function deactivate() {}
+export function deactivate() { }

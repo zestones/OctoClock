@@ -68,12 +68,13 @@ export function normalizeIssueUrl(raw) {
 export function registerCommands(context) {
     context.subscriptions.push(
         // ----------------------------------------------------------------
-        // octoclock.startTimer [issueUrl?]
-        // When called with a URL (e.g. from the My Issues panel), skip the
-        // input prompt and start immediately. Without an argument, fall back
-        // to the interactive InputBox flow.
+        // octoclock.startTimer [issueUrl? | TreeItem?]
+        // Accepts either a URL string (e.g. from My Issues), a TreeItem with an
+        // `issueUrl` property (Tracked Time inline action), or no argument
+        // (fall back to the interactive InputBox flow).
         // ----------------------------------------------------------------
-        vscode.commands.registerCommand('octoclock.startTimer', async (issueUrl) => {
+        vscode.commands.registerCommand('octoclock.startTimer', async (arg) => {
+            let issueUrl = typeof arg === 'string' ? arg : arg?.issueUrl;
             if (!issueUrl) {
                 const raw = await vscode.window.showInputBox({
                     prompt: 'Enter the GitHub issue URL',
