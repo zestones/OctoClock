@@ -17,19 +17,19 @@ import { getNonce } from '../../nonce.js';
  * @returns {string}
  */
 export function getHtml(webview, extensionUri) {
-    const nonce = getNonce();
-    const csp = buildCsp(nonce, webview);
+  const nonce = getNonce();
+  const csp = buildCsp(nonce, webview);
 
-    const tokensUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'tokens.css'));
-    const componentsUri = webview.asWebviewUri(
-        vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'shared', 'components.css'),
-    );
-    const codiconsUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'fonts', 'codicon.ttf'));
-    const appUri = webview.asWebviewUri(
-        vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'sidebar', 'my-issues', 'app.js'),
-    );
+  const tokensUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'tokens.css'));
+  const componentsUri = webview.asWebviewUri(
+    vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'shared', 'components.css'),
+  );
+  const codiconsCssUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'fonts', 'codicon.css'));
+  const appUri = webview.asWebviewUri(
+    vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'sidebar', 'my-issues', 'app.js'),
+  );
 
-    return /* html */ `<!DOCTYPE html>
+  return /* html */ `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -37,11 +37,17 @@ export function getHtml(webview, extensionUri) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="${tokensUri}">
   <link rel="stylesheet" href="${componentsUri}">
+  <link rel="stylesheet" href="${codiconsCssUri}">
   <style nonce="${nonce}">
-    /* codicons @font-face must stay here — needs a runtime webview URI */
-    @font-face { font-family: 'codicon'; src: url('${codiconsUri}') format('truetype'); }
-
     /* ── My Issues: panel-specific ── */
+    .issue-row { cursor: pointer; border-left: 2px solid transparent; padding-left: 18px; }
+    .issue-row-active { background: var(--oc-accent-card-bg); border-left-color: var(--oc-timer); }
+    .issue-row-active:hover { background: var(--oc-accent-card-bg); }
+    .btn-start { color: var(--oc-open); }
+    .btn-start:hover { color: var(--oc-open); background: rgba(63,185,80,.12); }
+    .btn-start:disabled { color: var(--oc-muted); }
+    .btn-open { color: var(--oc-desc); }
+    .btn-open:hover { color: var(--oc-link); }
     .branch-row { background: rgba(197,134,192,.06); border-left: 2px solid rgba(197,134,192,.35); padding-left: 18px; }
     .branch-row:hover { background: rgba(197,134,192,.12); }
     .bpill { font-size: 11px; font-family: var(--oc-font-mono); background: rgba(197,134,192,.15); color: var(--oc-branch); border-radius: 3px; padding: 1px 5px; white-space: nowrap; flex-shrink: 0; }

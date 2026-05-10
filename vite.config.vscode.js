@@ -10,18 +10,21 @@ import { defineConfig } from 'vite';
 // - minify: false   — keeps stack traces readable during development.
 // - sourcemap: true — enables debugging in the Extension Development Host.
 //
-// Also copies the codicons font to dist/fonts/ so it can be served via
-// webview.asWebviewUri() without network access.
+// Also copies the codicons font + stylesheet to dist/fonts/ so they can be
+// served via webview.asWebviewUri() without network access.
+// codicon.css contains all .codicon-<name>::before glyph mappings; without
+// it the font is loaded but nothing renders.
 
 /** @returns {import('vite').Plugin} */
 function copyCodiconsFont() {
     return {
         name: 'copy-codicons-font',
         closeBundle() {
-            const src = resolve(__dirname, 'node_modules/@vscode/codicons/dist/codicon.ttf');
+            const srcDir = resolve(__dirname, 'node_modules/@vscode/codicons/dist');
             const destDir = resolve(__dirname, 'packages/vscode-ext/dist/fonts');
             mkdirSync(destDir, { recursive: true });
-            copyFileSync(src, resolve(destDir, 'codicon.ttf'));
+            copyFileSync(resolve(srcDir, 'codicon.ttf'), resolve(destDir, 'codicon.ttf'));
+            copyFileSync(resolve(srcDir, 'codicon.css'), resolve(destDir, 'codicon.css'));
         },
     };
 }

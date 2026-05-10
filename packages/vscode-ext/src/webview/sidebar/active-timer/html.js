@@ -18,19 +18,19 @@ import { getNonce } from '../../nonce.js';
  * @returns {string}
  */
 export function getHtml(webview, extensionUri) {
-    const nonce = getNonce();
-    const csp = buildCsp(nonce, webview);
+  const nonce = getNonce();
+  const csp = buildCsp(nonce, webview);
 
-    const tokensUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'tokens.css'));
-    const componentsUri = webview.asWebviewUri(
-        vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'shared', 'components.css'),
-    );
-    const codiconsUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'fonts', 'codicon.ttf'));
-    const appUri = webview.asWebviewUri(
-        vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'sidebar', 'active-timer', 'app.js'),
-    );
+  const tokensUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'tokens.css'));
+  const componentsUri = webview.asWebviewUri(
+    vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'shared', 'components.css'),
+  );
+  const codiconsCssUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'fonts', 'codicon.css'));
+  const appUri = webview.asWebviewUri(
+    vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'sidebar', 'active-timer', 'app.js'),
+  );
 
-    return /* html */ `<!DOCTYPE html>
+  return /* html */ `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -38,10 +38,8 @@ export function getHtml(webview, extensionUri) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="${tokensUri}">
   <link rel="stylesheet" href="${componentsUri}">
+  <link rel="stylesheet" href="${codiconsCssUri}">
   <style nonce="${nonce}">
-    /* codicons @font-face must stay here — needs a runtime webview URI */
-    @font-face { font-family: 'codicon'; src: url('${codiconsUri}') format('truetype'); }
-
     /* ── Active Timer: panel-specific ── */
     .icon-desc  { color: var(--oc-desc); }
     .icon-muted { color: var(--oc-muted); }

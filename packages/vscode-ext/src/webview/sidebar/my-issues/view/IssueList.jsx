@@ -7,8 +7,6 @@
 //
 // CSS classes defined in html.js.
 
-import { h } from 'preact';
-
 /**
  * Escape special HTML characters to prevent XSS.
  * @param {string} s
@@ -74,15 +72,15 @@ export function IssueList({ issues, query, statusTab, timerRunning, activeIssueI
                 const iconName = isActive
                     ? 'codicon-clock'
                     : isClosed
-                      ? 'codicon-issue-closed'
-                      : 'codicon-issue-opened';
+                        ? 'codicon-issue-closed'
+                        : 'codicon-issue-opened';
 
                 // dangerouslySetInnerHTML is safe here — highlight() HTML-escapes
                 // both text and query before inserting <mark>.
                 const labelHtml = `#${issue.id}&nbsp;&nbsp;${highlight(issue.title, query)}`;
 
                 return (
-                    <div key={issue.id} class="row">
+                    <div key={issue.id} class={`row issue-row${isActive ? ' issue-row-active' : ''}`}>
                         <i class={`codicon ${iconName} row-icon`} style={`color:${iconColor}`} aria-hidden="true" />
                         {/* eslint-disable-next-line react/no-danger */}
                         <span
@@ -97,8 +95,8 @@ export function IssueList({ issues, query, statusTab, timerRunning, activeIssueI
                                     title={isActive ? 'Already tracking' : 'Start timer'}
                                     aria-label={
                                         isActive
-                                            ? `Already tracking issue #${issue.number}`
-                                            : `Start timer for issue #${issue.number}`
+                                            ? `Already tracking issue #${issue.id}`
+                                            : `Start timer for issue #${issue.id}`
                                     }
                                     disabled={isActive}
                                     onClick={() => !isActive && onStart(issue.url)}
@@ -113,7 +111,7 @@ export function IssueList({ issues, query, statusTab, timerRunning, activeIssueI
                                 type="button"
                                 class="ib btn-open"
                                 title="Open in GitHub"
-                                aria-label={`Open issue #${issue.number} on GitHub`}
+                                aria-label={`Open issue #${issue.id} on GitHub`}
                                 onClick={() => onOpen(issue.url)}
                             >
                                 <i class="codicon codicon-link-external" aria-hidden="true" />

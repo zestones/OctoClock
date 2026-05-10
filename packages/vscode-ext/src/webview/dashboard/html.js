@@ -12,17 +12,17 @@ import { getNonce } from '../nonce.js';
  * @returns {string}
  */
 export function getHtml(webview, extensionUri) {
-    const nonce = getNonce();
-    const csp = buildCsp(nonce, webview);
+  const nonce = getNonce();
+  const csp = buildCsp(nonce, webview);
 
-    const tokensUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'tokens.css'));
-    const componentsUri = webview.asWebviewUri(
-        vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'shared', 'components.css'),
-    );
-    const codiconsUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'fonts', 'codicon.ttf'));
-    const appUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'dashboard', 'app.js'));
+  const tokensUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'tokens.css'));
+  const componentsUri = webview.asWebviewUri(
+    vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'shared', 'components.css'),
+  );
+  const codiconsCssUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'fonts', 'codicon.css'));
+  const appUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'dashboard', 'app.js'));
 
-    return /* html */ `<!DOCTYPE html>
+  return /* html */ `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -30,9 +30,8 @@ export function getHtml(webview, extensionUri) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="${tokensUri}">
   <link rel="stylesheet" href="${componentsUri}">
+  <link rel="stylesheet" href="${codiconsCssUri}">
   <style nonce="${nonce}">
-    @font-face { font-family: 'codicon'; src: url('${codiconsUri}') format('truetype'); }
-
     body { padding: 0; margin: 0; }
     .dash { display: flex; flex-direction: column; height: 100vh; min-height: 0; font-family: var(--oc-font-ui); }
 

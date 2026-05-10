@@ -12,19 +12,19 @@ import { getNonce } from '../../nonce.js';
  * @returns {string}
  */
 export function getHtml(webview, extensionUri) {
-    const nonce = getNonce();
-    const csp = buildCsp(nonce, webview);
+  const nonce = getNonce();
+  const csp = buildCsp(nonce, webview);
 
-    const tokensUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'tokens.css'));
-    const componentsUri = webview.asWebviewUri(
-        vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'shared', 'components.css'),
-    );
-    const codiconsUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'fonts', 'codicon.ttf'));
-    const appUri = webview.asWebviewUri(
-        vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'sidebar', 'team-stats', 'app.js'),
-    );
+  const tokensUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'tokens.css'));
+  const componentsUri = webview.asWebviewUri(
+    vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'shared', 'components.css'),
+  );
+  const codiconsCssUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'fonts', 'codicon.css'));
+  const appUri = webview.asWebviewUri(
+    vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'sidebar', 'team-stats', 'app.js'),
+  );
 
-    return /* html */ `<!DOCTYPE html>
+  return /* html */ `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -32,9 +32,8 @@ export function getHtml(webview, extensionUri) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="${tokensUri}">
   <link rel="stylesheet" href="${componentsUri}">
+  <link rel="stylesheet" href="${codiconsCssUri}">
   <style nonce="${nonce}">
-    @font-face { font-family: 'codicon'; src: url('${codiconsUri}') format('truetype'); }
-
     .ts-section { padding: 4px 8px 8px; }
     .ts-section + .ts-section { border-top: 1px solid var(--oc-border); }
     .ts-heading { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--oc-muted); margin: 6px 0 4px; }
