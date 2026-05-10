@@ -59,11 +59,9 @@ export function activate(context) {
 
     const activeTimerProvider = new ActiveTimerProvider(context, storageEvents);
     context.subscriptions.push(
-        vscode.window.registerWebviewViewProvider(
-            ActiveTimerProvider.viewType,
-            activeTimerProvider,
-            { webviewOptions: { retainContextWhenHidden: true } },
-        ),
+        vscode.window.registerWebviewViewProvider(ActiveTimerProvider.viewType, activeTimerProvider, {
+            webviewOptions: { retainContextWhenHidden: true },
+        }),
         activeTimerProvider,
     );
 
@@ -76,4 +74,4 @@ export function activate(context) {
     console.log('OctoClock: activated');
 }
 
-export function deactivate() { }
+export function deactivate() {}
