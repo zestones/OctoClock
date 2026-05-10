@@ -21,7 +21,7 @@ const RANGES = /** @type {Array<{ id: 'today'|'week'|'month'|'all', label: strin
  */
 export function Topbar({ range, weekOffset, window: w, onRangeChange, onWeekShift }) {
     const isWeek = range === 'week';
-    const label = w.start && w.end ? (w.start === w.end ? w.start : `${w.start} → ${w.end}`) : 'all time';
+    const label = w.start && w.end ? (w.start === w.end ? w.start : `${w.start} - ${w.end}`) : 'all time';
 
     return (
         <div class="dash-topbar">
@@ -43,7 +43,7 @@ export function Topbar({ range, weekOffset, window: w, onRangeChange, onWeekShif
             </div>
             <div class="week-nav">
                 <button type="button" onClick={() => onWeekShift(-1)} disabled={!isWeek} aria-label="Previous week">
-                    &larr;
+                    <i class="codicon codicon-chevron-left" />
                 </button>
                 <span class="label">{label}</span>
                 <button
@@ -52,7 +52,7 @@ export function Topbar({ range, weekOffset, window: w, onRangeChange, onWeekShif
                     disabled={!isWeek || weekOffset >= 0}
                     aria-label="Next week"
                 >
-                    &rarr;
+                    <i class="codicon codicon-chevron-right" />
                 </button>
             </div>
         </div>

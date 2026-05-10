@@ -12,17 +12,17 @@ import { getNonce } from '../nonce.js';
  * @returns {string}
  */
 export function getHtml(webview, extensionUri) {
-    const nonce = getNonce();
-    const csp = buildCsp(nonce, webview);
+  const nonce = getNonce();
+  const csp = buildCsp(nonce, webview);
 
-    const tokensUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'tokens.css'));
-    const componentsUri = webview.asWebviewUri(
-        vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'shared', 'components.css'),
-    );
-    const codiconsCssUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'fonts', 'codicon.css'));
-    const appUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'dashboard', 'app.js'));
+  const tokensUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'tokens.css'));
+  const componentsUri = webview.asWebviewUri(
+    vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'shared', 'components.css'),
+  );
+  const codiconsCssUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'fonts', 'codicon.css'));
+  const appUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'dashboard', 'app.js'));
 
-    return /* html */ `<!DOCTYPE html>
+  return /* html */ `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -45,9 +45,10 @@ export function getHtml(webview, extensionUri) {
     .pill.active { background: var(--oc-accent, #007acc); color: var(--oc-bg); }
 
     .week-nav { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: var(--oc-muted); }
-    .week-nav button { background: transparent; border: 0; color: var(--oc-fg); cursor: pointer; padding: 2px 6px; border-radius: 2px; }
+    .week-nav button { display: inline-flex; align-items: center; justify-content: center; background: transparent; border: 0; color: var(--oc-fg); cursor: pointer; padding: 2px 6px; border-radius: 2px; }
     .week-nav button:hover:not(:disabled) { background: var(--oc-border); }
     .week-nav button:disabled { opacity: .35; cursor: not-allowed; }
+    .week-nav .codicon { font-size: 13px; }
     .week-nav .label { font-family: var(--oc-font-mono); }
 
     /* Tabs */

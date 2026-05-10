@@ -2,7 +2,7 @@
 //
 // Compact stats panel: KPI cards (your time today, team time this week),
 // horizontal bar chart of top issues, team activity rows, and the
-// "Full Dashboard →" button.
+// Team stats sidebar with a Full Dashboard CTA.
 //
 // Receives a single `stats` message from the host carrying everything
 // pre-aggregated; the webview is presentation-only.
@@ -150,7 +150,8 @@ export function TeamStatsPanel() {
                 onClick={() => vscode.postMessage({ type: 'openDashboard' })}
             >
                 <i class="codicon codicon-graph" />
-                Full Dashboard&nbsp;→
+                <span>Full Dashboard</span>
+                <i class="codicon codicon-chevron-right" />
             </button>
         </div>
     );
