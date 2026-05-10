@@ -59,7 +59,7 @@ function recencyLabel(dateStr) {
 }
 
 export function TeamStatsPanel() {
-    const [stats, setStats] = useState(/** @type {any} */(null));
+    const [stats, setStats] = useState(/** @type {any} */ (null));
 
     useVscodeMessage('stats', (msg) => setStats(msg.payload));
 
@@ -73,9 +73,8 @@ export function TeamStatsPanel() {
 
     const { myTimeToday, teamTimeWeek, issuesTouchedToday, issueBars, teamRows, currentUser } = stats;
     const maxBar = issueBars && issueBars.length > 0 ? Math.max(...issueBars.map((b) => b.seconds), 1) : 1;
-    const avatarMap = currentUser?.login && currentUser?.avatarUrl
-        ? { [currentUser.login]: currentUser.avatarUrl }
-        : {};
+    const avatarMap =
+        currentUser?.login && currentUser?.avatarUrl ? { [currentUser.login]: currentUser.avatarUrl } : {};
 
     return (
         <div>
@@ -135,7 +134,9 @@ export function TeamStatsPanel() {
                             <span class="av" style={url ? '' : `background:${avatarColor(r.user)}`}>
                                 {url ? <img src={url} alt={r.user} /> : initials(r.user)}
                             </span>
-                            <span class="team-name" title={r.lastIssueTitle || ''}>{r.user}</span>
+                            <span class="team-name" title={r.lastIssueTitle || ''}>
+                                {r.user}
+                            </span>
                             <span class="when">{recencyLabel(r.lastDate)}</span>
                             <span class="team-time">{fmtHM(r.todaySeconds)}</span>
                         </div>
@@ -144,11 +145,7 @@ export function TeamStatsPanel() {
             )}
 
             {/* ── Full Dashboard button ────────────────────────────── */}
-            <button
-                type="button"
-                class="dashboard-btn"
-                onClick={() => vscode.postMessage({ type: 'openDashboard' })}
-            >
+            <button type="button" class="dashboard-btn" onClick={() => vscode.postMessage({ type: 'openDashboard' })}>
                 <i class="codicon codicon-graph" />
                 <span>Full Dashboard</span>
                 <i class="codicon codicon-chevron-right" />

@@ -133,4 +133,4 @@
  * @property {EveryoneDataEntry[]} everyoneData - Aggregated team data
  */
 
-export { };
+export {};

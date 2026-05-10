@@ -19,7 +19,7 @@ const TABS = /** @type {const} */ (['open', 'closed', 'all']);
  * }} props
  */
 export function FilterBar({ query, onQuery, tab, onTab, workspaceOnly, onToggleWorkspace, workspaceAvailable }) {
-    const debounce = useRef(/** @type {ReturnType<typeof setTimeout>|null} */(null));
+    const debounce = useRef(/** @type {ReturnType<typeof setTimeout>|null} */ (null));
 
     const handleInput = (/** @type {Event} */ e) => {
         const value = /** @type {HTMLInputElement} */ (e.target).value;

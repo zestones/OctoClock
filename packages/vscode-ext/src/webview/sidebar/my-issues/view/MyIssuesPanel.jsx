@@ -22,16 +22,16 @@ import { IssueList } from './IssueList.jsx';
 const vscode = acquireVsCodeApi();
 
 export function MyIssuesPanel() {
-    const [issues, setIssues] = useState(/** @type {any[]} */([]));
+    const [issues, setIssues] = useState(/** @type {any[]} */ ([]));
     const [issuesLoaded, setIssuesLoaded] = useState(false);
     const [query, setQuery] = useState('');
     const [statusTab, setStatusTab] = useState('open');
     const [timerRunning, setTimerRunning] = useState(false);
-    const [activeIssueId, setActiveIssueId] = useState(/** @type {number|null} */(null));
-    const [workspaceRepos, setWorkspaceRepos] = useState(/** @type {string[]} */([]));
+    const [activeIssueId, setActiveIssueId] = useState(/** @type {number|null} */ (null));
+    const [workspaceRepos, setWorkspaceRepos] = useState(/** @type {string[]} */ ([]));
     const [workspaceOnly, setWorkspaceOnly] = useState(true);
     const [branch, setBranch] = useState(
-        /** @type {{ issueId: number, branch: string, url: string, title: string }|null} */(null),
+        /** @type {{ issueId: number, branch: string, url: string, title: string }|null} */ (null),
     );
 
     useVscodeMessage('issues', (msg) => {

@@ -142,13 +142,13 @@ export function IssueList({
                             const iconColor = isActive
                                 ? 'var(--oc-timer)'
                                 : isClosed
-                                    ? 'var(--oc-muted)'
-                                    : 'var(--oc-open)';
+                                  ? 'var(--oc-muted)'
+                                  : 'var(--oc-open)';
                             const iconName = isActive
                                 ? 'codicon-clock'
                                 : isClosed
-                                    ? 'codicon-issue-closed'
-                                    : 'codicon-issue-opened';
+                                  ? 'codicon-issue-closed'
+                                  : 'codicon-issue-opened';
 
                             const labelHtml = `#${issue.id}&nbsp;&nbsp;${highlight(issue.title, query)}`;
 

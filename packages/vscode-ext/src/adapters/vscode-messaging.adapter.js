@@ -112,7 +112,7 @@ export class VSCodeMessagingAdapter extends MessagingPort {
 
         next.finally(() => {
             console.info(LOG_PREFIX, 'Tracker sync queue drained for issue', { issueUrl });
-        }).catch(() => { }); // suppress unhandled rejection on the finally-chain
+        }).catch(() => {}); // suppress unhandled rejection on the finally-chain
 
         return next;
     }
@@ -121,11 +121,11 @@ export class VSCodeMessagingAdapter extends MessagingPort {
      * No-op — VS Code has no browser tabs to notify.
      * @param {string} _issueUrl
      */
-    notifyTimerStarted(_issueUrl) { }
+    notifyTimerStarted(_issueUrl) {}
 
     /**
      * No-op — VS Code has no browser tabs to notify.
      * @param {string} _issueUrl
      */
-    notifyTimerStopped(_issueUrl) { }
+    notifyTimerStopped(_issueUrl) {}
 }

@@ -39,9 +39,9 @@ export class SyncWatcher {
         const focusSub =
             typeof vscode.window.onDidChangeWindowState === 'function'
                 ? vscode.window.onDidChangeWindowState((state) => {
-                    if (state.focused) this._maybeSync('focus');
-                })
-                : { dispose() { } };
+                      if (state.focused) this._maybeSync('focus');
+                  })
+                : { dispose() {} };
 
         context.subscriptions.push({
             dispose: () => {

@@ -127,9 +127,7 @@ export class TeamStatsProvider {
                 }
             }
 
-            const currentUser = user?.login
-                ? { login: user.login, avatarUrl: user.avatar_url ?? null }
-                : null;
+            const currentUser = user?.login ? { login: user.login, avatarUrl: user.avatar_url ?? null } : null;
             const payload = TeamStatsProvider._aggregate(
                 trackedTimes ?? [],
                 everyoneData ?? [],
@@ -144,7 +142,14 @@ export class TeamStatsProvider {
     }
 
     static _emptyPayload() {
-        return { myTimeToday: 0, teamTimeWeek: 0, issuesTouchedToday: 0, issueBars: [], teamRows: [], currentUser: null };
+        return {
+            myTimeToday: 0,
+            teamTimeWeek: 0,
+            issuesTouchedToday: 0,
+            issueBars: [],
+            teamRows: [],
+            currentUser: null,
+        };
     }
 
     /**

@@ -51,7 +51,7 @@ export class IdleWatcher {
                 const active = vals[STORAGE_KEYS.ACTIVE_ISSUE];
                 if (active) this._arm();
             })
-            .catch(() => { });
+            .catch(() => {});
 
         const unsub = events.subscribe((event) => {
             if (event.type === 'set' && event.key === STORAGE_KEYS.ACTIVE_ISSUE) {

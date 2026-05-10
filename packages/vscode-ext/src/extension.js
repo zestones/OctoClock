@@ -149,4 +149,4 @@ export function activate(context) {
     console.log('OctoClock: activated');
 }
 
-export function deactivate() { }
+export function deactivate() {}

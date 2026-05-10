@@ -17,8 +17,8 @@ class NoOpMessagingAdapter extends MessagingPort {
     syncComment() {
         return Promise.resolve({ ok: true, commentId: null });
     }
-    notifyTimerStarted() { }
-    notifyTimerStopped() { }
+    notifyTimerStarted() {}
+    notifyTimerStopped() {}
 }
 
 // ---------------------------------------------------------------------------
@@ -50,7 +50,13 @@ describe('TimerService.syncComment — delegation', () => {
         await TimerService.syncComment('https://github.com/owner/repo/issues/1', 'owner', 'repo', 1);
 
         expect(fake.syncComment).toHaveBeenCalledOnce();
-        expect(fake.syncComment).toHaveBeenCalledWith('https://github.com/owner/repo/issues/1', 'owner', 'repo', 1, null);
+        expect(fake.syncComment).toHaveBeenCalledWith(
+            'https://github.com/owner/repo/issues/1',
+            'owner',
+            'repo',
+            1,
+            null,
+        );
     });
 
     it('returns the value resolved by the port', async () => {
