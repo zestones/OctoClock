@@ -62,6 +62,11 @@
         },
         "commands": [
             {
+                "command": "octoclock.openActiveTimer",
+                "title": "Open Active Timer",
+                "category": "OctoClock"
+            },
+            {
                 "command": "octoclock.startTimer",
                 "title": "Start timer for issue",
                 "category": "OctoClock"

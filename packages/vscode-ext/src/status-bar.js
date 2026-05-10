@@ -28,7 +28,7 @@ const TICK_INTERVAL_MS = 1000;
  * @returns {{ dispose: () => void }}
  */
 export function createStatusBarController(item, events) {
-    item.command = 'octoclock.stopTimer';
+    item.command = 'octoclock.openActiveTimer';
     item.show();
 
     /** @type {string | null} */
@@ -39,8 +39,9 @@ export function createStatusBarController(item, events) {
     let tickInterval = null;
 
     function tick() {
-        item.text = `$(clock) ${TimeService.timeStringSince(startTime)}`;
-        item.tooltip = `OctoClock: tracking ${activeIssue} — click to stop`;
+        const issueNumber = activeIssue?.split('/').pop() ?? '?';
+        item.text = `$(stop-circle) #${issueNumber} · ${TimeService.timeStringSince(startTime)}`;
+        item.tooltip = `OctoClock: tracking #${issueNumber} — click to open Active Timer`;
     }
 
     function startTick() {

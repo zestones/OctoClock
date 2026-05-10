@@ -91,9 +91,9 @@ describe('createStatusBarController', () => {
         expect(item.show).toHaveBeenCalledOnce();
     });
 
-    it('sets item.command to octoclock.stopTimer', () => {
+    it('sets item.command to octoclock.openActiveTimer', () => {
         createStatusBarController(item, events);
-        expect(item.command).toBe('octoclock.stopTimer');
+        expect(item.command).toBe('octoclock.openActiveTimer');
     });
 
     // -----------------------------------------------------------------------
@@ -122,7 +122,7 @@ describe('createStatusBarController', () => {
         createStatusBarController(item, events);
         await flushPromises();
 
-        expect(item.text).toContain('$(clock)');
+        expect(item.text).toContain('$(stop-circle)');
         expect(item.text).not.toBe('$(clock) OctoClock');
     });
 
@@ -142,7 +142,7 @@ describe('createStatusBarController', () => {
         events.emit({ type: 'set', key: STORAGE_KEYS.ACTIVE_ISSUE, value: '/owner/repo/issues/1' });
         events.emit({ type: 'set', key: STORAGE_KEYS.START_TIME, value: new Date().toISOString() });
 
-        expect(item.text).toContain('$(clock)');
+        expect(item.text).toContain('$(stop-circle)');
         expect(item.text).not.toBe('$(clock) OctoClock');
     });
 
