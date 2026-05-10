@@ -216,6 +216,19 @@ export function registerCommands(context) {
         // Update a single session duration via the tree-view context menu.
         // Pre-fills the input box with the current HH:MM:SS value.
         // ----------------------------------------------------------------
+        // octoclock.openActiveTimer
+        // Reveals the Active Timer WebviewView in the OctoClock sidebar.
+        // Used as the status bar item click handler so the user can see
+        // the running timer details without stopping it.
+        // ----------------------------------------------------------------
+        vscode.commands.registerCommand('octoclock.openActiveTimer', () => {
+            vscode.commands.executeCommand('octoclock.activeTimer.focus');
+        }),
+
+        // octoclock.editSession
+        // Update a single session duration via the tree-view context menu.
+        // Pre-fills the input box with the current HH:MM:SS value.
+        // ----------------------------------------------------------------
         vscode.commands.registerCommand('octoclock.editSession', async (item) => {
             if (!item?.issueUrl || !item?.date || item?.seconds === undefined) return;
             const raw = await vscode.window.showInputBox({
