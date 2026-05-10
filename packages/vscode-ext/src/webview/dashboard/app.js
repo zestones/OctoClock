@@ -25,4 +25,4 @@ void vscode;
 // Required: marks this file as an ES module so TypeScript keeps its
 // declarations in module scope (prevents redeclaration conflicts across
 // webview entry points in the same tsconfig compilation unit).
-export { };
+export {};

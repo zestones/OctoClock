@@ -34,9 +34,7 @@ export class DashboardPanel {
             vscode.ViewColumn.One,
             {
                 enableScripts: true,
-                localResourceRoots: [
-                    vscode.Uri.joinPath(context.extensionUri, 'dist'),
-                ],
+                localResourceRoots: [vscode.Uri.joinPath(context.extensionUri, 'dist')],
                 retainContextWhenHidden: true,
             },
         );

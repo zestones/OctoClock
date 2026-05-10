@@ -21,9 +21,7 @@ export class SettingsProvider {
     resolveWebviewView(webviewView) {
         webviewView.webview.options = {
             enableScripts: true,
-            localResourceRoots: [
-                vscode.Uri.joinPath(this._context.extensionUri, 'dist'),
-            ],
+            localResourceRoots: [vscode.Uri.joinPath(this._context.extensionUri, 'dist')],
         };
         webviewView.webview.html = this._getHtml(webviewView.webview);
     }

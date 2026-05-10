@@ -18,10 +18,7 @@ function copyCodiconsFont() {
     return {
         name: 'copy-codicons-font',
         closeBundle() {
-            const src = resolve(
-                __dirname,
-                'node_modules/@vscode/codicons/dist/codicon.ttf',
-            );
+            const src = resolve(__dirname, 'node_modules/@vscode/codicons/dist/codicon.ttf');
             const destDir = resolve(__dirname, 'packages/vscode-ext/dist/fonts');
             mkdirSync(destDir, { recursive: true });
             copyFileSync(src, resolve(destDir, 'codicon.ttf'));
