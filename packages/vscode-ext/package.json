@@ -16,7 +16,43 @@
     ],
     "main": "./dist/extension.js",
     "contributes": {
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "octoclock",
+                    "title": "OctoClock",
+                    "icon": "./src/icons/octoclock.svg"
+                }
+            ]
+        },
         "views": {
+            "octoclock": [
+                {
+                    "type": "webview",
+                    "id": "octoclock.activeTimer",
+                    "name": "Active Timer"
+                },
+                {
+                    "type": "webview",
+                    "id": "octoclock.myIssues",
+                    "name": "My Issues"
+                },
+                {
+                    "type": "webview",
+                    "id": "octoclock.trackedTime",
+                    "name": "Tracked Time"
+                },
+                {
+                    "type": "webview",
+                    "id": "octoclock.teamStats",
+                    "name": "Team Stats"
+                },
+                {
+                    "type": "webview",
+                    "id": "octoclock.settings",
+                    "name": "Settings"
+                }
+            ],
             "explorer": [
                 {
                     "id": "octoclock.repoTree",

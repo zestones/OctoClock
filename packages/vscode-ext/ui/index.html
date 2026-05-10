@@ -1740,7 +1740,7 @@
                             <i class="codicon codicon-chevron-down sec-chv" id="chv-activeTimer"></i>Active Timer
                         </div>
                         <div class="sec-acts">
-                            <button class="ib" title="Open issue on GitHub" onclick="event.stopPropagation()">
+                            <button type="button" class="ib" title="Open issue on GitHub" onclick="event.stopPropagation()">
                                 <i class="codicon codicon-link-external"></i>
                             </button>
                         </div>
@@ -1755,7 +1755,7 @@
                             </span>
                             <span class="timer" id="timer-display">1:23:47</span>
                             <div class="row-always">
-                                <button class="btn-stop" onclick="stopTimer()"><i
+                                <button type="button" class="btn-stop" onclick="stopTimer()"><i
                                         class="codicon codicon-debug-stop"></i>&nbsp;Stop</button>
                             </div>
                         </div>
@@ -1775,7 +1775,7 @@
                             <i class="codicon codicon-chevron-down sec-chv" id="chv-myIssues"></i>My Issues
                         </div>
                         <div class="sec-acts">
-                            <button class="ib" title="Refresh from GitHub" onclick="event.stopPropagation()">
+                            <button type="button" class="ib" title="Refresh from GitHub" onclick="event.stopPropagation()">
                                 <i class="codicon codicon-refresh"></i>
                             </button>
                         </div>
@@ -1788,7 +1788,7 @@
                             <span class="bpill">fix/42-login-redirect</span>
                             <span class="row-lbl" style="color:var(--c-desc);font-size:12px">#42 Fix login redirect
                                 bug</span>
-                            <button class="btn-track" id="branch-track-btn" onclick="trackIssue(42)">
+                            <button type="button" class="btn-track" id="branch-track-btn" onclick="trackIssue(42)">
                                 <i class="codicon codicon-play"></i>&nbsp;Track
                             </button>
                         </div>
@@ -1797,9 +1797,9 @@
                             <input class="filter-input" id="issue-search" placeholder="Filter by title or #id…"
                                 oninput="renderIssueList()" />
                             <div class="filter-tabs">
-                                <button class="ftab on" id="ftab-open" onclick="setStatusTab('open')">Open</button>
-                                <button class="ftab" id="ftab-closed" onclick="setStatusTab('closed')">Closed</button>
-                                <button class="ftab" id="ftab-all" onclick="setStatusTab('all')">All</button>
+                                <button type="button" class="ftab on" id="ftab-open" onclick="setStatusTab('open')">Open</button>
+                                <button type="button" class="ftab" id="ftab-closed" onclick="setStatusTab('closed')">Closed</button>
+                                <button type="button" class="ftab" id="ftab-all" onclick="setStatusTab('all')">All</button>
                             </div>
                         </div>
                         <div id="issues-list"></div>
@@ -1815,9 +1815,9 @@
                             <i class="codicon codicon-chevron-down sec-chv" id="chv-trackedTime"></i>Tracked Time
                         </div>
                         <div class="sec-acts">
-                            <button class="ib" title="Pin repository" onclick="event.stopPropagation()"><i
+                            <button type="button" class="ib" title="Pin repository" onclick="event.stopPropagation()"><i
                                     class="codicon codicon-pin"></i></button>
-                            <button class="ib" title="Refresh" onclick="event.stopPropagation()"><i
+                            <button type="button" class="ib" title="Refresh" onclick="event.stopPropagation()"><i
                                     class="codicon codicon-refresh"></i></button>
                         </div>
                     </div>
@@ -1835,7 +1835,7 @@
                             <i class="codicon codicon-repo row-icon"></i>
                             <span class="row-lbl">owner/repo-1</span>
                             <span class="row-desc" id="repo1-total">3h 12m</span>
-                            <div class="row-act"><button class="ib" title="Unpin"><i
+                            <div class="row-act"><button type="button" class="ib" title="Unpin"><i
                                         class="codicon codicon-pin"></i></button></div>
                         </div>
                         <div id="repo1-issues">
@@ -1845,7 +1845,7 @@
                                 <span class="row-lbl">#42&nbsp;<span class="dim-fg">Fix login redirect b…</span></span>
                                 <span class="row-desc" style="color:var(--c-active)" id="tracked-42-time">1h 23m</span>
                                 <div class="row-act">
-                                    <button class="ib" title="Stop timer" onclick="stopTimer()">
+                                    <button type="button" class="ib" title="Stop timer" onclick="stopTimer()">
                                         <i class="codicon codicon-debug-stop" style="color:var(--c-stop)"></i>
                                     </button>
                                 </div>
@@ -1855,9 +1855,9 @@
                                 <span class="row-lbl">#38&nbsp;<span class="dim-fg">Add dark mode toggle</span></span>
                                 <span class="row-desc">1h 49m</span>
                                 <div class="row-act">
-                                    <button class="ib" title="Start timer" onclick="trackIssue(38)"><i
+                                    <button type="button" class="ib" title="Start timer" onclick="trackIssue(38)"><i
                                             class="codicon codicon-play"></i></button>
-                                    <button class="ib" title="Delete sessions"><i
+                                    <button type="button" class="ib" title="Delete sessions"><i
                                             class="codicon codicon-trash"></i></button>
                                 </div>
                             </div>
@@ -1869,7 +1869,7 @@
                             <i class="codicon codicon-repo row-icon"></i>
                             <span class="row-lbl">owner/repo-2</span>
                             <span class="row-desc">0h 00m</span>
-                            <div class="row-act"><button class="ib" title="Unpin"><i
+                            <div class="row-act"><button type="button" class="ib" title="Unpin"><i
                                         class="codicon codicon-pin"></i></button></div>
                         </div>
                     </div>
@@ -1884,7 +1884,7 @@
                             <i class="codicon codicon-chevron-down sec-chv" id="chv-stats"></i>Stats &amp; Team
                         </div>
                         <div class="sec-acts">
-                            <button class="ib" title="Sync team data" onclick="event.stopPropagation()">
+                            <button type="button" class="ib" title="Sync team data" onclick="event.stopPropagation()">
                                 <i class="codicon codicon-sync"></i>
                             </button>
                         </div>
@@ -1938,7 +1938,7 @@
                             <span class="row-lbl">carol&nbsp;<span class="dim-fg">#51 API rate…</span></span>
                             <span class="row-desc">1h 02m</span><span class="when">yest.</span>
                         </div>
-                        <button class="dashboard-btn" onclick="showDashboard()">
+                        <button type="button" class="dashboard-btn" onclick="showDashboard()">
                             <i class="codicon codicon-graph"></i>&nbsp;Full dashboard
                         </button>
                     </div>
@@ -2150,8 +2150,8 @@
                     <div class="toast-hdr"><i class="codicon codicon-clock"></i>OctoClock</div>
                     <div class="toast-body">You've been coding for 32 min with no active timer.</div>
                     <div class="toast-btns">
-                        <button class="tbtn p" onclick="toastStartTimer()">Start timer</button>
-                        <button class="tbtn s" onclick="dismissToast()">Dismiss</button>
+                        <button type="button" class="tbtn p" onclick="toastStartTimer()">Start timer</button>
+                        <button type="button" class="tbtn s" onclick="dismissToast()">Dismiss</button>
                     </div>
                 </div>
             </div><!-- /editor -->
@@ -2234,18 +2234,18 @@
             const h = Math.floor(s / 3600);
             const m = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
             const sec = String(s % 60).padStart(2, '0');
-            return h + ':' + m + ':' + sec;
+            return `${h}:${m}:${sec}`;
         }
         function fmtShort(s) {
             const h = Math.floor(s / 3600);
             const m = Math.floor((s % 3600) / 60);
-            if (h === 0) return m + 'm';
-            return m === 0 ? h + 'h' : h + 'h ' + m + 'm';
+            if (h === 0) return `${m}m`;
+            return m === 0 ? `${h}h` : `${h}h ${m}m`;
         }
         function minToShort(min) {
             const h = Math.floor(min / 60), m = min % 60;
-            if (h === 0) return m + 'm';
-            return m === 0 ? h + 'h' : h + 'h ' + m + 'm';
+            if (h === 0) return `${m}m`;
+            return m === 0 ? `${h}h` : `${h}h ${m}m`;
         }
         function elapsed() {
             return state.timerRunning
@@ -2256,7 +2256,7 @@
         // Date utils
         function isoToday() { return new Date().toISOString().slice(0, 10); }
         function addDays(iso, n) {
-            const d = new Date(iso + 'T00:00:00');
+            const d = new Date(`${iso}T00:00:00`);
             d.setDate(d.getDate() + n);
             return d.toISOString().slice(0, 10);
         }
@@ -2270,11 +2270,11 @@
         function fmtDate(iso) {
             const [y, m, d] = iso.split('-');
             const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            return months[parseInt(m) - 1] + ' ' + parseInt(d);
+            return `${months[parseInt(m, 10) - 1]} ${parseInt(d, 10)}`;
         }
         function dayLabel(iso) {
             const days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
-            return days[new Date(iso + 'T12:00:00').getDay()];
+            return days[new Date(`${iso}T12:00:00`).getDay()];
         }
 
         // ── SESSION FILTER BY RANGE ────────────────────────────────────────────────────
@@ -2305,7 +2305,7 @@
             if (td) td.textContent = fmtTimer(s);
             const sb = document.getElementById('sb-timer');
             if (sb) sb.textContent = state.timerRunning
-                ? fmtShort(s) + ' · #' + state.timerIssueId : 'OctoClock';
+                ? `${fmtShort(s)} · #${state.timerIssueId}` : 'OctoClock';
             const t42 = document.getElementById('tracked-42-time');
             if (t42 && state.timerRunning && state.timerIssueId === 42)
                 t42.textContent = fmtShort(s);
@@ -2327,7 +2327,7 @@
             if (!issue) return;
             state.timerRunning = true; state.timerIssueId = id; state.timerStartEpoch = Date.now();
             document.getElementById('timer-repo').textContent = issue.repo;
-            document.getElementById('timer-issue-lbl').textContent = '#' + id + ' ' + issue.title.slice(0, 22) + '…';
+            document.getElementById('timer-issue-lbl').textContent = `#${id} ${issue.title.slice(0, 22)}…`;
             document.getElementById('timer-running-row').style.display = '';
             document.getElementById('timer-idle-row').style.display = 'none';
             const icon = document.getElementById('tracked-42-icon');
@@ -2337,15 +2337,17 @@
 
         // ── SIDEBAR SECTIONS ──────────────────────────────────────────────────────────
         function toggleSection(name) {
-            const body = document.getElementById('body-' + name);
-            const chv = document.getElementById('chv-' + name);
+            const body = document.getElementById(`body-${name}`);
+            const chv = document.getElementById(`chv-${name}`);
             if (!body || !chv) return;
             const closed = body.classList.toggle('closed');
             chv.classList.toggle('closed', closed);
         }
         function setStatusTab(status) {
             state.statusTab = status;
-            ['open', 'closed', 'all'].forEach(s => document.getElementById('ftab-' + s).classList.toggle('on', s === status));
+            ['open', 'closed', 'all'].forEach(s => {
+                document.getElementById(`ftab-${s}`).classList.toggle('on', s === status);
+            });
             renderIssueList();
         }
         function renderIssueList() {
@@ -2368,12 +2370,12 @@
                     const iconName = isActive ? 'codicon-clock' : isClosed ? 'codicon-issue-closed' : 'codicon-issue-opened';
                     const lblClass = isClosed ? ' dim' : '';
                     const playBtn = isClosed ? '' : isActive
-                        ? '<button class="ib" title="Already tracking" style="opacity:.35" disabled><i class="codicon codicon-play"></i></button>'
-                        : '<button class="ib" title="Start timer" onclick="trackIssue(' + issue.id + ')"><i class="codicon codicon-play"></i></button>';
+                        ? '<button type="button" class="ib" title="Already tracking" style="opacity:.35" disabled><i class="codicon codicon-play"></i></button>'
+                        : '<button type="button" class="ib" title="Start timer" onclick="trackIssue(' + issue.id + ')"><i class="codicon codicon-play"></i></button>';
                     return '<div class="row" data-id="' + issue.id + '">'
                         + '<i class="codicon ' + iconName + ' row-icon" style="color:' + iconColor + '"></i>'
                         + '<span class="row-lbl' + lblClass + '">#' + issue.id + '&nbsp;&nbsp;' + issue.title + '</span>'
-                        + '<div class="row-act">' + playBtn + '<button class="ib" title="Open in GitHub"><i class="codicon codicon-link-external"></i></button></div>'
+                        + '<div class="row-act">' + playBtn + '<button type="button" class="ib" title="Open in GitHub"><i class="codicon codicon-link-external"></i></button></div>'
                         + '</div>';
                 }).join('');
             }
@@ -2493,15 +2495,15 @@
                 + '<span class="d-heading">' + heading + '</span>'
                 + '<div class="d-range-tabs">'
                 + ['today', 'week', 'month', 'alltime'].map(r =>
-                    '<button class="d-rtab' + (state.dashRange === r ? ' on' : '') + '" onclick="setDashRange(\'' + r + '\')">'
+                    '<button type="button" class="d-rtab' + (state.dashRange === r ? ' on' : '') + '" onclick="setDashRange(\'' + r + '\')">'
                     + { today: 'Today', week: 'Week', month: 'Month', alltime: 'All time' }[r] + '</button>'
                 ).join('')
                 + '</div>'
                 + (showNav
                     ? '<div class="d-range-nav">'
-                    + '<button class="d-rnav" onclick="shiftWeek(-1)"><i class="codicon codicon-chevron-left" style="font-size:11px"></i></button>'
+                    + '<button type="button" class="d-rnav" onclick="shiftWeek(-1)"><i class="codicon codicon-chevron-left" style="font-size:11px"></i></button>'
                     + '<span>' + rangeLabel() + '</span>'
-                    + '<button class="d-rnav" onclick="shiftWeek(1)"' + (state.dashWeekOffset >= 0 ? ' disabled style="opacity:.3"' : '') + ' ><i class="codicon codicon-chevron-right" style="font-size:11px"></i></button>'
+                    + '<button type="button" class="d-rnav" onclick="shiftWeek(1)"' + (state.dashWeekOffset >= 0 ? ' disabled style="opacity:.3"' : '') + ' ><i class="codicon codicon-chevron-right" style="font-size:11px"></i></button>'
                     + '</div>'
                     : '<span style="font-size:11px;color:var(--c-desc)">' + rangeLabel() + '</span>')
                 + '</div>';
@@ -2593,10 +2595,10 @@
                 + '<div class="d-sec"><div class="d-sec-hdr"><span class="d-sec-lbl">Daily activity</span></div>'
                 + '<div class="d-chart" style="height:72px">' + chartHtml + '</div></div>'
                 + '<div class="d-sec"><div class="d-sec-hdr"><span class="d-sec-lbl">Time by issue</span>'
-                + '<button class="d-sec-act" onclick="setDashView(\'issues\')">View all →</button></div>'
+                + '<button type="button" class="d-sec-act" onclick="setDashView(\'issues\')">View all →</button></div>'
                 + issueRowsHtml + '</div>'
                 + '<div class="d-sec"><div class="d-sec-hdr"><span class="d-sec-lbl">Team</span>'
-                + '<button class="d-sec-act" onclick="setDashView(\'members\')">All members →</button></div>'
+                + '<button type="button" class="d-sec-act" onclick="setDashView(\'members\')">All members →</button></div>'
                 + teamHtml + '</div>';
         }
 
@@ -2716,7 +2718,10 @@
 
             // sessions log
             const byDate = {};
-            sess.forEach(s => { (byDate[s.date] = byDate[s.date] || []).push(s); });
+            sess.forEach(s => {
+                byDate[s.date] ??= [];
+                byDate[s.date].push(s);
+            });
             const sessHtml = Object.keys(byDate).sort((a, b) => b.localeCompare(a)).map(date => {
                 const rows = byDate[date].sort((a, b) => a.startH - b.startH || a.startM - b.startM).map(s => {
                     const issue = issueById(s.issueId);
@@ -2733,7 +2738,7 @@
             }).join('') || '<div style="font-size:12px;color:var(--c-muted)">No sessions in this period</div>';
 
             return topbarHtml('Members')
-                + '<button class="d-back" onclick="state.dashMember=null;renderDashboard()">'
+                + '<button type="button" class="d-back" onclick="state.dashMember=null;renderDashboard()">'
                 + '<i class="codicon codicon-arrow-left"></i> All members</button>'
                 + '<div class="d-mhero">' + avHtml(m, 'lg')
                 + '<div><div class="d-mhero-name">' + m.name + '</div><div class="d-mhero-sub">' + m.role + '</div></div></div>'
@@ -2755,14 +2760,14 @@
             const isf = state.dashSessFilter.issue;
             const sess = sessionsInRange(s =>
                 (mf === 'all' || s.member === mf) &&
-                (isf === 'all' || s.issueId === parseInt(isf))
+                (isf === 'all' || s.issueId === parseInt(isf, 10))
             );
 
             // filter controls
             const memberOpts = '<option value="all">All members</option>'
                 + MEMBERS.map(m => '<option value="' + m.id + '"' + (mf === m.id ? ' selected' : '') + '>' + m.name + '</option>').join('');
             const issueOpts = '<option value="all">All issues</option>'
-                + ISSUES_DATA.map(i => '<option value="' + i.id + '"' + (isf == String(i.id) ? ' selected' : '') + '>  #' + i.id + ' ' + i.title.slice(0, 20) + '</option>').join('');
+                + ISSUES_DATA.map(i => '<option value="' + i.id + '"' + (isf === String(i.id) ? ' selected' : '') + '>  #' + i.id + ' ' + i.title.slice(0, 20) + '</option>').join('');
 
             const filtersHtml = '<div class="d-sess-filters">'
                 + '<select class="d-sel" onchange="state.dashSessFilter.member=this.value;renderDashboard()">' + memberOpts + '</select>'
@@ -2771,7 +2776,10 @@
 
             // group by date
             const byDate = {};
-            sess.forEach(s => { (byDate[s.date] = byDate[s.date] || []).push(s); });
+            sess.forEach(s => {
+                byDate[s.date] ??= [];
+                byDate[s.date].push(s);
+            });
             const totalMin = sess.reduce((a, s) => a + s.durMin, 0);
             const groupsHtml = Object.keys(byDate).sort((a, b) => b.localeCompare(a)).map(date => {
                 const dayMin = byDate[date].reduce((a, s) => a + s.durMin, 0);
@@ -2813,7 +2821,7 @@
             }
             // sync nav tabs in case called from drillMember
             ['overview', 'issues', 'members', 'sessions'].forEach(id => {
-                const el2 = document.getElementById('dntab-' + id);
+                const el2 = document.getElementById(`dntab-${id}`);
                 if (el2) el2.classList.toggle('on', id === state.dashView);
             });
         }

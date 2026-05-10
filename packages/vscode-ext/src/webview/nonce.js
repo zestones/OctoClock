@@ -7,7 +7,7 @@
 // returned from a single getNonce() call for both the CSP header and the HTML
 // template rendered in that request.
 
-// @ts-ignore — node:crypto is a Node.js built-in available in the VS Code
+// @ts-expect-error — node:crypto is a Node.js built-in available in the VS Code
 // extension host (Node.js 18+). The project's jsconfig.json does not include
 // @types/node to avoid type conflicts with @types/chrome in the browser-ext
 // workspace package.

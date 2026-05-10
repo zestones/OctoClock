@@ -1,15 +1,36 @@
+import { copyFileSync, mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
 
-// Build the VS Code extension as a single CJS bundle.
+// Build the VS Code extension host as a single CJS bundle.
 //
 // Key constraints:
 // - format: 'cjs'   — VS Code extension host loads extensions via require().
 // - external: vscode — provided by the extension host; must never be bundled.
 // - minify: false   — keeps stack traces readable during development.
 // - sourcemap: true — enables debugging in the Extension Development Host.
+//
+// Also copies the codicons font to dist/fonts/ so it can be served via
+// webview.asWebviewUri() without network access.
+
+/** @returns {import('vite').Plugin} */
+function copyCodiconsFont() {
+    return {
+        name: 'copy-codicons-font',
+        closeBundle() {
+            const src = resolve(
+                __dirname,
+                'node_modules/@vscode/codicons/dist/codicon.ttf',
+            );
+            const destDir = resolve(__dirname, 'packages/vscode-ext/dist/fonts');
+            mkdirSync(destDir, { recursive: true });
+            copyFileSync(src, resolve(destDir, 'codicon.ttf'));
+        },
+    };
+}
 
 export default defineConfig({
+    plugins: [copyCodiconsFont()],
     build: {
         lib: {
             entry: resolve(__dirname, 'packages/vscode-ext/src/extension.js'),

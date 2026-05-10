@@ -53,7 +53,7 @@ describe('VSCodeStorageAdapter', () => {
     // -----------------------------------------------------------------------
     describe('GITHUB_TOKEN key routes to context.secrets', () => {
         it('set(GITHUB_TOKEN) writes to secrets, not globalState', async () => {
-            const token = 'ghp_' + 'a'.repeat(36);
+            const token = `ghp_${'a'.repeat(36)}`;
             await adapter.set(STORAGE_KEYS.GITHUB_TOKEN, token);
 
             expect(secrets.store).toHaveBeenCalledWith(STORAGE_KEYS.GITHUB_TOKEN, JSON.stringify(token));
@@ -61,7 +61,7 @@ describe('VSCodeStorageAdapter', () => {
         });
 
         it('get(GITHUB_TOKEN) reads from secrets, not globalState', async () => {
-            const token = 'ghp_' + 'b'.repeat(36);
+            const token = `ghp_${'b'.repeat(36)}`;
             await secrets.store(STORAGE_KEYS.GITHUB_TOKEN, JSON.stringify(token));
 
             const result = await adapter.get(STORAGE_KEYS.GITHUB_TOKEN);
@@ -121,7 +121,7 @@ describe('VSCodeStorageAdapter', () => {
     // -----------------------------------------------------------------------
     describe('getMultiple', () => {
         it('returns values from the correct backing store for each key', async () => {
-            const token = 'ghp_' + 'c'.repeat(36);
+            const token = `ghp_${'c'.repeat(36)}`;
             await secrets.store(STORAGE_KEYS.GITHUB_TOKEN, JSON.stringify(token));
             globalState._store.set(STORAGE_KEYS.ACTIVE_ISSUE, '/o/r/issues/2');
 
@@ -156,7 +156,7 @@ describe('VSCodeStorageAdapter', () => {
     // -----------------------------------------------------------------------
     describe('token round-trip', () => {
         it('value read back from secrets matches what was stored (format validation can run)', async () => {
-            const token = 'ghp_' + 'd'.repeat(36);
+            const token = `ghp_${'d'.repeat(36)}`;
             await adapter.set(STORAGE_KEYS.GITHUB_TOKEN, token);
             const readBack = await adapter.get(STORAGE_KEYS.GITHUB_TOKEN);
             expect(readBack).toBe(token);

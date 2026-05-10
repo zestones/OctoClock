@@ -14,7 +14,11 @@
         "packages/browser-ext/src/**/*.js",
         "packages/browser-ext/src/**/*.jsx",
         "packages/browser-ext/src/**/*.d.ts",
-        "packages/vscode-ext/src/**/*.js"
+        "packages/vscode-ext/src/**/*.js",
+        "packages/vscode-ext/src/**/*.d.ts"
     ],
-    "exclude": ["**/node_modules/**", "**/dist/**"]
+    "exclude": [
+        "**/node_modules/**",
+        "**/dist/**"
+    ]
 }
