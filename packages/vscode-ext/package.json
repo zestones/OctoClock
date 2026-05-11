@@ -3,7 +3,7 @@
     "displayName": "OctoClock — GitHub Time Tracker",
     "publisher": "zestones",
     "description": "Track time spent on GitHub issues directly from VS Code. Start and stop timers per issue, sync sessions back to a tracker comment, and review where your time goes with team-aware dashboards.",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "private": true,
     "license": "MIT",
     "categories": [

@@ -1,7 +1,7 @@
 {
     "name": "@octoclock/core",
     "private": true,
-    "version": "1.0.3",
+    "version": "1.0.4",
     "type": "module",
     "description": "Platform-agnostic services, utilities, and port interfaces. No chrome.* or vscode imports."
 }
