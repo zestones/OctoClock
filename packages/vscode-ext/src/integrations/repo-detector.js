@@ -90,7 +90,7 @@ export class WorkspaceRepoDetector {
 
         const pinned = await PinnedReposService.getPinnedRepos();
         const pinnedNames = new Set(pinned.map((r) => r.fullName));
-        const dismissed = new Set(/** @type {string[]} */(this._context.globalState.get(DISMISSED_KEY) ?? []));
+        const dismissed = new Set(/** @type {string[]} */ (this._context.globalState.get(DISMISSED_KEY) ?? []));
 
         const candidates = detected.filter(
             (slug) => !pinnedNames.has(slug) && !dismissed.has(slug) && !this._promptedThisSession.has(slug),
