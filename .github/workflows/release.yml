@@ -1,17 +1,16 @@
 # =============================================================
-# Release — build, version bump, zip & GitHub release
+# Browser release — sync version, build zip, publish GitHub release
 # =============================================================
 # Trigger: push a tag like v1.2.3
 # Flow:
 #   1. Extract version from tag
-#   2. Update package.json + manifest.json versions
-#   3. Commit version bump back to main
-#   4. Build the extension
-#   5. Zip dist/ as a ready-to-install Chrome extension
-#   6. Create a GitHub release with the zip attached
+#   2. Sync the global monorepo version locally for the release build
+#   3. Build the browser extension and attach its zip to the GitHub release
+#   4. Dispatch the dedicated VS Code release workflow
+#   5. Sync the same version back into main
 # =============================================================
 
-name: Release
+name: Release Browser
 
 on:
   push:
@@ -19,11 +18,90 @@ on:
       - "v*"
 
 permissions:
+  actions: write
   contents: write
 
+concurrency:
+  group: release-browser-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
-  release:
-    name: Build & Release
+  browser-release:
+    name: Build Browser Release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Sync monorepo version
+        run: pnpm run sync:version "${{ steps.version.outputs.version }}"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build browser extension
+        run: pnpm run build
+
+      - name: Zip browser extension
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          cd packages/browser-ext/dist
+          zip -r "../../../octoclock-browser-v${VERSION}.zip" .
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: v${{ steps.version.outputs.version }}
+          generate_release_notes: true
+          overwrite_files: true
+          body: |
+            ## OctoClock v${{ steps.version.outputs.version }}
+
+            ### Browser extension
+            1. Download `octoclock-browser-v${{ steps.version.outputs.version }}.zip`
+            2. Extract the archive
+            3. Open `chrome://extensions` → enable **Developer mode**
+            4. Click **Load unpacked** → select the extracted folder
+
+            ### VS Code extension
+            The `.vsix` package is attached by the dedicated VS Code release workflow.
+          files: octoclock-browser-v${{ steps.version.outputs.version }}.zip
+
+      - name: Dispatch VS Code release workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          TAG_NAME: v${{ steps.version.outputs.version }}
+        run: |
+          curl --fail-with-body -L \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${REPOSITORY}/actions/workflows/release-vscode.yml/dispatches" \
+            -d "{\"ref\":\"main\",\"inputs\":{\"tag_name\":\"${TAG_NAME}\"}}"
+
+  sync-version-back-to-main:
+    name: Sync Version Back To Main
+    needs: browser-release
     runs-on: ubuntu-latest
 
     steps:
@@ -32,54 +110,26 @@ jobs:
           ref: main
           token: ${{ secrets.PAT_TOKEN }}
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
+          cache: pnpm
 
-      - name: Extract version from tag
-        id: version
-        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
-
-      - name: Update package.json & manifest.json versions
-        run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          node -e "
-            const fs = require('fs');
-            for (const file of ['package.json', 'manifest.json']) {
-              const json = JSON.parse(fs.readFileSync(file, 'utf8'));
-              json.version = '${VERSION}';
-              fs.writeFileSync(file, JSON.stringify(json, null, 2) + '\n');
-            }
-          "
+      - name: Sync monorepo version
+        run: pnpm run sync:version "${{ needs.browser-release.outputs.version }}"
 
       - name: Commit version bump
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add package.json manifest.json
-          git diff --cached --quiet || git commit -m "chore: bump version to ${{ steps.version.outputs.version }}"
-          git push
-
-      - run: npm ci
-
-      - name: Build
-        run: npm run build
-
-      - name: Zip extension
-        run: cd dist && zip -r ../github-time-tracker-v${{ steps.version.outputs.version }}.zip .
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          name: v${{ steps.version.outputs.version }}
-          generate_release_notes: true
-          body: |
-            ## GitHub Time Tracker v${{ steps.version.outputs.version }}
-
-            ### Installation
-            1. Download `github-time-tracker-v${{ steps.version.outputs.version }}.zip` below
-            2. Extract the zip
-            3. Open `chrome://extensions` → enable **Developer mode**
-            4. Click **Load unpacked** → select the extracted folder
-          files: github-time-tracker-v${{ steps.version.outputs.version }}.zip
+          git add package.json \
+            packages/browser-ext/package.json \
+            packages/browser-ext/manifest.json \
+            packages/core/package.json \
+            packages/vscode-ext/package.json
+          git diff --cached --quiet || git commit -m "chore: bump version to ${{ needs.browser-release.outputs.version }}"
+          git push origin HEAD:main

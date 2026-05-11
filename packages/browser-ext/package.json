@@ -1,7 +1,7 @@
 {
     "name": "@octoclock/browser-ext",
     "private": true,
-    "version": "0.0.0",
+    "version": "1.0.3",
     "type": "module",
     "description": "Chrome MV3 extension entry points, browser adapters, and build config.",
     "scripts": {

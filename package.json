@@ -16,6 +16,7 @@
         "dev:vscode": "vite build --config vite.config.vscode.js --watch",
         "test:e2e": "pnpm run build:vscode && pnpm --filter octoclock run test:e2e",
         "build": "pnpm --filter @octoclock/browser-ext run build",
+        "sync:version": "node ./scripts/sync-version.mjs",
         "typecheck": "tsc -p jsconfig.json --noEmit",
         "lint": "biome lint .",
         "format": "biome format --write .",

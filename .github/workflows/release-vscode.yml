@@ -1,0 +1,94 @@
+# =============================================================
+# VS Code release — build VSIX, attach it to the GitHub release,
+# and publish it to the VS Code Marketplace.
+# =============================================================
+
+name: Release VS Code
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: Release tag to package and publish.
+        required: true
+        type: string
+  release:
+    types:
+      - published
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-vscode-${{ github.event.release.tag_name || inputs.tag_name }}
+  cancel-in-progress: false
+
+jobs:
+  vscode-release:
+    name: Build & Publish VS Code Extension
+    runs-on: ubuntu-latest
+    env:
+      VSCE_PAT: ${{ secrets.VSCE_PAT }}
+
+    steps:
+      - name: Resolve release tag
+        id: release
+        env:
+          INPUT_TAG_NAME: ${{ inputs.tag_name }}
+          RELEASE_TAG_NAME: ${{ github.event.release.tag_name }}
+        run: |
+          TAG_NAME="${INPUT_TAG_NAME:-$RELEASE_TAG_NAME}"
+
+          if [[ -z "$TAG_NAME" ]]; then
+            echo "Missing tag_name input or release tag." >&2
+            exit 1
+          fi
+
+          if [[ "$TAG_NAME" != v* ]]; then
+            echo "Expected tag to start with v, got: $TAG_NAME" >&2
+            exit 1
+          fi
+
+          echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
+          echo "version=${TAG_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ steps.release.outputs.tag_name }}
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Sync monorepo version
+        run: pnpm run sync:version "${{ steps.release.outputs.version }}"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build VS Code extension
+        run: pnpm run build:vscode
+
+      - name: Package VS Code extension
+        run: |
+          cd packages/vscode-ext
+          npm exec --yes --package @vscode/vsce vsce package --no-dependencies
+
+      - name: Upload VSIX to GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release.outputs.tag_name }}
+          files: packages/vscode-ext/octoclock-${{ steps.release.outputs.version }}.vsix
+          overwrite_files: true
+
+      - name: Publish to VS Code Marketplace
+        if: ${{ env.VSCE_PAT != '' }}
+        run: |
+          cd packages/vscode-ext
+          npm exec --yes --package @vscode/vsce vsce publish --packagePath "octoclock-${{ steps.release.outputs.version }}.vsix" -p "$VSCE_PAT"

@@ -76,10 +76,6 @@ importers:
   packages/core: {}
 
   packages/vscode-ext:
-    dependencies:
-      '@octoclock/core':
-        specifier: workspace:*
-        version: link:../core
     devDependencies:
       '@vscode/test-cli':
         specifier: 0.0.12

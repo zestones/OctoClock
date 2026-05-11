@@ -19,7 +19,7 @@
         "productivity",
         "dashboard"
     ],
-    "icon": "src/icons/octoclock.svg",
+    "icon": "src/icons/octoclock.png",
     "repository": {
         "type": "git",
         "url": "https://github.com/zestones/OctoClock.git"
@@ -250,9 +250,6 @@
     },
     "scripts": {
         "test:e2e": "node e2e/run-tests.mjs"
-    },
-    "dependencies": {
-        "@octoclock/core": "workspace:*"
     },
     "devDependencies": {
         "@vscode/test-cli": "0.0.12",
