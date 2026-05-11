@@ -116,9 +116,9 @@ export class SettingsProvider {
             StorageService.get(STORAGE_KEYS.AUTO_SYNC).catch(() => false),
         ]);
 
-        const idleEnabled = cfg.get('idleReminderEnabled', true) !== false;
+        const idleEnabled = Boolean(cfg.get('idleReminderEnabled', true));
         const idleMinutes = Number(cfg.get('idleReminderMinutes', 30)) || 30;
-        const codeLens = cfg.get('enableCodeLens', false) === true;
+        const codeLens = Boolean(cfg.get('enableCodeLens', false));
 
         return [
             makeNode(

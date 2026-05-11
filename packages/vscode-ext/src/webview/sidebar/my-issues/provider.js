@@ -31,6 +31,7 @@ import { getHtml } from './html.js';
 
 /** Issue URL path pattern, e.g. /owner/repo/issues/42 */
 const ISSUE_URL_RE = /^\/[^/]+\/[^/]+\/issues\/\d+$/;
+const UTF8_DECODER = new TextDecoder('utf-8');
 
 /**
  * Map a stored IssueEntry to the shape the webview expects.
@@ -66,7 +67,7 @@ async function getWorkspaceRepoSlugs() {
             try {
                 const configUri = vscode.Uri.joinPath(folder.uri, '.git', 'config');
                 const bytes = await vscode.workspace.fs.readFile(configUri);
-                const text = Buffer.from(bytes).toString('utf8');
+                const text = UTF8_DECODER.decode(bytes);
                 const re =
                     /url\s*=\s*(?:https?:\/\/[^\s/]*github\.com\/|git@github\.com:)([^\s/]+)\/([^\s/]+?)(?:\.git)?\s*$/gim;
                 for (let m = re.exec(text); m; m = re.exec(text)) {

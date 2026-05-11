@@ -29,6 +29,11 @@ import { STORAGE_KEYS } from '../../../../core/src/utils/constants.utils.js';
 import { aggregate, applyFilters, computeDateRange, computeMemberDetail, filterByWindow } from './filtering.js';
 import { getHtml } from './html.js';
 
+/** @typedef {{ type: 'ready' }} ReadyMessage */
+/** @typedef {{ type: 'rangeChange'|'filterChange', range?: string, weekOffset?: number, customStart?: string, customEnd?: string, memberFilter?: string|null, issueFilter?: string|null }} FilterMessage */
+/** @typedef {{ type: 'memberDrill', memberId: string, range?: string, weekOffset?: number, customStart?: string, customEnd?: string, memberFilter?: string|null, issueFilter?: string|null }} MemberDrillMessage */
+/** @typedef {ReadyMessage | FilterMessage | MemberDrillMessage} DashboardMessage */
+
 export class DashboardPanel {
     static viewType = 'octoclock.dashboard';
 
@@ -71,7 +76,7 @@ export class DashboardPanel {
         });
     }
 
-    /** @param {{ type: string, [k: string]: any }} msg */
+    /** @param {DashboardMessage} msg */
     async _handleMessage(msg) {
         if (msg.type === 'ready') return this._sendInit();
         if (msg.type === 'rangeChange' || msg.type === 'filterChange') return this._sendFiltered(msg);

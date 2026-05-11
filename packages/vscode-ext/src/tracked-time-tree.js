@@ -29,6 +29,7 @@ import { TimeService } from '../../core/src/utils/time.utils.js';
 // ---------------------------------------------------------------------------
 
 const WORKSPACE_FILTER_KEY = 'octoclock.trackedTime.workspaceFilter';
+const UTF8_DECODER = new TextDecoder('utf-8');
 
 /**
  * Returns the set of "owner/repo" pairs derivable from open workspace folders'
@@ -45,7 +46,7 @@ async function getWorkspaceRepoSlugs() {
             try {
                 const configUri = vscode.Uri.joinPath(folder.uri, '.git', 'config');
                 const bytes = await vscode.workspace.fs.readFile(configUri);
-                const text = Buffer.from(bytes).toString('utf8');
+                const text = UTF8_DECODER.decode(bytes);
                 // Match `url = ...github.com[:/]owner/repo(.git)?` on any remote.
                 const re =
                     /url\s*=\s*(?:https?:\/\/[^\s/]*github\.com\/|git@github\.com:)([^\s/]+)\/([^\s/]+?)(?:\.git)?\s*$/gim;

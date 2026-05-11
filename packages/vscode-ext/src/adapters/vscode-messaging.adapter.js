@@ -36,7 +36,7 @@ export class VSCodeMessagingAdapter extends MessagingPort {
      * Perform the GitHub tracker-comment create/update, mirroring the logic in
      * background/index.js `syncTrackerComment`.
      *
-     * @param {{ issueUrl: string, owner: string, repo: string, issueNumber: number }} payload
+    * @param {{ issueUrl: string, owner: string, repo: string, issueNumber: number, running?: string|null }} payload
      * @returns {Promise<import('../../../core/src/ports/messaging.port.js').SyncCommentResult>}
      */
     async #syncTrackerComment({ issueUrl, owner, repo, issueNumber, running = null }) {
@@ -112,7 +112,7 @@ export class VSCodeMessagingAdapter extends MessagingPort {
 
         next.finally(() => {
             console.info(LOG_PREFIX, 'Tracker sync queue drained for issue', { issueUrl });
-        }).catch(() => {}); // suppress unhandled rejection on the finally-chain
+        }).catch(() => { }); // suppress unhandled rejection on the finally-chain
 
         return next;
     }
@@ -121,11 +121,11 @@ export class VSCodeMessagingAdapter extends MessagingPort {
      * No-op — VS Code has no browser tabs to notify.
      * @param {string} _issueUrl
      */
-    notifyTimerStarted(_issueUrl) {}
+    notifyTimerStarted(_issueUrl) { }
 
     /**
      * No-op — VS Code has no browser tabs to notify.
      * @param {string} _issueUrl
      */
-    notifyTimerStopped(_issueUrl) {}
+    notifyTimerStopped(_issueUrl) { }
 }

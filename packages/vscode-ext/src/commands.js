@@ -340,7 +340,7 @@ export function registerCommands(context) {
         // ----------------------------------------------------------------
         vscode.commands.registerCommand('octoclock.toggleIdleReminder', async () => {
             const cfg = vscode.workspace.getConfiguration('octoclock');
-            const next = !(cfg.get('idleReminderEnabled', true) !== false);
+            const next = !Boolean(cfg.get('idleReminderEnabled', true));
             await cfg.update('idleReminderEnabled', next, vscode.ConfigurationTarget.Global);
             vscode.window.showInformationMessage(`OctoClock: Idle Reminder ${next ? 'enabled' : 'disabled'}`);
         }),
@@ -375,7 +375,7 @@ export function registerCommands(context) {
         // ----------------------------------------------------------------
         vscode.commands.registerCommand('octoclock.toggleCodeLens', async () => {
             const cfg = vscode.workspace.getConfiguration('octoclock');
-            const next = cfg.get('enableCodeLens', false) !== true;
+            const next = !Boolean(cfg.get('enableCodeLens', false));
             await cfg.update('enableCodeLens', next, vscode.ConfigurationTarget.Global);
             vscode.window.showInformationMessage(`OctoClock: Code Lens ${next ? 'enabled' : 'disabled'}`);
         }),

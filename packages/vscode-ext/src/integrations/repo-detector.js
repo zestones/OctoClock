@@ -22,6 +22,7 @@ import * as vscode from 'vscode';
 import { PinnedReposService } from '../../../core/src/services/pinned-repos.service.js';
 
 const DISMISSED_KEY = 'octoclock.dismissedAutoPinRepos';
+const UTF8_DECODER = new TextDecoder('utf-8');
 
 /**
  * Extract the set of `owner/repo` strings from a `.git/config` blob.
@@ -57,7 +58,7 @@ async function detectWorkspaceRepos() {
             try {
                 const configUri = vscode.Uri.joinPath(folder.uri, '.git', 'config');
                 const bytes = await vscode.workspace.fs.readFile(configUri);
-                const text = Buffer.from(bytes).toString('utf8');
+                const text = UTF8_DECODER.decode(bytes);
                 for (const slug of parseGitConfigForRepos(text)) found.add(slug);
             } catch {
                 // Not a git repo or config unreadable — skip.
@@ -89,7 +90,7 @@ export class WorkspaceRepoDetector {
 
         const pinned = await PinnedReposService.getPinnedRepos();
         const pinnedNames = new Set(pinned.map((r) => r.fullName));
-        const dismissed = new Set(/** @type {string[]} */ (this._context.globalState.get(DISMISSED_KEY) ?? []));
+        const dismissed = new Set(/** @type {string[]} */(this._context.globalState.get(DISMISSED_KEY) ?? []));
 
         const candidates = detected.filter(
             (slug) => !pinnedNames.has(slug) && !dismissed.has(slug) && !this._promptedThisSession.has(slug),
