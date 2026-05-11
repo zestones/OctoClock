@@ -91,4 +91,4 @@ jobs:
         if: ${{ env.VSCE_PAT != '' }}
         run: |
           cd packages/vscode-ext
-          npm exec --yes --package @vscode/vsce vsce publish --packagePath "octoclock-${{ steps.release.outputs.version }}.vsix" -p "$VSCE_PAT"
+          npm exec --yes --package @vscode/vsce -- vsce publish -i "octoclock-${{ steps.release.outputs.version }}.vsix" -p "$VSCE_PAT"
