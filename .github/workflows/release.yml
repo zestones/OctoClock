@@ -7,8 +7,8 @@
 #   2. Update package.json + manifest.json versions
 #   3. Commit version bump back to main
 #   4. Build the extension
-#   5. Zip dist/ as a ready-to-install Chrome extension
-#   6. Create a GitHub release with the zip attached
+#   5. Package dist/ as a .zip (Chromium) and a .xpi (Gecko)
+#   6. Create a GitHub release with both artifacts attached
 # =============================================================
 
 name: Release
@@ -66,8 +66,12 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Zip extension
-        run: cd dist && zip -r ../github-time-tracker-v${{ steps.version.outputs.version }}.zip .
+      - name: Package extension
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          (cd dist && zip -r "../github-time-tracker-v${VERSION}.zip" .)
+          # Same bytes, .xpi extension so Firefox-based browsers accept it from about:addons
+          cp "github-time-tracker-v${VERSION}.zip" "github-time-tracker-v${VERSION}.xpi"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -77,9 +81,19 @@ jobs:
           body: |
             ## GitHub Time Tracker v${{ steps.version.outputs.version }}
 
-            ### Installation
+            ### Chrome / Edge / Brave
             1. Download `github-time-tracker-v${{ steps.version.outputs.version }}.zip` below
             2. Extract the zip
             3. Open `chrome://extensions` → enable **Developer mode**
             4. Click **Load unpacked** → select the extracted folder
-          files: github-time-tracker-v${{ steps.version.outputs.version }}.zip
+
+            ### Firefox / Zen / LibreWolf
+            1. Download `github-time-tracker-v${{ steps.version.outputs.version }}.xpi` below
+            2. Open `about:config` → set `xpinstall.signatures.required` to **false** (the build is unsigned; this only works on browsers built without forced signing)
+            3. Open `about:addons` → ⚙️ → **Install Add-on From File…** → select the `.xpi`
+            4. In `about:addons` → **Permissions**, grant access to `api.github.com`
+
+            On stock Firefox, use `about:debugging#/runtime/this-firefox` → **Load Temporary Add-on…** instead.
+          files: |
+            github-time-tracker-v${{ steps.version.outputs.version }}.zip
+            github-time-tracker-v${{ steps.version.outputs.version }}.xpi
