@@ -4,7 +4,7 @@
 
 <br/>
 
-[![CI](https://github.com/zestones/OctoClock/actions/workflows/ci.yml/badge.svg)](https://github.com/zestones/OctoClock/actions/workflows/ci.yml) [![GitHub release](https://img.shields.io/github/v/release/zestones/OctoClock)](https://github.com/zestones/OctoClock/releases)
+[![CI](https://github.com/zestones/github-timetracker-extension/actions/workflows/ci.yml/badge.svg)](https://github.com/zestones/github-timetracker-extension/actions/workflows/ci.yml) [![GitHub release](https://img.shields.io/github/v/release/zestones/github-timetracker-extension)](https://github.com/zestones/github-timetracker-extension/releases)
 
 _A feature-rich browser extension that brings time tracking directly into GitHub. Track time on issues, pin repositories, visualize your work in a calendar, analyze stats per repo, and collaborate with your team — all without leaving GitHub._
 
@@ -110,7 +110,7 @@ When a timer is started, the extension automatically **backfills remote entries*
 | **Theme support** | System (auto-detect), Light, and Dark modes — preference persists across sessions                  |
 | **Data export**   | Export as CSV or JSON — CSV includes formula injection protection                                  |
 | **Settings**      | Masked token display, API rate limit indicator with reset countdown, token format validation       |
-| **Offline-first** | All data in Chrome `storage.local` — background worker refreshes every 15 min, ~33k entry capacity |
+| **Offline-first** | All data in `storage.local` — background worker refreshes every 15 min, ~33k entry capacity |
 
 ---
 
@@ -126,7 +126,7 @@ graph TD
     end
 
     GH[GitHub Issue Page]
-    ST[(Chrome Storage)]
+    ST[(Extension Storage)]
     API[GitHub API]
 
     CS -- injects timer --> GH
@@ -154,18 +154,35 @@ The extension is composed of three independently built entry points:
 | Build Tool           | [Vite](https://vitejs.dev/) (separate configs for popup, background, content) |
 | Linting / Formatting | [Biome](https://biomejs.dev/)                                                 |
 | Type Checking        | TypeScript via JSDoc annotations                                              |
-| Extension Manifest   | Manifest V3                                                                   |
+| Extension Manifest   | Manifest V3 (Chromium + Gecko)                                                |
 
 ---
 
 ## Getting Started
 
+### Chrome / Edge / Brave
+
 1. Download the latest `github-time-tracker-vX.Y.Z.zip` from the [Releases](https://github.com/zestones/github-timetracker-extension/releases) page.
 2. Extract the zip into a permanent folder (e.g. `~/extensions/github-timetracker`). **Remember this location — you'll need it for updates.**
 3. Open `chrome://extensions` → enable **Developer mode** (top-right toggle).
 4. Click **Load unpacked** → select the extracted folder.
-5. Navigate to any GitHub issue — a **Start Timer** button appears automatically.
-6. Open the extension popup and add a GitHub Classic Personal Access Token in **Settings** to unlock syncing, issue browsing, and commenting.
+
+### Firefox / Zen / LibreWolf
+
+The same build runs on Gecko — the manifest ships both a `service_worker` (Chrome) and a `scripts` (Firefox) background entry.
+
+1. Download the latest `github-time-tracker-vX.Y.Z.xpi` from the [Releases](https://github.com/zestones/github-timetracker-extension/releases) page.
+2. Open `about:config` → set `xpinstall.signatures.required` to **false**. Required because the build is self-hosted and unsigned; it only works on browsers built without forced signing (Zen, LibreWolf, Firefox Developer Edition / Nightly / ESR).
+3. Open `about:addons` → gear icon ⚙️ → **Install Add-on From File…** → select the `.xpi`.
+4. In `about:addons` → GitHub Time Tracker → **Permissions**, make sure access to `api.github.com` is granted — Manifest V3 host permissions are opt-in on Firefox.
+
+> [!TIP]
+> On stock Firefox (signing enforced), use `about:debugging#/runtime/this-firefox` → **Load Temporary Add-on…** → pick the `.xpi`. It works until the browser restarts.
+
+### Then, in any browser
+
+1. Navigate to any GitHub issue — a **Start Timer** button appears automatically.
+2. Open the extension popup and add a GitHub Classic Personal Access Token in **Settings** to unlock syncing, issue browsing, and commenting.
 
 > [!TIP]
 > To fix a missed stop after the fact, go to **Stats → repository → expand an issue** and click the session duration to correct it manually.
@@ -181,7 +198,7 @@ The extension is composed of three independently built entry points:
 
 1. Download the new `github-time-tracker-vX.Y.Z.zip` from [Releases](https://github.com/zestones/github-timetracker-extension/releases).
 2. Extract the zip and **overwrite the contents of your existing folder**, or extract to a new folder entirely — your choice.
-3. Open `chrome://extensions`, find GitHub Time Tracker, and click the **reload icon** (↺). If you used a new folder, click **Load unpacked** instead and select it.
+3. Open `chrome://extensions`, find GitHub Time Tracker, and click the **reload icon** (↺). If you used a new folder, click **Load unpacked** instead and select it. On Firefox-based browsers, install the new `.xpi` over the old one from `about:addons` — the add-on ID is stable, so it upgrades in place and keeps your data.
 4. If you loaded into a new folder, open **Settings → Sync from GitHub** to pull all your history back from the issue comments.
 
 > [!TIP]
