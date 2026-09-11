@@ -3,6 +3,12 @@
   "name": "GitHub Time Tracker",
   "version": "1.0.2",
   "description": "Track time spent on GitHub issues",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "octoclock@zestones.github.io",
+      "strict_min_version": "115.0"
+    }
+  },
   "permissions": [
     "storage",
     "tabs",
@@ -12,7 +18,10 @@
     "https://api.github.com/*"
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "scripts": [
+      "background.js"
+    ]
   },
   "content_scripts": [
     {
